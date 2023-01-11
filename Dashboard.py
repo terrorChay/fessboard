@@ -68,19 +68,18 @@ def main():
     with col1:
         with st.container():
             st.subheader('Темп прироста проектов')
+            projects_df['Грейд']
             
     with col2:
         with st.container():
-            st.subheader('Всего проектов')
+            st.subheader('Что-то')
 
     with col3:
+
         with st.container():
-            st.subheader('Что-то еще')
-            grades = pd.DataFrame({
-    'Грейд':['Грейд 0','Грейд 1','Грейд 2','Грейд 3','Грейд 4',],
-    'Количество проектов':[145,80,60,40,20]
-})
-            fig = px.pie(grades,values='Количество проектов',names='Грейд',
+            st.subheader('Всего проектов')
+            a = projects_df['Грейд']
+            fig = px.pie(a,values=a.value_counts(),names=a.value_counts().index,
              color_discrete_sequence=colors,
              hole=.4)
 
@@ -88,7 +87,7 @@ def main():
                   hovertemplate = "%{label}. Проектов: %{value}. <br>%{percent} от общего количества")
 
             fig.update_layout(
-                annotations     = [dict(text=c, x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
+                annotations     = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
                 plot_bgcolor    = tr,
                 paper_bgcolor   = tr,
                 #legend=dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
@@ -111,10 +110,10 @@ def main():
 
     with col2:
         with st.container():
-            # st.subheader('Вовлеченность потока')
+            st.subheader('Динамика вовлеченности потока')
             options = sorted(students_df.loc[(students_df['Бакалавриат'] == 'ФЭСН РАНХиГС')]['Бак. год'].unique(), reverse=True)
             options = list(map(lambda x: f'{x} - {x+4}', options))
-            year = st.selectbox(label='Динамика вовлеченности потока', options=options, index=0)
+            year = st.selectbox(label='Динамика вовлеченности потока', options=options, index=0,label_visibility="hidden")
             year = int(year[:4])
             if year:
                 m = students_df.loc[(students_df['Бак. год'] == year) & (students_df['Бакалавриат'] == 'ФЭСН РАНХиГС')]['ID студента'].nunique()
@@ -130,7 +129,9 @@ def main():
                 data = pd.Series(l, (f'1 курс ({year}-{year+1})',f'2 курс ({year+1}-{year+2})',f'3 курс ({year+2}-{year+3})',f'4 курс ({year+3}-{year+4})'))
                 fig = px.bar(data,color_discrete_sequence=colors,)
                 fig.update_yaxes(range = [0,1])
-                fig.update_layout(yaxis_tickformat=".0%")
+                fig.update_layout(yaxis_tickformat=".0%",showlegend=False,xaxis_title="Курс",
+    yaxis_title="Вовлечённость",font_family=font,plot_bgcolor=tr,)
+                fig.update_traces(hovertemplate = "%{label}. Вовлечённость: %{value}")
                 st.plotly_chart(fig, use_container_width=True)
 
     with col3:
