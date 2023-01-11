@@ -265,7 +265,7 @@ def run():
                             col2.image(value[1:-3], use_column_width=True)
                         except:
                             col2.write('Логотип уехал в отпуск')
-                            col2.caption(value)
+                            col2.caption(value[1:-3])
                     elif 'название компании' in key:
                         col1.subheader(value)
                     elif 'id компании' in key:
