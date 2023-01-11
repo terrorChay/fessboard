@@ -5,7 +5,6 @@ from my_query import query_dict
 import pandas as pd
 import numpy as np
 import re
-from PIL import Image
 from io import BytesIO
 from pandas.api.types import (
     is_categorical_dtype,
@@ -262,17 +261,10 @@ def run():
                     if 'сайт' in key:
                         col1.markdown(f'[{value}]({value})')
                     elif 'логотип' in key:
-                        st.caption('Initial data:')
-                        st.code(value)
-                        st.caption('Image Bytes:')
-                        image_bytes = bytes(value)
-                        st.code(image_bytes)
-                        st.caption('Image Stream:')
-                        image_stream = BytesIO(image_bytes)
                         try:
-                            col2.image(image_stream, use_column_width=True)
-                        except Exception as err:
-                            st.error(err)
+                            col2.image(value, use_column_width=True)
+                        except:
+                            col2.caption('Логотип уехал в отпуск')
                     elif 'название компании' in key:
                         col1.subheader(value)
                     elif 'id компании' in key:
