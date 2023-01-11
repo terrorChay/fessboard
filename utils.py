@@ -12,7 +12,7 @@ def page_config(title, layout='wide'):
 # load css with local source
 def load_local_css(file_name):
     try: # Local launch
-        with open(f'/app/fessboard/streamlit_app/{file_name}', 'r') as f:
+        with open(f'/app/fessboard/{file_name}', 'r') as f:
             st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
     except FileNotFoundError: # Streamlit Cloud
         with open(f'{file_name}', 'r') as f:
@@ -40,9 +40,9 @@ def remove_table_indice():
 # set logo
 def set_logo(dark=False):
     if dark:
-        logo_url = 'https://github.com/terrorChay/FESSBoard/blob/master/streamlit_app/img/logo_dark.png?raw=true'
+        logo_url = 'https://github.com/terrorChay/FESSBoard/blob/master/img/logo_dark.png?raw=true'
     else:
-        logo_url = 'https://github.com/terrorChay/FESSBoard/blob/master/streamlit_app/img/logo_light.png?raw=true'
+        logo_url = 'https://github.com/terrorChay/FESSBoard/blob/master/img/logo_light.png?raw=true'
 
     st.markdown(
         f"""
