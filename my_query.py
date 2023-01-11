@@ -129,9 +129,9 @@ query_dict =    {
                                                 T2.company_type AS 'Тип компании',
                                                 T3.company_sphere AS 'Отрасль',
                                                 T1.company_website AS 'Веб-сайт',
-                                                T1.company_logo_url AS 'Логотип'
+                                                T1.company_logo_ AS 'Логотип'
                                             FROM    (
-                                                        (SELECT companies.company_id, companies.company_name, companies.company_type_id, companies.company_sphere_id, companies.company_website, companies.company_logo_url FROM companies) AS T1
+                                                        (SELECT companies.company_id, companies.company_name, companies.company_type_id, companies.company_sphere_id, companies.company_website, companies.company_logo FROM companies) AS T1
                                                             LEFT JOIN 
                                                                 (SELECT company_types.company_type_id, company_types.company_type FROM company_types) AS T2
                                                                 ON T1.company_type_id = T2.company_type_id
