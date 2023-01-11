@@ -113,7 +113,7 @@ def main():
             st.subheader('Динамика вовлеченности потока')
             options = sorted(students_df.loc[(students_df['Бакалавриат'] == 'ФЭСН РАНХиГС')]['Бак. год'].unique(), reverse=True)
             options = list(map(lambda x: f'{x} - {x+4}', options))
-            year = st.selectbox(label='Динамика вовлеченности потока', options=options, index=0,label_visibility="hidden")
+            year = st.selectbox(label='Выберите поток', options=options, index=0,label_visibility="visible")
             year = int(year[:4])
             if year:
                 m = students_df.loc[(students_df['Бак. год'] == year) & (students_df['Бакалавриат'] == 'ФЭСН РАНХиГС')]['ID студента'].nunique()
