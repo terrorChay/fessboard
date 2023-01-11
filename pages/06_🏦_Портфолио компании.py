@@ -269,8 +269,9 @@ def run():
                     else:
                         # col1.text_input(label=key, value=value, disabled=True)
                         col1.caption(value)
-            except:
+            except Exception as err:
                 st.error('Ошибка 1')
+                st.write(err)
         # Проекты        
         with tab2:
             ## Draw search filters and return filtered df
