@@ -8,6 +8,10 @@ import plotly.express as px
 from connectdb import mysql_conn
 from datetime import datetime
 
+colors = ['#ED1C24','#F85546','#FF7C68','#FF9E8C','#FFBFB1','#FFDFD7']
+c=300
+font="Source Sans Pro"
+tr='rgba(0,0,0,0)'
 
 @st.experimental_memo(ttl=600, show_spinner=False)
 def query_data(query):
@@ -72,6 +76,32 @@ def main():
     with col3:
         with st.container():
             st.subheader('Что-то еще')
+            grades = pd.DataFrame({
+    'Грейд':['Грейд 0','Грейд 1','Грейд 2','Грейд 3','Грейд 4',],
+    'Количество проектов':[145,80,60,40,20]
+})
+            fig = px.pie(grades,values='Количество проектов',names='Грейд',
+             color_discrete_sequence=colors,
+             hole=.4)
+
+            fig.update_traces(textposition='inside', textinfo='label+value',
+                  hovertemplate = "%{label}. Проектов: %{value}. <br>%{percent} от общего количества")
+
+            fig.update_layout(
+                annotations     = [dict(text=c, x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
+                plot_bgcolor    = tr,
+                paper_bgcolor   = tr,
+                #legend=dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
+                showlegend=False,
+                font_family=font,
+                font_color="white",
+                title_font_family=font,
+                title_font_color="white",
+                legend_title_font_color="white",
+                margin = dict(l=10,r=10,t=10,b=10))
+
+            st.plotly_chart(fig,use_container_width=True)
+
 
     # second row
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -98,7 +128,7 @@ def main():
                     # e - Кол-во уникальных студентов с потока N, приниваших участие в проектах за 1 курс
                     l.append(e/m)
                 data = pd.Series(l, (f'1 курс ({year}-{year+1})',f'2 курс ({year+1}-{year+2})',f'3 курс ({year+2}-{year+3})',f'4 курс ({year+3}-{year+4})'))
-                fig = px.bar(data)
+                fig = px.bar(data,color_discrete_sequence=colors,)
                 fig.update_yaxes(range = [0,1])
                 fig.update_layout(yaxis_tickformat=".0%")
                 st.plotly_chart(fig, use_container_width=True)
