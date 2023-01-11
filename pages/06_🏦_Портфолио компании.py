@@ -262,8 +262,9 @@ def run():
                     if 'сайт' in key:
                         col1.markdown(f'[{value}]({value})')
                     elif 'логотип' in key:
-                        image = Image.open(value)
-                        col2.image(image, use_column_width=True)
+                        image_bytes = bytes(value)
+                        image_stream = BytesIO(image_bytes)
+                        col2.image(image_stream, use_column_width=True)
                     elif 'название компании' in key:
                         col1.subheader(value)
                     elif 'id компании' in key:
@@ -271,9 +272,8 @@ def run():
                     else:
                         # col1.text_input(label=key, value=value, disabled=True)
                         col1.caption(value)
-            except Exception as err:
+            except:
                 st.error('Ошибка 1')
-                st.write(err)
         # Проекты        
         with tab2:
             ## Draw search filters and return filtered df
