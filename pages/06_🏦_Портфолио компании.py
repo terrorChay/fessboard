@@ -262,9 +262,14 @@ def run():
                     if 'сайт' in key:
                         col1.markdown(f'[{value}]({value})')
                     elif 'логотип' in key:
+                        st.caption('Initial data:')
+                        st.code(value)
+                        st.caption('Image Bytes:')
+                        image_bytes = bytes(value)
+                        st.code(image_bytes)
+                        st.caption('Image Stream:')
+                        image_stream = BytesIO(image_bytes)
                         try:
-                            image_bytes = bytes(value)
-                            image_stream = BytesIO(image_bytes)
                             col2.image(image_stream, use_column_width=True)
                         except Exception as err:
                             st.error(err)
