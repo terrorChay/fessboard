@@ -5,6 +5,7 @@ from my_query import query_dict
 import pandas as pd
 import numpy as np
 import re
+from PIL import Image
 from io import BytesIO
 from pandas.api.types import (
     is_categorical_dtype,
@@ -261,7 +262,8 @@ def run():
                     if 'сайт' in key:
                         col1.markdown(f'[{value}]({value})')
                     elif 'логотип' in key:
-                        col2.image(value, use_column_width=True)
+                        image = Image.open(BytesIO(value))
+                        col2.image(image, use_column_width=True)
                     elif 'название компании' in key:
                         col1.subheader(value)
                     elif 'id компании' in key:
