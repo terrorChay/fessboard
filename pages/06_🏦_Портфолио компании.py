@@ -262,7 +262,7 @@ def run():
                     if 'сайт' in key:
                         col1.markdown(f'[{value}]({value})')
                     elif 'логотип' in key:
-                        image = Image.open(BytesIO(value))
+                        image = Image.open(value)
                         col2.image(image, use_column_width=True)
                     elif 'название компании' in key:
                         col1.subheader(value)
