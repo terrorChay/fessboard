@@ -262,9 +262,12 @@ def run():
                     if 'сайт' in key:
                         col1.markdown(f'[{value}]({value})')
                     elif 'логотип' in key:
-                        image_bytes = bytes(value)
-                        image_stream = BytesIO(image_bytes)
-                        col2.image(image_stream, use_column_width=True)
+                        try:
+                            image_bytes = bytes(value)
+                            image_stream = BytesIO(image_bytes)
+                            col2.image(image_stream, use_column_width=True)
+                        except Exception as err:
+                            st.error(err)
                     elif 'название компании' in key:
                         col1.subheader(value)
                     elif 'id компании' in key:
