@@ -3,7 +3,6 @@ from streamlit import session_state as session
 import utils as utils
 from my_query import query_dict
 import pandas as pd
-import base64
 import numpy as np
 import re
 from io import BytesIO
@@ -262,12 +261,7 @@ def run():
                     if 'сайт' in key:
                         col1.markdown(f'[{value}]({value})')
                     elif 'логотип' in key:
-                        value = base64.decodebytes(value)
-                        try:
-                            col2.image(value, use_column_width=True)
-                        except:
-                            col2.write('Логотип уехал в отпуск')
-                            col2.caption(value)
+                        col2.image(value, use_column_width=True)
                     elif 'название компании' in key:
                         col1.subheader(value)
                     elif 'id компании' in key:
