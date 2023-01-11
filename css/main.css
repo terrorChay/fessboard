@@ -44,6 +44,6 @@
     border-radius: 8px;
 } */
 
-.plotly {
+.js-plotly-plot .plotly, .js-plotly-plot .plotly div {
     font-family: "Source Sans Pro", sans-serif !important;
 }
