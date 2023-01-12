@@ -9,9 +9,13 @@ from connectdb import mysql_conn
 from datetime import datetime
 
 colors = ['#ED1C24','#F85546','#FF7C68','#FF9E8C','#FFBFB1','#FFDFD7']
+colors1 = ['#ED1C24','#F2595F','#C9A0DC','#F0DC82','#FFDAB9','#0ABCFF','#556832']
+colors2 = px.colors.qualitative.Dark24
+colors3 = ['#ED1C24','#F2595F']
 c=300
 font="Source Sans Pro"
 tr='rgba(0,0,0,0)'
+config = {'staticPlot': True,'displayModeBar': False}
 
 @st.experimental_memo(ttl=600, show_spinner=False)
 def query_data(query):
@@ -42,7 +46,7 @@ def load_projects():
 @st.experimental_memo(show_spinner=False)
 def load_students_in_projects():
     students_df = query_data(query_dict['students_in_projects']).merge(query_data(query_dict['students']), on='ID студента', how='left')
-    students_df.dropna(axis=0, subset=['ID группы'], inplace=True)
+    students_df.dropna(axis=0, subset=['Команда'], inplace=True)
     students_df.set_index('ID проекта', drop=True, inplace=True)
     return students_df
 
@@ -64,30 +68,29 @@ def main():
     col3.metric('Уникальных направлений', projects_df['Направление'].nunique())
     col4.metric('Уникальных партнеров', projects_df['Название компании'].nunique())
     # first row
-    col1, col2, col3 = st.columns([2, 1, 1])
+    col1, col2, col3 = st.columns([1, 2, 1])
     with col1:
         with st.container():
-            st.subheader('Темп прироста проектов')
-            projects_df['Грейд']
+            st.subheader('Проектов в работе')
             
     with col2:
         with st.container():
-            st.subheader('Что-то')
+            st.subheader('Барчарт по числу проектов в год ')
 
     with col3:
 
         with st.container():
-            st.subheader('Всего проектов')
+            st.subheader('Разделение проектов по грейдам')
             a = projects_df['Грейд']
             fig = px.pie(a,values=a.value_counts(),names=a.value_counts().index,
              color_discrete_sequence=colors,
              hole=.4)
 
             fig.update_traces(textposition='inside', textinfo='label+value',
-                  hovertemplate = "%{label}. Проектов: %{value}. <br>%{percent} от общего количества")
+                  hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества")
 
             fig.update_layout(
-                annotations     = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
+                # annotations     = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
                 plot_bgcolor    = tr,
                 paper_bgcolor   = tr,
                 #legend=dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
@@ -97,16 +100,26 @@ def main():
                 title_font_family=font,
                 title_font_color="white",
                 legend_title_font_color="white",
-                margin = dict(l=10,r=10,t=10,b=10))
+                height = 300,
+                margin = dict(t=0, l=0, r=0, b=0))
 
-            st.plotly_chart(fig,use_container_width=True)
+            st.plotly_chart(fig,use_container_width=True,config=config)
 
-
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col1:
+        with st.container():
+            st.subheader('Барчарт по числу партнёров по годам')
+    with col2:
+        with st.container():
+            st.subheader('Распределение проектов по типам компаний-заказчиков')
+    with col3:
+        with st.container():
+            st.subheader('Логотипы компаний')
     # second row
     col1, col2, col3 = st.columns([1, 2, 1])
     with col1:
         with st.container():
-            st.subheader('Какой-то кружок')
+            st.subheader('Доля вовлеченных студентов')
 
     with col2:
         with st.container():
@@ -131,12 +144,45 @@ def main():
                 fig.update_yaxes(range = [0,1])
                 fig.update_layout(yaxis_tickformat=".0%",showlegend=False,xaxis_title="Курс",
     yaxis_title="Вовлечённость",font_family=font,plot_bgcolor=tr,)
-                fig.update_traces(hovertemplate = "%{label}. Вовлечённость: %{value}")
-                st.plotly_chart(fig, use_container_width=True)
+                fig.update_traces(hovertemplate = "<b>%{label}.</b> Вовлечённость: <b>%{value}</b>")
+                st.plotly_chart(fig, use_container_width=True,config=config)
 
     with col3:
         with st.container():
-            st.subheader('Какой-то график')
+            st.subheader('Доля студентов в активных проектах по курсам')
+
+    col1, col2 = st.columns([2, 2])
+    with col1:
+        with st.container():
+            st.subheader('Пайчарт проектов по направлениям за выбранный год')
+            data = {'Макро': ['Marketing','Marketing','Marketing', 'Management','Management','Management', 'HR','HR', '<b>Design</b>'],
+        'Микро': ['Маркетинговая<br>компания', 'Маркетинговая<br>стратегия', 'Каналы<br>коммуникации',
+                  'Стратегическое<br>управление','Организационное<br>проектирование','Антикризисное<br>управление',
+                  'Кадровый аудит','Кадровая<br>политика',
+                  'Разработка<br>айдентики'],
+        'Количество': [16, 8, 19, 9,12,13,22,10,14]}
+
+            spheres_df = pd.DataFrame(data)
+            fig = px.sunburst(spheres_df,path=['Макро', 'Микро'], values='Количество',branchvalues="total",
+                            color_discrete_sequence=colors1)
+            fig.update_layout(margin = dict(t=0, l=0, r=0, b=0),
+                            paper_bgcolor=tr,
+                            font_family=font)
+            fig.update_traces(hovertemplate = "Направление <b>%{parent}</b><br><b>%{label}.</b> Проектов - <b>%{value}.</b>",
+                            insidetextorientation='radial',opacity=1,sort=True)
+            st.plotly_chart(fig, use_container_width=True,config=config)
+
+    with col2:
+        with st.container():
+            st.subheader('Барчарт по числу проектов в год ПО ВЫБРАННОМУ НАПРАВЛЕНИЮ ')
+    
+    col1, col2 = st.columns([2, 2])
+    with col1:
+        with st.container():
+            st.subheader('Топ людей по ролям')
+    with col2:
+        with st.container():
+            st.subheader('Распределение проектов по вузам-партнёрам')
 
 
 if __name__ == "__main__":
