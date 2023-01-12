@@ -63,10 +63,8 @@ query_dict =    {
                                                 mast_name AS 'Магистратура',
                                                 mast_reg_name as 'Маг. регион',
                                                 students.masters_start_year AS 'Маг. год',
-                                                student_statuses.student_status AS 'Статус'
+                                                students.is_banned AS 'Отстранен'
                                             FROM students
-                                            LEFT JOIN student_statuses
-                                                ON students.student_status_id = student_statuses.student_status_id
                                             LEFT JOIN universities
                                                 ON students.bachelors_university_id = universities.university_id
                                             LEFT JOIN   (
