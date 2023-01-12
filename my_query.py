@@ -98,11 +98,11 @@ query_dict =    {
                                             SELECT
                                                 T0.project_id AS 'ID проекта',
                                                 T0.project_end_date AS 'Дата окончания',
-                                                T1.group_id AS 'ID группы',
+                                                T1.team AS 'Команда',
                                                 T1.student_id AS 'ID студента',
                                                 T1.is_curator AS 'Куратор'
                                             FROM (SELECT projects.project_id, projects.project_end_date FROM projects) AS T0
-                                            LEFT JOIN   (SELECT students_in_projects.project_id, students_in_projects.group_id, students_in_projects.student_id, students_in_projects.is_curator FROM students_in_projects) AS T1
+                                            LEFT JOIN   (SELECT students_in_projects.project_id, students_in_projects.team, students_in_projects.student_id, students_in_projects.is_curator FROM students_in_projects) AS T1
                                                 ON T0.project_id = T1.project_id;
                                             """, 
 
@@ -137,9 +137,5 @@ query_dict =    {
                                                                 (SELECT company_spheres.company_sphere_id, company_spheres.company_sphere FROM company_spheres) AS T3
                                                                 ON T1.company_sphere_id = T3.company_sphere_id
                                                     );
-                                            """,
-                
-                "students_in_proj_v2"   :   """
-
                                             """,
 }
