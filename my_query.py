@@ -63,10 +63,8 @@ query_dict =    {
                                                 mast_name AS 'Магистратура',
                                                 mast_reg_name as 'Маг. регион',
                                                 students.masters_start_year AS 'Маг. год',
-                                                student_statuses.student_status AS 'Статус'
+                                                students.is_banned AS 'Отстранен'
                                             FROM students
-                                            LEFT JOIN student_statuses
-                                                ON students.student_status_id = student_statuses.student_status_id
                                             LEFT JOIN universities
                                                 ON students.bachelors_university_id = universities.university_id
                                             LEFT JOIN   (
@@ -100,11 +98,11 @@ query_dict =    {
                                             SELECT
                                                 T0.project_id AS 'ID проекта',
                                                 T0.project_end_date AS 'Дата окончания',
-                                                T1.group_id AS 'ID группы',
+                                                T1.team AS 'Команда',
                                                 T1.student_id AS 'ID студента',
                                                 T1.is_curator AS 'Куратор'
                                             FROM (SELECT projects.project_id, projects.project_end_date FROM projects) AS T0
-                                            LEFT JOIN   (SELECT students_in_projects.project_id, students_in_projects.group_id, students_in_projects.student_id, students_in_projects.is_curator FROM students_in_projects) AS T1
+                                            LEFT JOIN   (SELECT students_in_projects.project_id, students_in_projects.team, students_in_projects.student_id, students_in_projects.is_curator FROM students_in_projects) AS T1
                                                 ON T0.project_id = T1.project_id;
                                             """, 
 
@@ -129,9 +127,9 @@ query_dict =    {
                                                 T2.company_type AS 'Тип компании',
                                                 T3.company_sphere AS 'Отрасль',
                                                 T1.company_website AS 'Веб-сайт',
-                                                T1.company_logo_url AS 'Логотип'
+                                                T1.company_logo AS 'Логотип'
                                             FROM    (
-                                                        (SELECT companies.company_id, companies.company_name, companies.company_type_id, companies.company_sphere_id, companies.company_website, companies.company_logo_url FROM companies) AS T1
+                                                        (SELECT companies.company_id, companies.company_name, companies.company_type_id, companies.company_sphere_id, companies.company_website, companies.company_logo FROM companies) AS T1
                                                             LEFT JOIN 
                                                                 (SELECT company_types.company_type_id, company_types.company_type FROM company_types) AS T2
                                                                 ON T1.company_type_id = T2.company_type_id
@@ -139,9 +137,5 @@ query_dict =    {
                                                                 (SELECT company_spheres.company_sphere_id, company_spheres.company_sphere FROM company_spheres) AS T3
                                                                 ON T1.company_sphere_id = T3.company_sphere_id
                                                     );
-                                            """,
-                
-                "students_in_proj_v2"   :   """
-
                                             """,
 }

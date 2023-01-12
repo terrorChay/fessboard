@@ -56,7 +56,7 @@ def load_students_in_projects(project_ids):
     students_df.set_index('ID проекта', drop=True, inplace=True)
 
     students_with_company   = project_ids.merge(students_df, how='left', left_index=True, right_index=True)
-    students_with_company.dropna(axis=0, subset=['ID группы', 'ID студента'], inplace=True)
+    students_with_company.dropna(axis=0, subset=['Команда', 'ID студента'], inplace=True)
 
     return students_with_company
 
@@ -261,13 +261,10 @@ def run():
                     if 'сайт' in key:
                         col1.markdown(f'[{value}]({value})')
                     elif 'логотип' in key:
-                        if len(value) > 5:
-                            try:
-                                col2.image(value, use_column_width=True)
-                            except:
-                                col2.write('Логотип уехал в отпуск')
-                        else:
-                            col2.image('https://i.pinimg.com/originals/18/3e/9b/183e9bd688fe158b9141aa162c853382.jpg', use_column_width=True)
+                        try:
+                            col2.image(value, use_column_width=True)
+                        except:
+                            col2.caption('Логотип уехал в отпуск')
                     elif 'название компании' in key:
                         col1.subheader(value)
                     elif 'id компании' in key:
@@ -297,12 +294,12 @@ def run():
                     project_name = projects_with_company['Название проекта'].loc[project_idx]
                     with st.expander(f'Проект "{project_name}"'):
 
-                        students_in_project     = students_with_company[['ID группы', 'ФИО студента', 'Бакалавриат', 'Магистратура']].loc[[project_idx]]
-                        unique_groups_idx       = students_in_project['ID группы'].unique()
+                        students_in_project     = students_with_company[['Команда', 'ФИО студента', 'Бакалавриат', 'Магистратура']].loc[[project_idx]]
+                        unique_groups_idx       = students_in_project['Команда'].unique()
                         group_counter = 0
                         for group_idx in unique_groups_idx:
                             st.caption(f'Группа {group_counter+1}')
-                            students_in_group   = students_in_project[students_in_project['ID группы'] == group_idx].reset_index()
+                            students_in_group   = students_in_project[students_in_project['Команда'] == group_idx].reset_index()
                             st.dataframe(students_in_group[['ФИО студента', 'Бакалавриат', 'Магистратура']], use_container_width=True)    
                             
                             group_counter += 1
