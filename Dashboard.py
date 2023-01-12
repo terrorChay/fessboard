@@ -154,22 +154,18 @@ def main():
     col1, col2 = st.columns([2, 2])
     with col1:
         with st.container():
-            st.subheader('Пайчарт проектов по направлениям за выбранный год')
-            data = {'Макро': ['Marketing','Marketing','Marketing', 'Management','Management','Management', 'HR','HR', '<b>Design</b>'],
-        'Микро': ['Маркетинговая<br>компания', 'Маркетинговая<br>стратегия', 'Каналы<br>коммуникации',
-                  'Стратегическое<br>управление','Организационное<br>проектирование','Антикризисное<br>управление',
-                  'Кадровый аудит','Кадровая<br>политика',
-                  'Разработка<br>айдентики'],
-        'Количество': [16, 8, 19, 9,12,13,22,10,14]}
-
-            spheres_df = pd.DataFrame(data)
-            fig = px.sunburst(spheres_df,path=['Макро', 'Микро'], values='Количество',branchvalues="total",
-                            color_discrete_sequence=colors1)
+            st.subheader('Направления проектов')
+            fields_df = query_data(query_dict['project_fields'])
+            fields_df['Количество']=fields_df['Микро'].map(projects_df['Направление'].value_counts())
+            fields_df['Микро'] = fields_df['Микро'].str.replace(' ','<br>')
+            fields_df['Макро'] = '<b>'+fields_df['Макро'].astype(str)+'</b>'
+            fig = px.sunburst(fields_df,path=['Макро', 'Микро'], values='Количество',branchvalues="total",color_discrete_sequence=colors)
+            # ,color_discrete_sequence=colors1 - если придумаем красивые цвета, это нужно вставить в параметры fig.sunburst
             fig.update_layout(margin = dict(t=0, l=0, r=0, b=0),
                             paper_bgcolor=tr,
                             font_family=font)
-            fig.update_traces(hovertemplate = "Направление <b>%{parent}</b><br><b>%{label}.</b> Проектов - <b>%{value}.</b>",
-                            insidetextorientation='radial',opacity=1,sort=True)
+            fig.update_traces(hovertemplate = "Направление <b>%{parent}</b><br><b>%{label}.</b> Проектов: <b>%{value}</b>",
+                            insidetextorientation='auto',opacity=1,sort=True)
             st.plotly_chart(fig, use_container_width=True,config=config)
 
     with col2:
