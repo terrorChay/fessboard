@@ -8,13 +8,14 @@ import plotly.express as px
 from connectdb import mysql_conn
 from datetime import datetime
 
+#Наборы цветов
 colors = ['#ED1C24','#F85546','#FF7C68','#FF9E8C','#FFBFB1','#FFDFD7']
 colors1 = ['#ED1C24','#F2595F','#C9A0DC','#F0DC82','#FFDAB9','#0ABCFF','#556832']
 colors2 = px.colors.qualitative.Dark24
 colors3 = ['#ED1C24','#F2595F']
-c=300
-font="Source Sans Pro"
 tr='rgba(0,0,0,0)'
+
+font="Source Sans Pro"
 config = {'staticPlot': True,'displayModeBar': False}
 
 @st.experimental_memo(ttl=600, show_spinner=False)
@@ -67,43 +68,116 @@ def main():
     col2.metric('Всего студентов',  students_df.shape[0])
     col3.metric('Уникальных направлений', projects_df['Направление'].nunique())
     col4.metric('Уникальных партнеров', projects_df['Название компании'].nunique())
-    # first row
+    
+    # row 1
+
     col1, col2, col3 = st.columns([1, 2, 1])
+
     with col1:
         with st.container():
-            st.subheader('Проектов в работе')
+            st.subheader('Разделение проектов по грейдам')
+            a   = projects_df['Грейд']
             
+            fig = px.pie(
+            a,
+            values                  = a.value_counts(),
+            names                   = a.value_counts().index,
+            color_discrete_sequence = colors,
+            hole                    = .4
+            )
+
+            fig.update_traces(
+                textposition  = 'inside',
+                textinfo      = 'label+value',
+                hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+                textfont_size = 18
+                )
+
+            fig.update_layout(
+                plot_bgcolor            = tr,
+                paper_bgcolor           = tr,
+                showlegend              = False,
+                font_family             = font,
+                font_color              = "white",
+                title_font_family       = font,
+                title_font_color        = "white",
+                legend_title_font_color = "white",
+                height                  = 300,
+                margin                  = dict(t=0, l=0, r=0, b=0)
+                )
+
+            st.plotly_chart(fig,use_container_width=True,config=config)
+
     with col2:
         with st.container():
             st.subheader('Барчарт по числу проектов в год ')
+
+            data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [16, 24, 37,45,63]}
+            test_df = pd.DataFrame(data)
+
+            fig = px.bar(test_df, 
+                x                       = 'Год',
+                y                       = 'Количество',
+                color_discrete_sequence = colors,
+                text_auto               = True
+                )
+            
+            fig.update_layout(
+                font_family   = font,
+                font_size     = 18,
+                paper_bgcolor = tr,
+                plot_bgcolor  = tr,
+                margin        = dict(t=0, l=0, r=20, b=0)
+                )
+            
+            fig.update_traces(
+                textfont_size = 18,
+                textangle     = 0,
+                textposition  = "outside",
+                cliponaxis    = False
+                )
+
+            st.plotly_chart(fig,use_container_width=True,config=config)
+
 
     with col3:
 
         with st.container():
             st.subheader('Разделение проектов по грейдам')
-            a = projects_df['Грейд']
-            fig = px.pie(a,values=a.value_counts(),names=a.value_counts().index,
-             color_discrete_sequence=colors,
-             hole=.4)
+            a   = projects_df['Грейд']
 
-            fig.update_traces(textposition='inside', textinfo='label+value',
-                  hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества")
+            fig = px.pie(a,
+            values                  = a.value_counts(),
+            names                   = a.value_counts().index,
+            color_discrete_sequence = colors,
+            hole                    = .4
+            )
+
+            fig.update_traces(
+                textposition  = 'inside',
+                textinfo      = 'label+value',
+                hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+                textfont_size = 18
+                )
 
             fig.update_layout(
-                # annotations     = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
-                plot_bgcolor    = tr,
-                paper_bgcolor   = tr,
-                #legend=dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
-                showlegend=False,
-                font_family=font,
-                font_color="white",
-                title_font_family=font,
-                title_font_color="white",
-                legend_title_font_color="white",
-                height = 300,
-                margin = dict(t=0, l=0, r=0, b=0))
+                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
+                plot_bgcolor            = tr,
+                paper_bgcolor           = tr,
+                #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
+                showlegend              = False,
+                font_family             = font,
+                font_color              = "white",
+                title_font_family       = font,
+                title_font_color        = "white",
+                legend_title_font_color = "white",
+                height                  = 300,
+                margin                  = dict(t=0, l=0, r=0, b=0)
+                )
 
             st.plotly_chart(fig,use_container_width=True,config=config)
+    
+    # row 2
 
     col1, col2, col3 = st.columns([1, 2, 1])
     with col1:
@@ -115,7 +189,9 @@ def main():
     with col3:
         with st.container():
             st.subheader('Логотипы компаний')
-    # second row
+    
+    # row 3
+
     col1, col2, col3 = st.columns([1, 2, 1])
     with col1:
         with st.container():
@@ -140,38 +216,68 @@ def main():
                     # e - Кол-во уникальных студентов с потока N, приниваших участие в проектах за 1 курс
                     l.append(e/m)
                 data = pd.Series(l, (f'1 курс ({year}-{year+1})',f'2 курс ({year+1}-{year+2})',f'3 курс ({year+2}-{year+3})',f'4 курс ({year+3}-{year+4})'))
+                
                 fig = px.bar(data,color_discrete_sequence=colors,)
                 fig.update_yaxes(range = [0,1])
-                fig.update_layout(yaxis_tickformat=".0%",showlegend=False,xaxis_title="Курс",
-    yaxis_title="Вовлечённость",font_family=font,plot_bgcolor=tr,)
+                
+                fig.update_layout(
+                    yaxis_tickformat = ".0%",
+                    showlegend       = False,
+                    xaxis_title      = "Курс",
+                    yaxis_title      = "Вовлечённость",
+                    font_family      = font,
+                    plot_bgcolor     = tr,
+                    font_size        = 13,
+                    )
+                
                 fig.update_traces(hovertemplate = "<b>%{label}.</b> Вовлечённость: <b>%{value}</b>")
+        
                 st.plotly_chart(fig, use_container_width=True,config=config)
 
     with col3:
         with st.container():
             st.subheader('Доля студентов в активных проектах по курсам')
+    
+    # row 4
 
     col1, col2 = st.columns([2, 2])
     with col1:
         with st.container():
             st.subheader('Направления проектов')
-            fields_df = query_data(query_dict['project_fields'])
-            fields_df['Количество']=fields_df['Микро'].map(projects_df['Направление'].value_counts())
-            fields_df['Микро'] = fields_df['Микро'].str.replace(' ','<br>')
-            fields_df['Макро'] = '<b>'+fields_df['Макро'].astype(str)+'</b>'
-            fig = px.sunburst(fields_df,path=['Макро', 'Микро'], values='Количество',branchvalues="total",color_discrete_sequence=colors)
-            # ,color_discrete_sequence=colors1 - если придумаем красивые цвета, это нужно вставить в параметры fig.sunburst
-            fig.update_layout(margin = dict(t=0, l=0, r=0, b=0),
-                            paper_bgcolor=tr,
-                            font_family=font)
-            fig.update_traces(hovertemplate = "Направление <b>%{parent}</b><br><b>%{label}.</b> Проектов: <b>%{value}</b>",
-                            insidetextorientation='auto',opacity=1,sort=True)
+
+            fields_df               = query_data(query_dict['project_fields'])
+            fields_df['Количество'] = fields_df['Микро'].map(projects_df['Направление'].value_counts())
+            fields_df['Микро']      = fields_df['Микро'].str.replace(' ','<br>')
+            fields_df['Макро']      = '<b>'+fields_df['Макро'].astype(str)+'</b>'
+
+            fig = px.sunburst(fields_df,
+            path                    = ['Макро', 'Микро'],
+            values                  = 'Количество',
+            branchvalues            = "total",
+            color_discrete_sequence = colors
+            )
+
+            fig.update_layout(
+                margin        = dict(t=0, l=0, r=0, b=0),
+                paper_bgcolor = tr,
+                font_family   = font
+                )
+    
+            fig.update_traces(
+                hovertemplate         = "Направление <b>%{parent}</b><br><b>%{label}.</b> Проектов: <b>%{value}</b>",
+                insidetextorientation = 'auto',
+                opacity               = 1,
+                sort                  = True
+                )
+
             st.plotly_chart(fig, use_container_width=True,config=config)
 
     with col2:
         with st.container():
             st.subheader('Барчарт по числу проектов в год ПО ВЫБРАННОМУ НАПРАВЛЕНИЮ ')
     
+    # row 5
+
     col1, col2 = st.columns([2, 2])
     with col1:
         with st.container():
