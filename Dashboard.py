@@ -213,7 +213,7 @@ def main():
             st.subheader('Динамика вовлеченности потока')
             options = sorted(students_df.loc[(students_df['Бакалавриат'] == 'ФЭСН РАНХиГС')]['Бак. год'].unique(), reverse=True)
             options = list(map(lambda x: f'{x} - {x+4}', options))
-            year = st.selectbox(label='Выберите поток', options=options, index=0,label_visibility="visible")
+            year = st.selectbox(label='Выберите поток', options=options, index=0,label_visibility="collapsed")
             year = int(year[:4])
             if year:
                 m = students_df.loc[(students_df['Бак. год'] == year) & (students_df['Бакалавриат'] == 'ФЭСН РАНХиГС')]['ID студента'].nunique()
@@ -296,30 +296,29 @@ def main():
             # plot controls
             st.subheader('Интерактивные рейтинги')
             rating_subject  = st.selectbox(label='Показывать топ', options=['Преподавателей', 'Студентов'], index=0, label_visibility="collapsed")
-            sort_asc        = st.checkbox('По возрастанию', key="order")
+            sort_asc        = st.checkbox('По возрастанию', value=True)
             chart_container = st.container()
-            display_limit   = st.slider(label='Показывать топ', min_value=1, max_value=15, value=5)
+            display_limit   = st.slider(label='Ограничить вывод', min_value=1, max_value=15, value=5)
             # data selection
             if rating_subject == 'Преподавателей':
-                data = teachers_in_projects_df['ФИО преподавателя'].value_counts(ascending=sort_asc).iloc[:display_limit]
+                data = teachers_in_projects_df.value_counts(subset='ФИО преподавателя', ascending=sort_asc).iloc[:display_limit]
             else:
-                data = students_in_projects_df['ФИО студента'].value_counts(ascending=sort_asc).iloc[:display_limit]
+                data = students_in_projects_df.value_counts(subset='ФИО студента', ascending=sort_asc).iloc[:display_limit]
             # set up a plot
-            fig = px.bar(data,orientation='h',color_discrete_sequence=colors)
+            fig = px.bar(data, orientation='h', color_discrete_sequence=colors)
             fig.update_layout(
-                # yaxis={'categoryorder': f'total asc={sort_asc}'},
-                showlegend       = False,
-                font_family      = font,
-                plot_bgcolor     = tr,
-                font_size        = 13,
-                xaxis_visible    = False,
-                yaxis_title      = "",
-                title = f'Топ {display_limit} {rating_subject}'
-                
-                # margin           = dict(t=20, l=20, r=20, b=20),
+                yaxis=dict(autorange="reversed"),
+                showlegend      = False,
+                font_family     = font,
+                plot_bgcolor    = tr,
+                font_size       = 13,
+                xaxis_visible   = False,
+                yaxis_title     = "",
+                height          = 350,
+                margin          = dict(t=0, b=0),
                 )
             # display the plot
-            chart_container.plotly_chart(fig, use_container_width=True,config=config)
+            chart_container.plotly_chart(fig, use_container_width=True, config=config)
     
     with col2:
         with st.container():
