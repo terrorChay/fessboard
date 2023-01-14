@@ -29,6 +29,7 @@
 /* Style columns */
 [data-testid="column"] {
     box-shadow: 0 0 3px #cccccc;
+    border-radius: 0.25rem;
     padding: 1em;
 }  
 
