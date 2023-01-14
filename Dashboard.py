@@ -169,6 +169,7 @@ def main():
                 textinfo      = 'label+value',
                 hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
                 textfont_size = 18
+                
                 )
 
             fig.update_layout(
@@ -242,7 +243,7 @@ def main():
                     margin           = dict(t=0, l=0, r=0, b=0),
                     )
                 
-                fig.update_traces(hovertemplate = "<b>%{label}.</b> Вовлечённость: <b>%{value}</b>")
+                fig.update_traces(hovertemplate = "<b>%{label}.</b> Вовлечённость: <b>%{value}</b>",cliponaxis    = False)
         
                 st.plotly_chart(fig, use_container_width=True,config=config)
 
@@ -296,9 +297,9 @@ def main():
             # plot controls
             st.subheader('Интерактивные рейтинги')
             rating_subject  = st.selectbox(label='Показывать топ', options=['Преподавателей', 'Студентов'], index=0, label_visibility="collapsed")
-            sort_asc        = st.checkbox('По возрастанию', value=True)
+            sort_asc        = st.checkbox('По возрастанию', value=False)
             chart_container = st.container()
-            display_limit   = st.slider(label='Ограничить вывод', min_value=1, max_value=15, value=5)
+            display_limit   = st.slider(label='Ограничить вывод', min_value=1, max_value=15, value=10)
             # data selection
             if rating_subject == 'Преподавателей':
                 data = teachers_in_projects_df.value_counts(subset='ФИО преподавателя', ascending=sort_asc).iloc[:display_limit]
@@ -315,8 +316,10 @@ def main():
                 xaxis_visible   = False,
                 yaxis_title     = "",
                 height          = 350,
-                margin          = dict(t=0, b=0),
+                margin          = dict(t=50, b=0,l=0,r=0),
+                title = f'Топ {display_limit} {rating_subject}'
                 )
+            fig.update_traces(cliponaxis    = True)
             # display the plot
             chart_container.plotly_chart(fig, use_container_width=True, config=config)
     
