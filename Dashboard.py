@@ -45,21 +45,32 @@ def load_projects():
     return projects_df
 
 @st.experimental_memo(show_spinner=False)
-def load_students_in_projects():
-    students_df = query_data(query_dict['students_in_projects']).merge(query_data(query_dict['students']), on='ID студента', how='left')
-    students_df.dropna(axis=0, subset=['Команда'], inplace=True)
-    students_df.set_index('ID проекта', drop=True, inplace=True)
-    return students_df
+def load_people_in_projects(teachers=False):
+    if teachers:
+        a = 'teachers_in_projects'
+        b = 'teachers'
+        c = 'ID преподавателя'
+    else:
+        a = 'students_in_projects'
+        b = 'students'
+        c = 'ID студента'  
+    df = query_data(query_dict[a]).merge(query_data(query_dict[b]), on=c, how='left')
+    # df.dropna(axis=0, subset=['Команда'], inplace=True)
+    df.set_index('ID проекта', drop=True, inplace=True)
+    return df
 
 @st.experimental_memo(show_spinner=False)
 def load_students():
     return query_data(query_dict['students'])
 
 def main():
+    # load data
     with st.spinner('Читаем PMI и PMBOK...'):
         projects_df = load_projects()
     with st.spinner('Происходит аджайл...'):
-        students_in_projects_df = load_students_in_projects()
+        students_in_projects_df = load_people_in_projects()
+    with st.spinner('Изучаем требования стейкхолдеров...'):
+        teachers_in_projects_df = load_people_in_projects(teachers=True)
     with st.spinner('Изучаем требования стейкхолдеров...'):
         students_df = load_students()
     # metrics
@@ -282,43 +293,33 @@ def main():
     col1, col2 = st.columns([2, 2])
     with col1:
         with st.container():
+            # plot controls
             st.subheader('Интерактивные рейтинги')
-            w = st.selectbox(label='Показывать топ', options=['Преподавателей'], index=0,label_visibility="collapsed")
-            # n = st.selectbox(label='Показывать топ', options=[10,5,3], index=0,label_visibility="visible")
-            
-            st.checkbox('По убыванию',key="order")
-
-
-
-            teachers_df2 = query_data(query_dict['teachers_in_projects']).merge(query_data(query_dict['teachers']), on='ID преподавателя', how='left')
-            
-            a = teachers_df2['ФИО преподавателя']
-
-            
-            if st.session_state.order:
-                o = 'descending'
-                b = a.value_counts().nsmallest(n=n)
+            rating_subject  = st.selectbox(label='Показывать топ', options=['Преподавателей', 'Студентов'], index=0, label_visibility="collapsed")
+            sort_asc        = st.checkbox('По возрастанию', key="order")
+            chart_container = st.container()
+            display_limit   = st.slider(label='Показывать топ', min_value=1, max_value=15, value=5)
+            # data selection
+            if rating_subject == 'Преподавателей':
+                data = teachers_in_projects_df['ФИО преподавателя'].value_counts(ascending=sort_asc).iloc[:display_limit]
             else:
-                o = 'ascending'
-                b = a.value_counts().nlargest(n=n)
-                
-            fig = px.bar(b,orientation='h',color_discrete_sequence=colors)
-
+                data = students_in_projects_df['ФИО студента'].value_counts(ascending=sort_asc).iloc[:display_limit]
+            # set up a plot
+            fig = px.bar(data,orientation='h',color_discrete_sequence=colors)
             fig.update_layout(
-                yaxis={'categoryorder': f'total {o}'},
+                # yaxis={'categoryorder': f'total asc={sort_asc}'},
                 showlegend       = False,
                 font_family      = font,
                 plot_bgcolor     = tr,
                 font_size        = 13,
                 xaxis_visible    = False,
                 yaxis_title      = "",
-                title = f'Топ {n} {w}'
+                title = f'Топ {display_limit} {rating_subject}'
                 
                 # margin           = dict(t=20, l=20, r=20, b=20),
                 )
-
-            st.plotly_chart(fig, use_container_width=True,config=config)
-            n = st.slider('Показывать топ', 3, 20, 10)
+            # display the plot
+            chart_container.plotly_chart(fig, use_container_width=True,config=config)
     
     with col2:
         with st.container():
