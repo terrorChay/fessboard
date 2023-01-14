@@ -228,6 +228,7 @@ def main():
                     font_family      = font,
                     plot_bgcolor     = tr,
                     font_size        = 13,
+                    margin           = dict(t=0, l=0, r=0, b=0),
                     )
                 
                 fig.update_traces(hovertemplate = "<b>%{label}.</b> Вовлечённость: <b>%{value}</b>")
@@ -281,7 +282,44 @@ def main():
     col1, col2 = st.columns([2, 2])
     with col1:
         with st.container():
-            st.subheader('Топ людей по ролям')
+            st.subheader('Интерактивные рейтинги')
+            w = st.selectbox(label='Показывать топ', options=['Преподавателей'], index=0,label_visibility="collapsed")
+            # n = st.selectbox(label='Показывать топ', options=[10,5,3], index=0,label_visibility="visible")
+            
+            st.checkbox('По убыванию',key="order")
+
+
+
+            teachers_df2 = query_data(query_dict['teachers_in_projects']).merge(query_data(query_dict['teachers']), on='ID преподавателя', how='left')
+            
+            a = teachers_df2['ФИО преподавателя']
+
+            
+            if st.session_state.order:
+                o = 'descending'
+                b = a.value_counts().nsmallest(n=n)
+            else:
+                o = 'ascending'
+                b = a.value_counts().nlargest(n=n)
+                
+            fig = px.bar(b,orientation='h',color_discrete_sequence=colors)
+
+            fig.update_layout(
+                yaxis={'categoryorder': f'total {o}'},
+                showlegend       = False,
+                font_family      = font,
+                plot_bgcolor     = tr,
+                font_size        = 13,
+                xaxis_visible    = False,
+                yaxis_title      = "",
+                title = f'Топ {n} {w}'
+                
+                # margin           = dict(t=20, l=20, r=20, b=20),
+                )
+
+            st.plotly_chart(fig, use_container_width=True,config=config)
+            n = st.slider('Показывать топ', 3, 20, 10)
+    
     with col2:
         with st.container():
             st.subheader('Распределение проектов по вузам-партнёрам')
