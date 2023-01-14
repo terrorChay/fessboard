@@ -50,6 +50,6 @@
 }
 
 /* remove View fullscreen button */
-button[title="View fullscreen"] {
+/* button[title="View fullscreen"] {
     visibility: hidden;
-}
+} */

@@ -18,7 +18,7 @@ colors3 = ['#ED1C24','#F2595F']
 tr='rgba(0,0,0,0)'
 
 font="Source Sans Pro"
-config = {'staticPlot': True,'displayModeBar': False}
+config = {'staticPlot': False,'displayModeBar': False}
 
 @st.experimental_memo(ttl=600, show_spinner=False)
 def query_data(query):
@@ -91,7 +91,184 @@ def main():
     col6.metric('Уникальных партнеров', projects_df['Название компании'].nunique())
 
     # row 1
+    
+    col1, col2,col3,col4,col5 = st.columns([1, 1,1,1,2])
+    with col1:
+        with st.container():
+            st.markdown('**Распределение проектов по вузам-партнёрам**')
+            a   = projects_df['Грейд']
 
+            fig = px.pie(a,
+            values                  = a.value_counts(),
+            names                   = a.value_counts().index,
+            color_discrete_sequence = colors,
+            hole                    = .4
+            )
+
+            fig.update_traces(
+                textposition  = 'inside',
+                textinfo      = 'label+value',
+                hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+                textfont_size = 12
+                
+                )
+
+            fig.update_layout(
+                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
+                plot_bgcolor            = tr,
+                paper_bgcolor           = tr,
+                #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
+                showlegend              = False,
+                font_family             = font,
+                title_font_family       = font,
+                title_font_color        = "white",
+                legend_title_font_color = "white",
+                height                  = 150,
+                margin                  = dict(t=0, l=0, r=0, b=0),
+                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
+                )
+
+            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+            # st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+    with col2:
+        with st.container():
+            st.markdown('**Барчарт по числу проектов в год**')
+
+            data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [16, 24, 37,45,63]}
+            test_df = pd.DataFrame(data)
+
+            fig = px.bar(test_df, 
+                x                       = 'Год',
+                y                       = 'Количество',
+                color_discrete_sequence = colors,
+                text_auto               = True
+                )
+            
+            fig.update_layout(
+                font_family   = font,
+                font_size     = 8,
+                paper_bgcolor = tr,
+                plot_bgcolor  = tr,
+                margin        = dict(t=0, l=0, r=0, b=0),
+                yaxis_title     = "",
+                xaxis_title     = "",
+                width = 10,
+                height = 200,
+                xaxis_visible   = True,
+                )
+            
+            fig.update_traces(
+                textfont_size = 14,
+                textangle     = 0,
+                textposition  = "inside",
+                cliponaxis    = False
+                )
+            fig['data'][0].width=0.7
+            st.plotly_chart(fig,use_container_width=True,config=config)
+    with col3:
+        with st.container():
+            st.markdown('**Динамика вовлеченности потока**')
+            options = sorted(students_df.loc[(students_df['Бакалавриат'] == 'ФЭСН РАНХиГС')]['Бак. год'].unique(), reverse=True)
+            options = list(map(lambda x: f'{x} - {x+4}', options))
+            year = st.selectbox(label='Выберите потоd', options=options, index=0,label_visibility="collapsed")
+            year = int(year[:4])
+            if year:
+                m = students_df.loc[(students_df['Бак. год'] == year) & (students_df['Бакалавриат'] == 'ФЭСН РАНХиГС')]['ID студента'].nunique()
+                l = []
+                for i in range(0, 4):
+                    e = students_in_projects_df.loc[
+                            (students_in_projects_df['Бак. год'] == year)
+                        &   (students_in_projects_df['Бакалавриат'] == 'ФЭСН РАНХиГС')
+                        &   (students_in_projects_df['Дата окончания'].between(datetime.strptime(f'{year+i}-09-01', '%Y-%m-%d').date(), datetime.strptime(f'{year+i+1}-09-01', '%Y-%m-%d').date()))
+                        ]['ID студента'].nunique()
+                    # e - Кол-во уникальных студентов с потока N, приниваших участие в проектах за 1 курс
+                    l.append(e/m)
+                data = pd.Series(l, (f'1 курс ({year}-{year+1})',f'2 курс ({year+1}-{year+2})',f'3 курс ({year+2}-{year+3})',f'4 курс ({year+3}-{year+4})'))
+                
+                fig = px.bar(data,color_discrete_sequence=colors,)
+                fig.update_yaxes(range = [0,1])
+                
+                fig.update_layout(
+                    yaxis_tickformat = ".0%",
+                    showlegend       = False,
+                    xaxis_title      = "Курс",
+                    yaxis_title      = "Вовлечённость",
+                    font_family      = font,
+                    plot_bgcolor     = tr,
+                    # font_size        = 7,
+                    height = 100,
+                    margin           = dict(t=0, l=0, r=0, b=0),
+                    xaxis_visible   = False,
+                    )
+                
+                fig.update_traces(hovertemplate = "<b>%{label}.</b> Вовлечённость: <b>%{value}</b>",cliponaxis    = False)
+        
+                st.plotly_chart(fig, use_container_width=True,config=config)
+    with col4:
+        with st.container():
+            st.markdown('**Направления проектов**')
+
+            fields_df               = query_data(query_dict['project_fields'])
+            fields_df['Количество'] = fields_df['Микро'].map(projects_df['Направление'].value_counts())
+            fields_df['Микро']      = fields_df['Микро'].str.replace(' ','<br>')
+            fields_df['Макро']      = '<b>'+fields_df['Макро'].astype(str)+'</b>'
+
+            fig = px.sunburst(fields_df,
+            path                    = ['Макро', 'Микро'],
+            values                  = 'Количество',
+            branchvalues            = "total",
+            color_discrete_sequence = colors
+            )
+
+            fig.update_layout(
+                margin        = dict(t=0, l=0, r=0, b=0),
+                paper_bgcolor = tr,
+                font_family   = font,
+                height = 200,
+                )
+    
+            fig.update_traces(
+                hovertemplate         = "Направление <b>%{parent}</b><br><b>%{label}.</b> Проектов: <b>%{value}</b>",
+                insidetextorientation = 'auto',
+                opacity               = 1,
+                sort                  = True
+                )
+
+            st.plotly_chart(fig, use_container_width=True,config=config)
+    
+    
+    with col5:
+        with st.container():
+            st.markdown('**Интерактивные рейтинги**')
+            rating_subject  = st.selectbox(label='Показывать топ', options=['Преподавателей', 'Студентов'], index=0, label_visibility="collapsed")
+            sort_asc = False
+            chart_container = st.container()
+            display_limit   = st.slider(label='Ограничить вывод', min_value=1, max_value=10, value=3, label_visibility="collapsed")
+            # data selection
+            if rating_subject == 'Преподавателей':
+                data = teachers_in_projects_df.value_counts(subset='ФИО преподавателя', ascending=sort_asc).iloc[:display_limit]
+            else:
+                data = students_in_projects_df.value_counts(subset='ФИО студента', ascending=sort_asc).iloc[:display_limit]
+            # set up a plot
+            fig = px.bar(data, orientation='h', color_discrete_sequence=colors)
+            fig.update_layout(
+                yaxis=dict(autorange="reversed"),
+                showlegend      = False,
+                font_family     = font,
+                plot_bgcolor    = tr,
+                # font_size       = 13,
+                xaxis_visible   = False,
+                yaxis_title     = "",
+                height          = 100,
+                margin          = dict(t=0, b=0,l=0,r=0),
+                # title = f'Топ {display_limit} {rating_subject}',
+                )
+            fig.update_traces(
+                textposition  = "inside",)
+            fig['data'][0].width=0.4
+            # display the plot
+            chart_container.plotly_chart(fig, use_container_width=True, config=config)
+    col1, col2,col3,col4 = st.columns([1, 2,2,1])
     col1, col2, col3 = st.columns([2, 3, 1])
 
     with col1:
@@ -114,7 +291,7 @@ def main():
                 textposition  = 'inside',
                 textinfo      = 'percent',
                 hovertemplate = "Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от проектов в работе",
-                textfont_size = 18
+                # textfont_size = 18
                 
                 )
 
@@ -343,42 +520,6 @@ def main():
 
     col1, col2 = st.columns([2, 2])
     
-    with col1:
-        with st.container():
-            # plot controls
-            st.subheader('Интерактивные рейтинги')
-            rating_subject  = st.selectbox(label='Показывать топ', options=['Преподавателей', 'Студентов'], index=0, label_visibility="collapsed")
-            sort_asc        = st.checkbox('По возрастанию', value=False)
-            chart_container = st.container()
-            display_limit   = st.slider(label='Ограничить вывод', min_value=1, max_value=15, value=10)
-            # data selection
-            if rating_subject == 'Преподавателей':
-                data = teachers_in_projects_df.value_counts(subset='ФИО преподавателя', ascending=sort_asc).iloc[:display_limit]
-            else:
-                data = students_in_projects_df.value_counts(subset='ФИО студента', ascending=sort_asc).iloc[:display_limit]
-            # set up a plot
-            fig = px.bar(data, orientation='h', color_discrete_sequence=colors)
-            fig.update_layout(
-                yaxis=dict(autorange="reversed"),
-                showlegend      = False,
-                font_family     = font,
-                plot_bgcolor    = tr,
-                font_size       = 13,
-                xaxis_visible   = False,
-                yaxis_title     = "",
-                height          = 350,
-                margin          = dict(t=50, b=0,l=0,r=0),
-                title = f'Топ {display_limit} {rating_subject}',
-                )
-            fig.update_traces(
-                textposition  = "inside",)
-            fig['data'][0].width=0.4
-            # display the plot
-            chart_container.plotly_chart(fig, use_container_width=True, config=config)
-    
-    with col2:
-        with st.container():
-            st.subheader('Распределение проектов по вузам-партнёрам')
 
 
 if __name__ == "__main__":
