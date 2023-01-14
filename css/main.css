@@ -1,6 +1,5 @@
 /* Контейнер метрики */
 [data-testid="metric-container"] {
-    border-radius: 8px;
     justify-content: center;
 } 
 
@@ -29,7 +28,7 @@
 /* Style columns */
 [data-testid="column"] {
     box-shadow: 0 0 3px #cccccc;
-    border-radius: 0.25rem;
+    border-radius: 8px;
     padding: 1em;
 }  
 
