@@ -7,6 +7,8 @@ import numpy as np
 import plotly.express as px
 from connectdb import mysql_conn
 from datetime import datetime
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
 #Наборы цветов
 colors = ['#ED1C24','#F85546','#FF7C68','#FF9E8C','#FFBFB1','#FFDFD7']
@@ -74,34 +76,46 @@ def main():
     with st.spinner('Изучаем требования стейкхолдеров...'):
         students_df = load_students()
     # metrics
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric('Всего проектов',   projects_df.shape[0])
-    col2.metric('Всего студентов',  students_df.shape[0])
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
+    total = projects_df['Статус'].value_counts().sum() 
+
+    col1.metric('Проектов в работе',
+    int(projects_df.loc[projects_df['Статус'] == 'Активен']['Статус'].value_counts().sum()),
+    delta=f'{total} завершено',
+    delta_color = 'normal')
+
+    col2.metric('Студентов задействовано',  students_df.shape[0])
     col3.metric('Уникальных направлений', projects_df['Направление'].nunique())
     col4.metric('Уникальных партнеров', projects_df['Название компании'].nunique())
-    
+    col5.metric('Уникальных направлений', projects_df['Направление'].nunique())
+    col6.metric('Уникальных партнеров', projects_df['Название компании'].nunique())
+
     # row 1
 
-    col1, col2, col3 = st.columns([1, 2, 1])
+    col1, col2, col3 = st.columns([2, 3, 1])
 
     with col1:
         with st.container():
-            st.subheader('Разделение проектов по грейдам')
-            a   = projects_df['Грейд']
             
-            fig = px.pie(
-            a,
-            values                  = a.value_counts(),
-            names                   = a.value_counts().index,
-            color_discrete_sequence = colors,
-            hole                    = .4
+            frozen = projects_df.loc[projects_df['Статус'] == 'Заморожен']['Статус'].value_counts().sum()
+            active = projects_df.loc[projects_df['Статус'] == 'Активен']['Статус'].value_counts().sum()
+            total = active + frozen
+            st.subheader(f'{active}/{total}')
+            df = pd.DataFrame({'names' : ['progress',' '],'values' :  [frozen, total - frozen]})
+
+            fig = px.pie(df, 
+            values ='values', 
+            names = 'names', 
+            hole = 0.8,
+            color_discrete_sequence = ['#3DD56D', '#ED1C24']
             )
 
             fig.update_traces(
                 textposition  = 'inside',
-                textinfo      = 'label+value',
-                hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+                textinfo      = 'percent',
+                hovertemplate = "Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от проектов в работе",
                 textfont_size = 18
+                
                 )
 
             fig.update_layout(
@@ -109,16 +123,17 @@ def main():
                 paper_bgcolor           = tr,
                 showlegend              = False,
                 font_family             = font,
-                font_color              = "white",
                 title_font_family       = font,
                 title_font_color        = "white",
                 legend_title_font_color = "white",
                 height                  = 300,
-                margin                  = dict(t=0, l=0, r=0, b=0)
+                margin                  = dict(t=0, l=0, r=0, b=0),
                 )
 
-            st.plotly_chart(fig,use_container_width=True,config=config)
+            fig.data[0].textfont.color = 'white'
+            st.plotly_chart(fig, use_container_width=True,config=config)
 
+                 
     with col2:
         with st.container():
             st.subheader('Барчарт по числу проектов в год ')
@@ -138,23 +153,27 @@ def main():
                 font_size     = 18,
                 paper_bgcolor = tr,
                 plot_bgcolor  = tr,
-                margin        = dict(t=0, l=0, r=20, b=0)
+                margin        = dict(t=0, l=0, r=0, b=0),
+                yaxis_title     = "",
+                xaxis_title     = "",
+                width = 10,
+                height = 300
                 )
             
             fig.update_traces(
                 textfont_size = 18,
                 textangle     = 0,
-                textposition  = "outside",
+                textposition  = "inside",
                 cliponaxis    = False
                 )
-
+            fig['data'][0].width=0.7
             st.plotly_chart(fig,use_container_width=True,config=config)
 
 
     with col3:
-
+        st.subheader('Пайчарт')
         with st.container():
-            st.subheader('Разделение проектов по грейдам')
+
             a   = projects_df['Грейд']
 
             fig = px.pie(a,
@@ -179,15 +198,15 @@ def main():
                 #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
                 showlegend              = False,
                 font_family             = font,
-                font_color              = "white",
                 title_font_family       = font,
                 title_font_color        = "white",
                 legend_title_font_color = "white",
                 height                  = 300,
-                margin                  = dict(t=0, l=0, r=0, b=0)
+                margin                  = dict(t=0, l=0, r=0, b=0),
+                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
                 )
 
-            st.plotly_chart(fig,use_container_width=True,config=config)
+            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
     
     # row 2
 
@@ -198,6 +217,34 @@ def main():
     with col2:
         with st.container():
             st.subheader('Распределение проектов по типам компаний-заказчиков')
+            data = projects_df['Тип компании']
+            data1 = projects_df['Отрасль']
+            fig = make_subplots(1,2,specs=[[{'type':'domain'}, {'type':'domain'}]],
+                    )
+            fig.add_trace(go.Pie(values= data.value_counts(),labels= data.value_counts().index, marker_colors=colors),1,1)
+            fig.add_trace(go.Pie(values= data1.value_counts(),labels= data1.value_counts().index, marker_colors=colors),1,2)
+            fig.update_layout(
+                plot_bgcolor            = tr,
+                paper_bgcolor           = tr,
+                #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
+                showlegend              = False,
+                font_family             = font,
+                title_font_family       = font,
+                legend_title_font_color = "white",
+                height                  = 300,
+                font_size     = 18,
+                margin                  = dict(t=0, l=0, r=0, b=0),
+                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
+                )
+            fig.update_traces(
+                textposition  = 'inside',
+                textinfo      = 'percent',
+                hovertemplate = "Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от проектов в работе",
+                textfont_size = 18
+                
+                )
+
+            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
     with col3:
         with st.container():
             st.subheader('Логотипы компаний')
@@ -253,8 +300,11 @@ def main():
     
     # row 4
 
-    col1, col2 = st.columns([2, 2])
+    col1, col2,col3 = st.columns([2,3, 1])
     with col1:
+        with st.container():
+            st.subheader('Барчарт по числу проектов в год ПО ВЫБРАННОМУ НАПРАВЛЕНИЮ ')
+    with col2:
         with st.container():
             st.subheader('Направления проектов')
 
@@ -285,13 +335,14 @@ def main():
 
             st.plotly_chart(fig, use_container_width=True,config=config)
 
-    with col2:
+    with col3:
         with st.container():
             st.subheader('Барчарт по числу проектов в год ПО ВЫБРАННОМУ НАПРАВЛЕНИЮ ')
     
     # row 5
 
     col1, col2 = st.columns([2, 2])
+    
     with col1:
         with st.container():
             # plot controls
@@ -317,9 +368,11 @@ def main():
                 yaxis_title     = "",
                 height          = 350,
                 margin          = dict(t=50, b=0,l=0,r=0),
-                title = f'Топ {display_limit} {rating_subject}'
+                title = f'Топ {display_limit} {rating_subject}',
                 )
-            fig.update_traces(cliponaxis    = True)
+            fig.update_traces(
+                textposition  = "inside",)
+            fig['data'][0].width=0.4
             # display the plot
             chart_container.plotly_chart(fig, use_container_width=True, config=config)
     
