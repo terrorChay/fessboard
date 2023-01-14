@@ -296,9 +296,9 @@ def main():
             # plot controls
             st.subheader('Интерактивные рейтинги')
             rating_subject  = st.selectbox(label='Показывать топ', options=['Преподавателей', 'Студентов'], index=0, label_visibility="collapsed")
-            sort_asc        = st.checkbox('По возрастанию', value=True)
+            sort_asc        = st.checkbox('По возрастанию', value=False)
             chart_container = st.container()
-            display_limit   = st.slider(label='Ограничить вывод', min_value=1, max_value=15, value=5)
+            display_limit   = st.slider(label='Ограничить вывод', min_value=1, max_value=15, value=10)
             # data selection
             if rating_subject == 'Преподавателей':
                 data = teachers_in_projects_df.value_counts(subset='ФИО преподавателя', ascending=sort_asc).iloc[:display_limit]
