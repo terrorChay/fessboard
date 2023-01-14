@@ -138,4 +138,13 @@ query_dict =    {
                                                                 ON T1.company_sphere_id = T3.company_sphere_id
                                                     );
                                             """,
+                                            
+                "project_fields"        :   """
+                                            SELECT
+                                                field_spheres.sphere AS 'Макро',
+                                                project_fields.field AS 'Микро'                                                
+                                            FROM project_fields
+                                            LEFT JOIN
+                                                field_spheres ON project_fields.sphere_id   = field_spheres.sphere_id;
+                                            """,
 }
