@@ -28,7 +28,7 @@ def main():
         students_in_projects_df = utils.load_people_in_projects()
     with st.spinner('Изучаем требования стейкхолдеров...'):
         teachers_in_projects_df = utils.load_people_in_projects(teachers=True)
-    with st.spinner('Вызываем скарм-мастер...'):
+    with st.spinner('Вызываем скарм-мастера...'):
         students_df = utils.load_students()
     # metrics
     col1, col2, col3, col4, col5, col6 = st.columns(6)
