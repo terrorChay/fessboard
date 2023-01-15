@@ -146,14 +146,14 @@ def main():
             
             fig.update_layout(
                 font_family   = font,
-                font_size     = 8,
+                font_size     = 10,
                 paper_bgcolor = tr,
                 plot_bgcolor  = tr,
                 margin        = dict(t=0, l=0, r=0, b=0),
                 yaxis_title     = "",
                 xaxis_title     = "",
                 width = 10,
-                height = 200,
+                height = 220,
                 xaxis_visible   = True,
                 )
             
@@ -167,7 +167,7 @@ def main():
             st.plotly_chart(fig,use_container_width=True,config=config)
     with col3:
         with st.container():
-            st.markdown('**Динамика вовлеченности потока**')
+            st.markdown('**Вовлечённость потока**')
             options = sorted(students_df.loc[(students_df['Бакалавриат'] == 'ФЭСН РАНХиГС')]['Бак. год'].unique(), reverse=True)
             options = list(map(lambda x: f'{x} - {x+4}', options))
             year = st.selectbox(label='Выберите потоd', options=options, index=0,label_visibility="collapsed")
@@ -196,7 +196,7 @@ def main():
                     font_family      = font,
                     plot_bgcolor     = tr,
                     # font_size        = 7,
-                    height = 100,
+                    height = 150,
                     margin           = dict(t=0, l=0, r=0, b=0),
                     xaxis_visible   = False,
                     )
