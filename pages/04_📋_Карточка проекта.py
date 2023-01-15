@@ -201,7 +201,7 @@ def project_selection(df: pd.DataFrame):
 @st.experimental_memo(show_spinner=False)
 def load_students_from_project(project_id):
     students_df = query_data(query_dict['students_in_projects']).merge(query_data(query_dict['students']), on='ID студента', how='left')
-    students_df.dropna(axis=0, subset=['ID группы', 'ID студента'], inplace=True)
+    students_df.dropna(axis=0, subset=['Команда', 'ID студента'], inplace=True)
     students_df = students_df.loc[students_df['ID проекта'] == project_id]
     return students_df
 
@@ -283,33 +283,20 @@ def run():
                         st.caption(f':bust_in_silhouette: {i}')
             with right:
                 students = load_students_from_project(project_id)
-                unique_groups_idx = students['ID группы'].unique()
+                unique_groups_idx = students['Команда'].unique()
                 if len(unique_groups_idx) > 0:
                     group_counter = 0
                     for group_idx in unique_groups_idx:
                         st.text(f'Проектная команда {group_counter+1}')
-                        students_in_group   = students[students['ID группы'] == group_idx]
-                        for i in students_in_group[['ФИО студента', 'isCurator']].values:
+                        students_in_the_group   = students[students['Команда'] == group_idx]
+                        for i in students_in_the_group[['ФИО студента', 'isCurator']].values:
                             if i[1] == 1:
                                 st.caption(f':bust_in_silhouette: {i[0]} (Куратор)')
                             else:
-                                st.caption(f':bust_in_silhouette: {i[0]}')
-                        # st.dataframe(students_in_group[['ФИО студента', 'Бакалавриат', 'Магистратура']], use_container_width=True)    
+                                st.caption(f':bust_in_silhouette: {i[0]}') 
                         group_counter += 1
                 else:
                     st.warning('Данных нет, но вы держитесь...')
-            # with st.expander('Экспорт участников', True):
-            #     students = load_students_from_project(project_id)
-            #     unique_groups_idx = students['ID группы'].unique()
-            #     if len(unique_groups_idx) > 0:
-            #         group_counter = 0
-            #         for group_idx in unique_groups_idx:
-            #             st.caption(f'Команда {group_counter+1}')
-            #             students_in_group   = students[students['ID группы'] == group_idx].reset_index()
-            #             st.dataframe(students_in_group[['ФИО студента', 'Бакалавриат', 'Магистратура']], use_container_width=True)    
-            #             group_counter += 1
-            #     else:
-            #         st.warning('Данных нет, но вы держитесь...')
 
 
 if __name__ == "__main__":

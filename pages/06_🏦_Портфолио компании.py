@@ -171,7 +171,7 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore: list) -> pd.DataFrame:
 
 # Apply filters and return company name
 def company_selection(df: pd.DataFrame):
-    df = df[['ID компании', 'Название компании', 'Тип компании', 'Отрасль', 'Грейд']].copy()
+    df = df[['ID компании', 'Название компании', 'Тип компании', 'Отрасль']].copy()
     df.insert(0, 'Составной ключ', df['ID компании'].astype('str') + ' - ' + df['Название компании'])
     company = False
 
@@ -180,7 +180,7 @@ def company_selection(df: pd.DataFrame):
         left, right = st.columns(2)
         # Filters for household name selection input
         ## df.columns[1:] so that the company name is not used (its the first col)
-        for idx, column in enumerate(df.columns[2:]):
+        for idx, column in enumerate(df.columns[3:]):
             options = df[column].unique()
             ### preselection tweak to preserve selected filter values in case related filters get adjusted
             cached_value_key = column+'-input'
@@ -287,24 +287,24 @@ def run():
             else:
                 st.warning('Проекты не найдены')
             # Project groups
-            st.markdown('#### Просмотр проектных команд')
-            unique_projects_idx = students_with_company.index.unique()
-            if len(unique_projects_idx) >= 1:
-                for project_idx in unique_projects_idx:
-                    project_name = projects_with_company['Название проекта'].loc[project_idx]
-                    with st.expander(f'Проект "{project_name}"'):
+            # st.markdown('#### Просмотр проектных команд')
+            # unique_projects_idx = students_with_company.index.unique()
+            # if len(unique_projects_idx) >= 1:
+            #     for project_idx in unique_projects_idx:
+            #         project_name = projects_with_company['Название проекта'].loc[project_idx]
+            #         with st.expander(f'Проект "{project_name}"'):
 
-                        students_in_project     = students_with_company[['Команда', 'ФИО студента', 'Бакалавриат', 'Магистратура']].loc[[project_idx]]
-                        unique_groups_idx       = students_in_project['Команда'].unique()
-                        group_counter = 0
-                        for group_idx in unique_groups_idx:
-                            st.caption(f'Группа {group_counter+1}')
-                            students_in_group   = students_in_project[students_in_project['Команда'] == group_idx].reset_index()
-                            st.dataframe(students_in_group[['ФИО студента', 'Бакалавриат', 'Магистратура']], use_container_width=True)    
+            #             students_in_project     = students_with_company[['Команда', 'ФИО студента', 'Бакалавриат', 'Магистратура']].loc[[project_idx]]
+            #             unique_groups_idx       = students_in_project['Команда'].unique()
+            #             group_counter = 0
+            #             for group_idx in unique_groups_idx:
+            #                 st.caption(f'Группа {group_counter+1}')
+            #                 students_in_group   = students_in_project[students_in_project['Команда'] == group_idx].reset_index()
+            #                 st.dataframe(students_in_group[['ФИО студента', 'Бакалавриат', 'Магистратура']], use_container_width=True)    
                             
-                            group_counter += 1
-            else:
-                st.warning('Проектные команды не найдены')
+            #                 group_counter += 1
+            # else:
+            #     st.warning('Проектные команды не найдены')
 
         # Студенты
         with tab3:
@@ -316,8 +316,9 @@ def run():
             # if search has results draw dataframe and download buttons
             if df_search_applied.shape[0]:
                 st.dataframe(df_search_applied, use_container_width=True)
-                st.download_button('Скачать CSV', data=convert_df(df_search_applied), file_name="fessboard_slice.csv", mime='text/csv')
-                st.download_button('Скачать XLSX', data=convert_df(df_search_applied, True), file_name="fessboard_slice.xlsx")
+                col1, col2, _col3, _col4, _col5, _col6 = st.columns([0.8, 1, 1, 1, 1, 1])
+                col1.download_button('💾 CSV', data=convert_df(df_search_applied), file_name=f"{company}_students.csv", mime='text/csv')
+                col2.download_button('💾 Excel', data=convert_df(df_search_applied, True), file_name=f"{company}_students.xlsx")
             else:
                 st.warning('Студенты не найдены')
 
@@ -325,7 +326,7 @@ def run():
         st.warning('Выберите компанию-заказчика')
     
 if __name__ == "__main__":
-    utils.page_config(layout='centered', title='Портфолио компании')
+    utils.page_config(layout='wide', title='Портфолио компании')
     utils.remove_footer()
     utils.set_logo()
     run()
