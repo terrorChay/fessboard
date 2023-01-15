@@ -12,7 +12,8 @@ query_dict =    {
                                                 projects.project_start_date AS 'Дата начала',
                                                 projects.project_end_date AS 'Дата окончания',
                                                 project_grades.grade AS 'Грейд',
-                                                project_fields.field AS 'Направление',
+                                                T00.sphere AS 'Макро-направление',
+                                                T0.field AS 'Микро-направление',
                                                 CASE
                                                     WHEN
                                                         projects.is_frozen = 1
@@ -25,8 +26,13 @@ query_dict =    {
                                             FROM projects 
                                             LEFT JOIN project_grades
                                                 ON projects.project_grade_id   = project_grades.grade_id
-                                            LEFT JOIN project_fields
-                                                ON projects.project_field_id   = project_fields.field_id
+                                            LEFT JOIN   (
+                                                            (SELECT project_fields.field_id, project_fields.field, project_fields.sphere_id FROM project_fields) AS T0
+                                                                LEFT JOIN
+                                                                    (SELECT field_spheres.sphere_id, field_spheres.sphere FROM field_spheres) AS T00
+                                                                ON T0.sphere_id = T00.sphere_id
+                                                        )
+                                                ON projects.project_field_id = T0.field_id
                                             LEFT JOIN   (
                                                             (SELECT companies.company_id, companies.company_name, companies.company_type_id, companies.company_sphere_id FROM companies) AS T1
                                                                 LEFT JOIN 

@@ -18,66 +18,21 @@ tr='rgba(0,0,0,0)'
 font="Source Sans Pro"
 config = {'staticPlot': True,'displayModeBar': False}
 
-@st.experimental_memo(ttl=600, show_spinner=False)
-def query_data(query):
-    with mysql_conn() as conn:
-        df = pd.read_sql(query, conn)
-    return df
-
-@st.experimental_memo(show_spinner=False)
-def load_projects():
-    # Load data from database
-    projects_df = query_data(query_dict['projects'])
-    managers_df = query_data(query_dict['managers_in_projects']).merge(query_data(query_dict['students']), on='ID студента', how='left')
-    teachers_df = query_data(query_dict['teachers_in_projects']).merge(query_data(query_dict['teachers']), on='ID преподавателя', how='left')
-
-    # Join multiple managers and teachers into list values
-    managers_df = managers_df.groupby(['ID проекта'])['ФИО студента'].apply(list).reset_index()
-    teachers_df = teachers_df.groupby(['ID проекта'])['ФИО преподавателя'].apply(list).reset_index()
-
-    # Left join dataframes to create consolidated one
-    projects_df = projects_df.merge(managers_df, on='ID проекта', how='left')
-    projects_df = projects_df.merge(teachers_df, on='ID проекта', how='left')
-
-    # Set project ID as dataframe index
-    projects_df.set_index('ID проекта', drop=True, inplace=True)
-    projects_df.rename(columns={'ФИО студента':'Менеджеры', 'ФИО преподавателя':'Преподаватели'}, inplace=True)
-    return projects_df
-
-@st.experimental_memo(show_spinner=False)
-def load_people_in_projects(teachers=False):
-    if teachers:
-        a = 'teachers_in_projects'
-        b = 'teachers'
-        c = 'ID преподавателя'
-    else:
-        a = 'students_in_projects'
-        b = 'students'
-        c = 'ID студента'  
-    df = query_data(query_dict[a]).merge(query_data(query_dict[b]), on=c, how='left')
-    # df.dropna(axis=0, subset=['Команда'], inplace=True)
-    df.set_index('ID проекта', drop=True, inplace=True)
-    return df
-
-@st.experimental_memo(show_spinner=False)
-def load_students():
-    return query_data(query_dict['students'])
-
 def main():
     # load data
     with st.spinner('Читаем PMI и PMBOK...'):
-        projects_df = load_projects()
+        projects_df = utils.load_projects()
     with st.spinner('Происходит аджайл...'):
-        students_in_projects_df = load_people_in_projects()
+        students_in_projects_df = utils.load_people_in_projects()
     with st.spinner('Изучаем требования стейкхолдеров...'):
-        teachers_in_projects_df = load_people_in_projects(teachers=True)
+        teachers_in_projects_df = utils.load_people_in_projects(teachers=True)
     with st.spinner('Изучаем требования стейкхолдеров...'):
-        students_df = load_students()
+        students_df = utils.load_students()
     # metrics
     col1, col2, col3, col4 = st.columns(4)
     col1.metric('Всего проектов',   projects_df.shape[0])
     col2.metric('Всего студентов',  students_df.shape[0])
-    col3.metric('Уникальных направлений', projects_df['Направление'].nunique())
+    col3.metric('Уникальных направлений', projects_df['Микро-направление'].nunique())
     col4.metric('Уникальных партнеров', projects_df['Название компании'].nunique())
     
     # row 1
@@ -257,13 +212,16 @@ def main():
         with st.container():
             st.subheader('Направления проектов')
 
-            fields_df               = query_data(query_dict['project_fields'])
-            fields_df['Количество'] = fields_df['Микро'].map(projects_df['Направление'].value_counts())
-            fields_df['Микро']      = fields_df['Микро'].str.replace(' ','<br>')
-            fields_df['Макро']      = '<b>'+fields_df['Макро'].astype(str)+'</b>'
-
-            fig = px.sunburst(fields_df,
-            path                    = ['Макро', 'Микро'],
+            # fields_df               = utils.query_data(query_dict['project_fields'])
+            # fields_df['Количество'] = fields_df['Микро'].map(projects_df['Микро-направление'].value_counts())
+            # fields_df['Микро']      = fields_df['Микро'].str.replace(' ','<br>')
+            # fields_df['Макро']      = '<b>'+fields_df['Макро'].astype(str)+'</b>'
+            _fields_df = projects_df[['Макро-направление', 'Микро-направление']].copy()
+            _fields_count = _fields_df['Микро-направление'].value_counts().reset_index(name='Количество')
+            _fields_df = _fields_df.drop_duplicates(subset='Микро-направление')
+            _fields_df = _fields_df.merge(_fields_count, left_on='Микро-направление', right_on='index').drop(labels='index', axis=1)
+            fig = px.sunburst(_fields_df,
+            path                    = ['Макро-направление', 'Микро-направление'],
             values                  = 'Количество',
             branchvalues            = "total",
             color_discrete_sequence = colors
