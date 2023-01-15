@@ -40,9 +40,9 @@ def main():
     delta_color = 'normal')
 
     col2.metric('Студентов задействовано',  students_df.shape[0])
-    col3.metric('Уникальных направлений', projects_df['Направление'].nunique())
+    col3.metric('Уникальных направлений', projects_df['Микро-направление'].nunique())
     col4.metric('Уникальных партнеров', projects_df['Название компании'].nunique())
-    col5.metric('Уникальных направлений', projects_df['Направление'].nunique())
+    col5.metric('Уникальных сфер', projects_df['Макро-направление'].nunique())
     col6.metric('Уникальных партнеров', projects_df['Название компании'].nunique())
 
     # row 1
