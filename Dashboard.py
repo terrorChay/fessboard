@@ -163,12 +163,15 @@ def main():
         with st.container():
             st.markdown('**Направления проектов**')
 
-            fields_df               = query_data(query_dict['project_fields'])
-            fields_df['Количество'] = fields_df['Микро'].map(projects_df['Направление'].value_counts())
-            fields_df['Микро']      = fields_df['Микро'].str.replace(' ','<br>')
-            fields_df['Макро']      = '<b>'+fields_df['Макро'].astype(str)+'</b>'
-
-            fig = px.sunburst(fields_df,
+            # fields_df               = utils.query_data(query_dict['project_fields'])
+            # fields_df['Количество'] = fields_df['Микро'].map(projects_df['Направление'].value_counts())
+            # fields_df['Микро']      = fields_df['Микро'].str.replace(' ','<br>')
+            # fields_df['Макро']      = '<b>'+fields_df['Макро'].astype(str)+'</b>'
+            _fields_df = projects_df[['Макро-направление', 'Микро-направление']].copy()
+            _fields_count = _fields_df['Микро-направление'].value_counts().reset_index(name='Количество')
+            _fields_df = _fields_df.drop_duplicates(subset='Микро-направление')
+            _fields_df = _fields_df.merge(_fields_count, left_on='Микро-направление', right_on='index').drop(labels='index', axis=1)
+            fig = px.sunburst(_fields_df,
             path                    = ['Макро', 'Микро'],
             values                  = 'Количество',
             branchvalues            = "total",
