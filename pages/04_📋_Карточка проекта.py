@@ -110,7 +110,7 @@ def project_selection(df: pd.DataFrame):
         left, right = st.columns(2)
         # Filters for project selection
         ## df.columns[3:] so that the composite key, project id and project name are ignored
-        for idx, column in enumerate(df.columns[3:]):
+        for idx, column in enumerate(df.columns[4:]):
             options = df[column].unique()
             ### preselection tweak to preserve selected filter values in case related filters get adjusted
             cached_value_key = column+'-input'
