@@ -18,7 +18,7 @@ colors3 = ['#ED1C24','#F2595F']
 tr='rgba(0,0,0,0)'
 
 font="Source Sans Pro"
-config = {'staticPlot': True,'displayModeBar': False}
+config = {'staticPlot': False,'displayModeBar': False}
 
 def main():
     # load data
@@ -170,6 +170,7 @@ def main():
             _fields_df = projects_df[['Макро-направление', 'Микро-направление']].copy()
             _fields_count = _fields_df['Микро-направление'].value_counts().reset_index(name='Количество')
             _fields_df = _fields_df.drop_duplicates(subset='Микро-направление')
+            _fields_df['Макро-направление'] = _fields_df['Макро-направление'].apply(lambda x: f'<b>{x}</b>')
             _fields_df = _fields_df.merge(_fields_count, left_on='Микро-направление', right_on='index').drop(labels='index', axis=1)
             fig = px.sunburst(_fields_df,
             path                    = ['Макро-направление', 'Микро-направление'],
