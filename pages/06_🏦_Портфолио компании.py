@@ -226,8 +226,6 @@ def company_selection(df: pd.DataFrame):
 
 # App launch
 def run():
-    # Feedback btn
-    st.sidebar.button(label='Сообщить об ошибке')
     # Load dataframe
     with st.spinner('Изучаем SCRUM...'):
         projects_df = load_projects()
