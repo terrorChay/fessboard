@@ -15,34 +15,6 @@ from pandas.api.types import (
 import plotly.express as px
 from connectdb import mysql_conn
 from datetime import date
- 
- # Database Query
-@st.experimental_memo(ttl=600, show_spinner=False)
-def query_data(query):
-    with mysql_conn() as conn:
-        df = pd.read_sql(query, conn)
-    return df
-
-# Load projects dataset
-@st.experimental_memo(show_spinner=False)
-def load_projects():
-    # Load data from database
-    projects_df = query_data(query_dict['projects'])
-    managers_df = query_data(query_dict['managers_in_projects']).merge(query_data(query_dict['students']), on='ID студента', how='left')
-    teachers_df = query_data(query_dict['teachers_in_projects']).merge(query_data(query_dict['teachers']), on='ID преподавателя', how='left')
-
-    # Join multiple managers and teachers into list values
-    managers_df = managers_df.groupby(['ID проекта'])['ФИО студента'].apply(list).reset_index()
-    teachers_df = teachers_df.groupby(['ID проекта'])['ФИО преподавателя'].apply(list).reset_index()
-
-    # Left join dataframes to create consolidated one
-    projects_df = projects_df.merge(managers_df, on='ID проекта', how='left')
-    projects_df = projects_df.merge(teachers_df, on='ID проекта', how='left')
-
-    # Set project ID as dataframe index
-    # projects_df.set_index('ID проекта', drop=True, inplace=True)
-    projects_df.rename(columns={'ФИО студента':'Менеджеры', 'ФИО преподавателя':'Преподаватели'}, inplace=True)
-    return projects_df
 
 # Apply search filters and return filtered dataset
 def search_dataframe(df: pd.DataFrame) -> pd.DataFrame:
@@ -127,22 +99,6 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore: list) -> pd.DataFrame:
 
     return df
 
-@st.experimental_memo(show_spinner=False)
-def convert_df(df: pd.DataFrame, to_excel=False):
-    if to_excel:
-        output = BytesIO()
-        writer = pd.ExcelWriter(output, engine='xlsxwriter')
-        df.to_excel(writer, index=False, sheet_name='FESSBoard')
-        workbook = writer.book
-        worksheet = writer.sheets['FESSBoard']
-        format1 = workbook.add_format({'num_format': '0.00'}) 
-        worksheet.set_column('A:A', None, format1)  
-        workbook.close()
-        processed_data = output.getvalue()
-    else:
-        processed_data = df.to_csv().encode('utf-8')
-    return processed_data
-
 # Apply filters and return company name
 def project_selection(df: pd.DataFrame):
     df = df[['ID проекта', 'Название проекта', 'Название компании', 'Грейд', 'Направление', 'Статус']].copy()
@@ -198,17 +154,11 @@ def project_selection(df: pd.DataFrame):
 
     return selected_project
 
-@st.experimental_memo(show_spinner=False)
-def load_students_from_project(project_id):
-    students_df = query_data(query_dict['students_in_projects']).merge(query_data(query_dict['students']), on='ID студента', how='left')
-    students_df.dropna(axis=0, subset=['Команда', 'ID студента'], inplace=True)
-    students_df = students_df.loc[students_df['ID проекта'] == project_id]
-    return students_df
-
 # App launch
 def run():
     # Load dataframe
-    projects_df = load_projects()
+    projects_df = utils.load_projects()
+    students_in_projects = utils.load_students_in_projects()
     st.title('Карточка проекта')
     st.write('''
             #### На данной странице можно ознакомиться со всей информацией по выбранному проекту!
@@ -282,7 +232,7 @@ def run():
                     for i in teachers:
                         st.caption(f':bust_in_silhouette: {i}')
             with right:
-                students = load_students_from_project(project_id)
+                students = students_in_projects.loc[students_in_projects['ID проекта'] == project_id]
                 unique_groups_idx = students['Команда'].unique()
                 if len(unique_groups_idx) > 0:
                     group_counter = 0

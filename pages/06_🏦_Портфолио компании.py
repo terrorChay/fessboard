@@ -1,11 +1,9 @@
 import streamlit as st
 from streamlit import session_state as session
 import utils as utils
-from my_query import query_dict
 import pandas as pd
 import numpy as np
 import re
-from io import BytesIO
 from pandas.api.types import (
     is_categorical_dtype,
     is_datetime64_any_dtype,
@@ -14,68 +12,7 @@ from pandas.api.types import (
     is_float_dtype,
 )
 import plotly.express as px
-from connectdb import mysql_conn
  
-# Database Query
-@st.experimental_memo(ttl=600, show_spinner=False)
-def query_data(query):
-    with mysql_conn() as conn:
-        df = pd.read_sql(query, conn)
-    return df
-
-# Load projects dataset
-@st.experimental_memo(show_spinner=False)
-def load_projects():
-    # Load data from database
-    projects_df = query_data(query_dict['projects'])
-    managers_df = query_data(query_dict['managers_in_projects']).merge(query_data(query_dict['students']), on='ID студента', how='left')
-    teachers_df = query_data(query_dict['teachers_in_projects']).merge(query_data(query_dict['teachers']), on='ID преподавателя', how='left')
-
-    # Join multiple managers and teachers into list values
-    managers_df = managers_df.groupby(['ID проекта'])['ФИО студента'].apply(list).reset_index()
-    teachers_df = teachers_df.groupby(['ID проекта'])['ФИО преподавателя'].apply(list).reset_index()
-
-    # Left join dataframes to create consolidated one
-    projects_df = projects_df.merge(managers_df, on='ID проекта', how='left')
-    projects_df = projects_df.merge(teachers_df, on='ID проекта', how='left')
-
-    # Set project ID as dataframe index
-    # projects_df.set_index('ID проекта', drop=True, inplace=True)
-    projects_df.rename(columns={'ФИО студента':'Менеджеры', 'ФИО преподавателя':'Преподаватели'}, inplace=True)
-    return projects_df
-
-@st.experimental_memo(show_spinner=False)
-def load_companies():
-    companies_df = query_data(query_dict['companies'])
-    return companies_df
-
-@st.experimental_memo(show_spinner=False)
-def load_students_in_projects(project_ids):
-    # Load data from database
-    students_df = query_data(query_dict['students_in_projects']).merge(query_data(query_dict['students']), on='ID студента', how='left')
-    students_df.set_index('ID проекта', drop=True, inplace=True)
-
-    students_with_company   = project_ids.merge(students_df, how='left', left_index=True, right_index=True)
-    students_with_company.dropna(axis=0, subset=['Команда', 'ID студента'], inplace=True)
-
-    return students_with_company
-
-@st.experimental_memo(show_spinner=False)
-def convert_df(df: pd.DataFrame, to_excel=False):
-    if to_excel:
-        output = BytesIO()
-        writer = pd.ExcelWriter(output, engine='xlsxwriter')
-        df.to_excel(writer, index=False, sheet_name='FESSBoard')
-        workbook = writer.book
-        worksheet = writer.sheets['FESSBoard']
-        format1 = workbook.add_format({'num_format': '0.00'}) 
-        worksheet.set_column('A:A', None, format1)  
-        workbook.close()
-        processed_data = output.getvalue()
-    else:
-        processed_data = df.to_csv().encode('utf-8')
-    return processed_data
-
 # Apply search filters and return filtered dataset
 def search_dataframe(df: pd.DataFrame, label='Поиск') -> pd.DataFrame:
 
@@ -228,7 +165,7 @@ def company_selection(df: pd.DataFrame):
 def run():
     # Load dataframe
     with st.spinner('Изучаем SCRUM...'):
-        projects_df = load_projects()
+        projects_df = utils.load_projects()
     st.title('Портфолио компании')
     st.write('''
             #### На данной странице можно ознакомиться с портфелем проектов выбранной компании!
@@ -240,14 +177,13 @@ def run():
         tab1, tab2, tab3 = st.tabs(['О компании', 'Проекты', 'Студенты'])
         # load info about company as a dictionary
         with st.spinner('Делаем однотумбовые столы...'):
-            company_data_df            = load_companies()
+            company_data_df            = utils.load_companies()
         company_data_df            = company_data_df.loc[company_data_df['ID компании'] == company_id].to_dict()
         # load only projects with selected company
         projects_with_company   = projects_df.loc[projects_df['ID компании'] == company_id]
         # load only students who had projects with selected company
         with st.spinner('Захватываем мир...'):
-            # !!!!!!!!!!!! НАДО ПЕРЕПИСАТЬ, ЧТОБЫ ПО АЙДИ ПРОЕКТА РАБОТАЛО, А НЕ НАЗВАНИЮ !!!!!!!!!!!!!!!!
-            students_with_company   = load_students_in_projects(projects_with_company[['Название проекта']])
+            students_with_company   = utils.load_students_in_projects(all=False, selected_projects=projects_with_company[['ID проекта']])
 
         # О компании
         with tab1:
@@ -280,8 +216,8 @@ def run():
             if df_search_applied.shape[0]:
                 st.dataframe(df_search_applied, use_container_width=True)
                 col1, col2, _col3, _col4, _col5, _col6 = st.columns([0.8, 1, 1, 1, 1, 1])
-                col1.download_button('💾 CSV', data=convert_df(df_search_applied), file_name=f"{company}_slice.csv", mime='text/csv')
-                col2.download_button('💾 Excel', data=convert_df(df_search_applied, True), file_name=f"{company}_slice.xlsx")
+                col1.download_button('💾 CSV', data=utils.convert_df(df_search_applied), file_name=f"{company}_slice.csv", mime='text/csv')
+                col2.download_button('💾 Excel', data=utils.convert_df(df_search_applied, True), file_name=f"{company}_slice.xlsx")
             else:
                 st.warning('Проекты не найдены')
             # Project groups
@@ -315,13 +251,13 @@ def run():
             if df_search_applied.shape[0]:
                 st.dataframe(df_search_applied, use_container_width=True)
                 col1, col2, _col3, _col4, _col5, _col6 = st.columns([0.8, 1, 1, 1, 1, 1])
-                col1.download_button('💾 CSV', data=convert_df(df_search_applied), file_name=f"{company}_students.csv", mime='text/csv')
-                col2.download_button('💾 Excel', data=convert_df(df_search_applied, True), file_name=f"{company}_students.xlsx")
+                col1.download_button('💾 CSV', data=utils.convert_df(df_search_applied), file_name=f"{company}_students.csv", mime='text/csv')
+                col2.download_button('💾 Excel', data=utils.convert_df(df_search_applied, True), file_name=f"{company}_students.xlsx")
             else:
                 st.warning('Студенты не найдены')
 
     else:
-        st.warning('Выберите компанию-заказчика')
+        st.markdown(f"<h4 style='text-align: center;'>Выберите компанию 😎</h4>", unsafe_allow_html=True)
     
 if __name__ == "__main__":
     utils.page_config(layout='wide', title='Портфолио компании')

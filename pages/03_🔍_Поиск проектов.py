@@ -13,35 +13,6 @@ from pandas.api.types import (
     is_object_dtype,
 )
 import plotly.express as px
-from connectdb import mysql_conn
- 
- # Database Query
-@st.experimental_memo(ttl=600, show_spinner=False)
-def query_data(query):
-    with mysql_conn() as conn:
-        df = pd.read_sql(query, conn)
-    return df
-
-# Load consolidated projects dataframe
-@st.experimental_memo(show_spinner=False)
-def load_projects():
-    # Load data from database
-    projects_df = query_data(query_dict['projects'])
-    managers_df = query_data(query_dict['managers_in_projects']).merge(query_data(query_dict['students']), on='ID студента', how='left')
-    teachers_df = query_data(query_dict['teachers_in_projects']).merge(query_data(query_dict['teachers']), on='ID преподавателя', how='left')
-
-    # Join multiple managers and teachers into list values
-    managers_df = managers_df.groupby(['ID проекта'])['ФИО студента'].apply(list).reset_index()
-    teachers_df = teachers_df.groupby(['ID проекта'])['ФИО преподавателя'].apply(list).reset_index()
-
-    # Left join dataframes to create consolidated one
-    projects_df = projects_df.merge(managers_df, on='ID проекта', how='left')
-    projects_df = projects_df.merge(teachers_df, on='ID проекта', how='left')
-
-    # Set project ID as dataframe index
-    projects_df.set_index('ID проекта', drop=True, inplace=True)
-    projects_df.rename(columns={'ФИО студента':'Менеджеры', 'ФИО преподавателя':'Преподаватели'}, inplace=True)
-    return projects_df
 
 # Apply search filters and return filtered dataset
 def search_dataframe(df: pd.DataFrame) -> pd.DataFrame:
@@ -131,27 +102,11 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
             df[col] = df[col].dt.strftime('%d-%m-%Y')
     return df
 
-@st.experimental_memo(show_spinner=False)
-def convert_df(df: pd.DataFrame, to_excel=False):
-    if to_excel:
-        output = BytesIO()
-        writer = pd.ExcelWriter(output, engine='xlsxwriter')
-        df.to_excel(writer, index=False, sheet_name='FESSBoard')
-        workbook = writer.book
-        worksheet = writer.sheets['FESSBoard']
-        format1 = workbook.add_format({'num_format': '0.00'}) 
-        worksheet.set_column('A:A', None, format1)  
-        workbook.close()
-        processed_data = output.getvalue()
-    else:
-        processed_data = df.to_csv().encode('utf-8')
-    return processed_data
-
 # App launch
 def run():
     # Load dataframe
     with st.spinner('Поднимаем тайные архивы...'):
-        projects_df = load_projects()
+        projects_df = utils.load_projects()
     st.title('Поиск проектов')
     st.write('''
             #### На данной странице можно составить выборку проектов по заданным параметрам!
@@ -171,8 +126,8 @@ def run():
             with tab1:
                 st.dataframe(df_filters_applied)
                 col1, col2, _col3, _col4, _col5, _col6 = st.columns([0.8, 1, 1, 1, 1, 1])
-                col1.download_button('💾 CSV', data=convert_df(df_search_applied), file_name="fessboard_slice.csv", mime='text/csv')
-                col2.download_button('💾 Excel', data=convert_df(df_search_applied, True), file_name="fessboard_slice.xlsx")
+                col1.download_button('💾 CSV', data=utils.convert_df(df_search_applied), file_name="fessboard_slice.csv", mime='text/csv')
+                col2.download_button('💾 Excel', data=utils.convert_df(df_search_applied, True), file_name="fessboard_slice.xlsx")
             with tab2:
                 st.write('какая-то аналитика')
         else:
