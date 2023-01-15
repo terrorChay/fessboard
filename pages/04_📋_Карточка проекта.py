@@ -101,7 +101,7 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore: list) -> pd.DataFrame:
 
 # Apply filters and return company name
 def project_selection(df: pd.DataFrame):
-    df = df[['ID проекта', 'Название проекта', 'Название компании', 'Грейд', 'Направление', 'Статус']].copy()
+    df = df[['ID проекта', 'Название проекта', 'Название компании', 'Грейд', 'Макро-направление', 'Микро-направление', 'Статус']].copy()
     df.insert(0, 'Составной ключ', df['ID проекта'].astype('str') + ' - ' + df['Название проекта'])
     selected_project = False
 
@@ -189,7 +189,7 @@ def run():
             with center:
                 st.markdown(f"<h2 style='text-align: center;'>{output['Название проекта']}</h2>", unsafe_allow_html=True)
             with right:
-                st.markdown(f"<i><p style='text-align: right;'>{output['Направление']}<br>{output['Грейд']}</p></i>", unsafe_allow_html=True)
+                st.markdown(f"<i><p style='text-align: right;'>{output['Микро-направление']}<br>{output['Грейд']}</p></i>", unsafe_allow_html=True)
             st.markdown(f"<p style='text-align: center;'>{start_date} — {end_date}<br>{output['Статус']}</p>", unsafe_allow_html=True)
             st.markdown(f"<hr style='height:0.1rem;'/>", unsafe_allow_html=True)
         # Project goals and result
