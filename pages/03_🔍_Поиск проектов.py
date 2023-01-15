@@ -149,8 +149,6 @@ def convert_df(df: pd.DataFrame, to_excel=False):
 
 # App launch
 def run():
-    # Feedback btn
-    st.sidebar.button(label='Сообщить об ошибке')
     # Load dataframe
     with st.spinner('Поднимаем тайные архивы...'):
         projects_df = load_projects()
