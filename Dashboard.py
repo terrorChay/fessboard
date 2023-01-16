@@ -84,7 +84,7 @@ def main():
                 )
 
             st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
-            # st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+
     with col2:
         with st.container():
             st.markdown('**Барчарт по числу проектов в год**')
@@ -357,8 +357,8 @@ def main():
             data1 = projects_df['Отрасль']
             fig = make_subplots(1,2,specs=[[{'type':'domain'}, {'type':'domain'}]],
                     )
-            fig.add_trace(go.Pie(values= data.value_counts(),labels= data.value_counts().index, marker_colors=colors),1,1)
-            fig.add_trace(go.Pie(values= data1.value_counts(),labels= data1.value_counts().index, marker_colors=colors),1,2)
+            fig.add_trace(go.Pie(values= data.value_counts(),labels= data.value_counts().index, marker_colors=colors,hole=.4),1,1)
+            fig.add_trace(go.Pie(values= data1.value_counts(),labels= data1.value_counts().index, marker_colors=colors,hole=.4),1,2)
             fig.update_layout(
                 plot_bgcolor            = tr,
                 paper_bgcolor           = tr,
