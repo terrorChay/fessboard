@@ -19,6 +19,11 @@
 /* Дельта метрики */
 [data-testid="stMetricDelta"] {
     justify-content: center;
+    margin-right: 20px;
+}
+
+[data-testid="stMetricDelta"] svg {
+    visibility: hidden;
 }
 
 [data-testid="stMetricDelta"] > div {

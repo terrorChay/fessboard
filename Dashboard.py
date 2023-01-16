@@ -31,64 +31,54 @@ def main():
     with st.spinner('Изучаем требования стейкхолдеров...'):
         students_df = utils.load_students()
     # metrics
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
-    
-    #Готово
-    delta1 = projects_df.loc[projects_df['Статус'] == 'Завершен']['Статус'].value_counts().sum()
-    col1.metric(
-        label       = 'Проектов в работе',
-        value       = int(projects_df.loc[projects_df['Статус'] == 'Активен']['Статус'].value_counts().sum()),
-        delta       = f'{delta1} Завершено',
-        delta_color = 'normal ')
-
-
-    #Дельта - количество уникальных студентов в активных проектах (уникальне из students_in_projects , статус проекта "Активен")
-    #Заголовок метрики должен быть "Студентов приняло участие" но он не влезает (Это хз как решить, пусть висит)
-    delta2 = 10
-    col2.metric(
-        label       = 'Студентов использовано',
-        value       = students_in_projects_df['ID студента'].nunique(),
-        delta       = f'{delta2} активны',
-        delta_color = 'normal')
-    #Готово
-    delta3 = projects_df['Отрасль'].nunique()
-    col3.metric(
-        label       = 'Компаний-партнёров', 
-        value       = projects_df['Название компании'].nunique(),
-        delta       = f'Из {delta3} отраслей',
-        delta_color = 'normal')
-    
-    #Отображать количество Университетов-партнёров
-    #Дельта - количество уникальных регионов Университетов - партнёров
-    delta4 = 1234
-    col4.metric(
-        label       = 'Университетов-партнёров',
-        value       = 1234,
-        delta       = f'В {delta4} регионах',
-        delta_color = 'normal')
-    
-    #Готово
-    delta5 = projects_df['Макро-направление'].nunique()
-    col5.metric(
-        label       = 'Уникальных направлений',
-        value       = projects_df['Микро-направление'].nunique(),
-        delta       = f'В {delta5} сферах',
-        delta_color = 'normal')
-    
-    #Отображать количество мероприятий (количество записей из таблицы events)
-    #Дельта - сумма записей из таблицы event_participants (Возможно стоит считать только уникальных, не знаю)
-    delta6 = 1234
-    col6.metric(
-        label       = 'Мероприятий проведено',
-        value       = 1234,
-        delta       = f'{delta6} участников',
-        delta_color = 'normal')
-
-    
-    
-
-    
-
+    with st.container():
+        col1, col2, col3, col4, col5, col6 = st.columns(6)
+        #Готово
+        delta1 = projects_df.loc[projects_df['Статус'] == 'Завершен']['Статус'].value_counts().sum()
+        col1.metric(
+            label       = 'Проектов в работе',
+            value       = int(projects_df.loc[projects_df['Статус'] == 'Активен']['Статус'].value_counts().sum()),
+            delta       = f'{delta1} завершено',
+            delta_color = 'normal')
+        #Дельта - количество уникальных студентов в активных проектах (уникальне из students_in_projects , статус проекта "Активен")
+        #Заголовок метрики должен быть "Студентов приняло участие" но он не влезает (Это хз как решить, пусть висит)
+        delta2 = 10 # Не готово
+        col2.metric(
+            label       = 'Студентов задействовано',
+            value       = students_in_projects_df['ID студента'].nunique(),
+            delta       = f'{delta2} за все время',
+            delta_color = 'normal')
+        #Готово
+        delta3 = 123 # Не готово
+        col3.metric(
+            label       = 'Компаний-партнёров', 
+            value       = projects_df['Название компании'].nunique(),
+            delta       = f'+ {delta3} в этому году',
+            delta_color = 'normal')
+        
+        #Отображать количество Университетов-партнёров
+        delta4 = 1234 #Готово
+        col4.metric(
+            label       = 'Университетов-партнёров',
+            value       = 1234,
+            delta       = f'{delta4} в этому году',
+            delta_color = 'normal')
+        
+        #Готово
+        delta5 = projects_df['Макро-направление'].nunique()
+        col5.metric(
+            label       = 'Уникальных направлений',
+            value       = projects_df['Микро-направление'].nunique(),
+            delta       = f'В {delta5} сферах',
+            delta_color = 'normal')
+        #Отображать количество мероприятий (количество записей из таблицы events)
+        #Дельта - сумма записей из таблицы event_participants (Возможно стоит считать только уникальных, не знаю)
+        delta6 = 1234 #Не готово
+        col6.metric(
+            label       = 'Мероприятий проведено',
+            value       = 1234,
+            delta       = f'{delta6} участников',
+            delta_color = 'normal')
     # row 0
     col1, col2,col3,col4,col5 = st.columns([1, 2,1,1,1])
     with col1:
