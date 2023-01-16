@@ -32,25 +32,68 @@ def main():
         students_df = utils.load_students()
     # metrics
     col1, col2, col3, col4, col5, col6 = st.columns(6)
-    total = projects_df['Статус'].value_counts().sum() 
-
-    col1.metric('Проектов в работе',
-    int(projects_df.loc[projects_df['Статус'] == 'Активен']['Статус'].value_counts().sum()),
-    delta=f'{total} завершено',
-    delta_color = 'normal')
-
-    col2.metric('Студентов задействовано',  students_df.shape[0])
-    col3.metric('Уникальных направлений', projects_df['Микро-направление'].nunique())
-    col4.metric('Уникальных партнеров', projects_df['Название компании'].nunique())
-    col5.metric('Уникальных сфер', projects_df['Макро-направление'].nunique())
-    col6.metric('Уникальных партнеров', projects_df['Название компании'].nunique())
-
-    # row 1
     
-    col1, col2,col3,col4,col5 = st.columns([1, 1,1,1,2])
+    #Готово
+    delta1 = projects_df.loc[projects_df['Статус'] == 'Завершен']['Статус'].value_counts().sum()
+    col1.metric(
+        label       = 'Проектов в работе',
+        value       = int(projects_df.loc[projects_df['Статус'] == 'Активен']['Статус'].value_counts().sum()),
+        delta       = f'{delta1} Завершено',
+        delta_color = 'normal ')
+
+
+    #Дельта - количество уникальных студентов в активных проектах (уникальне из students_in_projects , статус проекта "Активен")
+    #Заголовок метрики должен быть "Студентов приняло участие" но он не влезает (Это хз как решить, пусть висит)
+    delta2 = 10
+    col2.metric(
+        label       = 'Студентов использовано',
+        value       = students_in_projects_df['ID студента'].nunique(),
+        delta       = f'{delta2} активны',
+        delta_color = 'normal')
+    #Готово
+    delta3 = projects_df['Отрасль'].nunique()
+    col3.metric(
+        label       = 'Компаний-партнёров', 
+        value       = projects_df['Название компании'].nunique(),
+        delta       = f'Из {delta3} отраслей',
+        delta_color = 'normal')
+    
+    #Отображать количество Университетов-партнёров
+    #Дельта - количество уникальных регионов Университетов - партнёров
+    delta4 = 1234
+    col4.metric(
+        label       = 'Университетов-партнёров',
+        value       = 1234,
+        delta       = f'В {delta4} регионах',
+        delta_color = 'normal')
+    
+    #Готово
+    delta5 = projects_df['Макро-направление'].nunique()
+    col5.metric(
+        label       = 'Уникальных направлений',
+        value       = projects_df['Микро-направление'].nunique(),
+        delta       = f'В {delta5} сферах',
+        delta_color = 'normal')
+    
+    #Отображать количество мероприятий (количество записей из таблицы events)
+    #Дельта - сумма записей из таблицы event_participants (Возможно стоит считать только уникальных, не знаю)
+    delta6 = 1234
+    col6.metric(
+        label       = 'Мероприятий проведено',
+        value       = 1234,
+        delta       = f'{delta6} участников',
+        delta_color = 'normal')
+
+    
+    
+
+    
+
+    # row 0
+    col1, col2,col3,col4,col5 = st.columns([1, 2,1,1,1])
     with col1:
         with st.container():
-            st.markdown('**Распределение проектов по вузам-партнёрам**')
+            st.markdown('**Грейды проектов**')
             a   = projects_df['Грейд']
 
             fig = px.pie(a,
@@ -64,7 +107,7 @@ def main():
                 textposition  = 'inside',
                 textinfo      = 'label+value',
                 hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
-                textfont_size = 12
+                textfont_size = 14
                 
                 )
 
@@ -78,48 +121,65 @@ def main():
                 title_font_family       = font,
                 title_font_color        = "white",
                 legend_title_font_color = "white",
-                height                  = 150,
+                height                  = 220,
                 margin                  = dict(t=0, l=0, r=0, b=0),
                 #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
                 )
 
             st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
-
     with col2:
         with st.container():
-            st.markdown('**Барчарт по числу проектов в год**')
+            st.markdown('**Число проектов в год**')
 
-            data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [16, 24, 37,45,63]}
+            data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [16, 24, 37,45,63],'Прирост':
+            [16,8,13,8,18]}
             test_df = pd.DataFrame(data)
 
-            fig = px.bar(test_df, 
-                x                       = 'Год',
-                y                       = 'Количество',
-                color_discrete_sequence = colors,
-                text_auto               = True
-                )
-            
+            fig = make_subplots(1,1)
+
+# add first bar trace at row = 1, col = 1
+            fig.add_trace(go.Bar(x=test_df['Год'], y=test_df['Количество'],
+                     name='Проектов в год',
+                     marker_color = '#ED1C24',
+                     opacity=1,
+                     marker_line_width=2,
+                     text=list(test_df['Количество']),
+                     hovertext= ''
+                     
+),
+              row = 1, col = 1)
             fig.update_layout(
-                font_family   = font,
-                font_size     = 10,
-                paper_bgcolor = tr,
-                plot_bgcolor  = tr,
-                margin        = dict(t=0, l=0, r=0, b=0),
-                yaxis_title     = "",
-                xaxis_title     = "",
-                width = 10,
-                height = 220,
-                xaxis_visible   = True,
-                )
-            
+                 font_family   = font,
+                 font_size     = 13,
+                 paper_bgcolor = tr,
+                 plot_bgcolor  = tr,
+                 margin        = dict(t=0, l=0, r=0, b=0),
+                 yaxis_title     = "",
+                 xaxis_title     = "",
+                 width = 10,
+                 height = 220,
+                 xaxis_visible   = True,
+                 showlegend       = False,
+                 
+                 )
             fig.update_traces(
                 textfont_size = 14,
-                textangle     = 0,
-                textposition  = "inside",
-                cliponaxis    = False
-                )
+                 textangle     = 0,
+                 textposition  = "inside",
+                 cliponaxis    = False,
+                 )
             fig['data'][0].width=0.7
+# add first scatter trace at row = 1, col = 1
+            fig.add_trace(go.Scatter(x=test_df['Год'], y=test_df['Прирост'], line=dict(color='#07C607'), name='Прирост проектов'),
+              row = 1, col = 1)
             st.plotly_chart(fig,use_container_width=True,config=config)
+
+
+    # row 1 
+    col1, col2,col3,col4,col5 = st.columns([1, 1,1,1,2])
+    
+
+        
     with col3:
         with st.container():
             st.markdown('**Вовлечённость потока**')
@@ -202,7 +262,7 @@ def main():
             rating_subject  = st.selectbox(label='Показывать топ', options=['Преподавателей', 'Студентов'], index=0, label_visibility="collapsed")
             sort_asc = False
             chart_container = st.container()
-            display_limit   = st.slider(label='Ограничить вывод', min_value=1, max_value=10, value=3, label_visibility="collapsed")
+            display_limit   = st.slider(label='Ограничить вывод', min_value=1, max_value=10, value=5, label_visibility="collapsed")
             # data selection
             if rating_subject == 'Преподавателей':
                 data = teachers_in_projects_df.value_counts(subset='ФИО преподавателя', ascending=sort_asc).iloc[:display_limit]
@@ -308,42 +368,6 @@ def main():
 
     with col3:
         st.subheader('Пайчарт')
-        with st.container():
-
-            a   = projects_df['Грейд']
-
-            fig = px.pie(a,
-            values                  = a.value_counts(),
-            names                   = a.value_counts().index,
-            color_discrete_sequence = colors,
-            hole                    = .4
-            )
-
-            fig.update_traces(
-                textposition  = 'inside',
-                textinfo      = 'label+value',
-                hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
-                textfont_size = 18
-                
-                )
-
-            fig.update_layout(
-                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
-                plot_bgcolor            = tr,
-                paper_bgcolor           = tr,
-                #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
-                showlegend              = False,
-                font_family             = font,
-                title_font_family       = font,
-                title_font_color        = "white",
-                legend_title_font_color = "white",
-                height                  = 300,
-                margin                  = dict(t=0, l=0, r=0, b=0),
-                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
-                )
-
-            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
-    
     # row 2
 
     col1, col2, col3 = st.columns([1, 2, 1])
