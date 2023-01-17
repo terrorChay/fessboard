@@ -95,7 +95,7 @@ def main():
 
             fig.update_traces(
                 textposition  = 'inside',
-                textinfo      = 'label+value',
+                textinfo      = 'label',
                 hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
                 textfont_size = 14
                 
@@ -218,19 +218,20 @@ def main():
     with col5:
         with st.container():
             st.markdown('**Регионы мероприятий**')
-            a   = projects_df['Грейд']
+            data    = {'Регион': ['Москва', 'Нижний Новгород', 'Казань','Калининград','Сарапул'],'Количество': [10, 3, 1,3,1]}
+            events_regions_df = pd.DataFrame(data)
 
-            fig = px.pie(a,
-            values                  = a.value_counts(),
-            names                   = a.value_counts().index,
+            fig = px.pie(events_regions_df,
+            values                  = events_regions_df['Количество'],
+            names                   = events_regions_df['Регион'],
             color_discrete_sequence = colors,
             hole                    = .4
             )
 
             fig.update_traces(
                 textposition  = 'inside',
-                textinfo      = 'label+value',
-                hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+                textinfo      = 'label',
+                hovertemplate = "<b>%{label}.</b> Мероприятий: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
                 textfont_size = 14
                 
                 )
@@ -256,45 +257,63 @@ def main():
     col1, col2,col3,col4,col5 = st.columns([1, 2,1,1,1])
     with col1:
         with st.container():
-            st.markdown('**Что-то**')
+            st.markdown('**Международных компаний**')
+            delta1 = projects_df.loc[projects_df['Статус'] == 'Завершен']['Статус'].value_counts().sum()
+            st.metric(
+            label       = 'Проектов в работе',
+            value       = int(projects_df.loc[projects_df['Статус'] == 'Активен']['Статус'].value_counts().sum()),
+            label_visibility="collapsed")
+            st.markdown('**Малый и средний бизнес**')
+            st.metric(
+            label       = 'Проектов в работе',
+            value       = 10,
+            label_visibility="collapsed"
+)
     
     with col2:
         with st.container():
-            st.markdown('**Распределение проектов по типам компаний-партнеров**')
-            data = projects_df['Тип компании']
-            data1 = projects_df['Отрасль']
-            fig = make_subplots(1,2,specs=[[{'type':'domain'}, {'type':'domain'}]],
-                    )
-            fig.add_trace(go.Pie(values= data.value_counts(),labels= data.value_counts().index, marker_colors=colors,hole=.4),1,1)
-            fig.add_trace(go.Pie(values= data1.value_counts(),labels= data1.value_counts().index, marker_colors=colors,hole=.4),1,2)
+            st.markdown('**Рост количества компаний-партнёров (накопительным итогом)**')
+            
+    with col3:
+        with st.container():
+            st.markdown('**Типы компаний (пайчарт)**')
+            data    = {'Регион': ['Москва', 'Нижний Новгород', 'Казань','Калининград','Сарапул'],'Количество': [10, 3, 1,3,1]}
+            events_regions_df = pd.DataFrame(data)
+
+            fig = px.pie(events_regions_df,
+            values                  = events_regions_df['Количество'],
+            names                   = events_regions_df['Регион'],
+            color_discrete_sequence = colors,
+            hole                    = .4
+            )
+
+            fig.update_traces(
+                textposition  = 'inside',
+                textinfo      = 'label',
+                hovertemplate = "<b>%{label}.</b> Мероприятий: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+                textfont_size = 14
+                
+                )
+
             fig.update_layout(
+                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
                 plot_bgcolor            = tr,
                 paper_bgcolor           = tr,
                 #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
                 showlegend              = False,
                 font_family             = font,
                 title_font_family       = font,
+                title_font_color        = "white",
                 legend_title_font_color = "white",
                 height                  = 220,
-                font_size     = 18,
                 margin                  = dict(t=0, l=0, r=0, b=0),
                 #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
                 )
-            fig.update_traces(
-                textposition  = 'inside',
-                textinfo      = 'percent',
-                hovertemplate = "Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от проектов в работе",
-                textfont_size = 18
-                
-                )
 
-            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
-    with col3:
-        with st.container():
-            st.markdown('**Что-то**') 
+            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False}) 
     with col4:
         with st.container():
-            st.markdown('**Что-то**')
+            st.markdown('**Топ заказчиков (пайчарт с топ 5 + другие)**')
     with col5:
         with st.container():
             st.markdown('**Наши партнёры**')  
@@ -302,6 +321,8 @@ def main():
                 image = r'img\sber_logo.png',
                 use_column_width = 'auto',
             )
+            st.write('СБЕР Агентство Инноваций Москвы (Московский инновационный кластер) BMW (?)\nBOSCH\
+Segezha Xiaomi Schneider Студия имени горького')
     
     # Ряд студентов
     col1, col2,col3,col4,col5 = st.columns([1, 2,1,1,1])
@@ -394,8 +415,15 @@ def main():
                 fig.update_traces(hovertemplate = "<b>%{label}.</b> Вовлечённость: <b>%{value}</b>",cliponaxis    = False)
         
                 st.plotly_chart(fig, use_container_width=True,config=config)
-    
-
+    with col3:
+        with st.container():
+            st.markdown('**Вовлечённость потока**')   
+    with col4:
+        with st.container():
+            st.markdown('**Вовлечённость потока**')
+    with col5:
+        with st.container():
+            st.markdown('**Наши партнёры**')
     #Ряд интерактивов
     col1, col2 = st.columns([2, 4])
     
@@ -467,7 +495,37 @@ def main():
             # display the plot
             chart_container.plotly_chart(fig, use_container_width=True, config=config)
 
-    
+    col1, col2 = st.columns([1,1])
+    with col1:
+        with st.container():
+            data = projects_df['Тип компании']
+            data1 = projects_df['Отрасль']
+            fig = make_subplots(1,2,specs=[[{'type':'domain'}, {'type':'domain'}]],
+                    )
+            fig.add_trace(go.Pie(values= data.value_counts(),labels= data.value_counts().index, marker_colors=colors,hole=.4),1,1)
+            fig.add_trace(go.Pie(values= data1.value_counts(),labels= data1.value_counts().index, marker_colors=colors,hole=.4),1,2)
+            fig.update_layout(
+                plot_bgcolor            = tr,
+                paper_bgcolor           = tr,
+                #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
+                showlegend              = False,
+                font_family             = font,
+                title_font_family       = font,
+                legend_title_font_color = "white",
+                height                  = 220,
+                font_size     = 18,
+                margin                  = dict(t=0, l=0, r=0, b=0),
+                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
+                )
+            fig.update_traces(
+                textposition  = 'inside',
+                textinfo      = 'percent',
+                hovertemplate = "Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от проектов в работе",
+                textfont_size = 18
+                
+                )
+
+            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
 
 
 if __name__ == "__main__":
