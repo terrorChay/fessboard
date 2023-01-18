@@ -183,8 +183,7 @@ def run():
         projects_with_company   = projects_df.loc[projects_df['ID компании'] == company_id]
         # load only students who had projects with selected company
         with st.spinner('Захватываем мир...'):
-            students_with_company   = utils.load_students_in_projects(all=False, selected_projects=projects_with_company[['ID проекта']])
-
+            students_with_company   = utils.load_students_in_projects(all=False, selected_projects=list(projects_with_company[['ID проекта']].values))
         # О компании
         with tab1:
             try:

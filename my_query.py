@@ -19,8 +19,8 @@ query_dict =    {
                                                         projects.is_frozen = 1
                                                     THEN 'Заморожен'
                                                     WHEN
-                                                        projects.is_frozen != 1 AND DAYNAME(projects.project_end_date) IS NULL
-                                                    THEN 'Активен'
+                                                        projects.is_frozen != 1 AND (DAYNAME(projects.project_end_date) IS NULL OR DATE(projects.project_end_date) >= CURDATE())
+                                                    THEN 'Активен' 
                                                     ELSE 'Завершен'
                                                 END AS 'Статус'
                                             FROM projects 
@@ -57,12 +57,12 @@ query_dict =    {
                                                     WHEN students.student_id in (SELECT managers_in_projects.student_id FROM managers_in_projects)
                                                     THEN 1
                                                     ELSE 0
-                                                END AS 'isManager',
+                                                END AS 'Опыт менеджера',
                                                 CASE
                                                     WHEN students.student_id in (SELECT students_in_projects.student_id FROM students_in_projects WHERE students_in_projects.is_curator = 1)
                                                     THEN 1
                                                     ELSE 0
-                                                END AS 'isCurator',
+                                                END AS 'Опыт куратора',
                                                 bach_name AS 'Бакалавриат',
                                                 bach_reg_name AS 'Бак. регион',
                                                 students.bachelors_start_year AS 'Бак. год',
@@ -99,19 +99,42 @@ query_dict =    {
                                                     T0.teacher_midname) AS 'ФИО преподавателя'
                                             FROM (SELECT teachers.teacher_id, teachers.teacher_surname, teachers.teacher_name, teachers.teacher_midname FROM teachers) AS T0;
                                             """,
-                
+
+                "universities"          :   """
+                                            SELECT
+                                            universities.university_id AS 'ID вуза',
+                                            universities.university_name AS 'Название',
+                                            T0.region AS 'Регион'
+                                            FROM universities
+                                            LEFT JOIN   (SELECT regions.region_id, regions.region FROM regions) AS T0
+                                                ON universities.university_id = T0.region_id;
+                                            """,
+
                 "students_in_projects"  :   """
                                             SELECT
-                                                T0.project_id AS 'ID проекта',
-                                                T0.project_end_date AS 'Дата окончания',
-                                                T1.team AS 'Команда',
-                                                T1.student_id AS 'ID студента',
-                                                T1.is_curator AS 'Куратор'
-                                            FROM (SELECT projects.project_id, projects.project_end_date FROM projects) AS T0
-                                            LEFT JOIN   (SELECT students_in_projects.project_id, students_in_projects.team, students_in_projects.student_id, students_in_projects.is_curator FROM students_in_projects) AS T1
-                                                ON T0.project_id = T1.project_id;
-                                            """, 
-
+                                                students_in_projects.project_id AS 'ID проекта',
+                                                students_in_projects.student_id AS 'ID студента',
+                                                CASE
+                                                    WHEN
+                                                        T1.is_frozen = 1
+                                                    THEN 'Заморожен'
+                                                    WHEN
+                                                        T1.is_frozen != 1 AND (DAYNAME(T1.project_end_date) IS NULL OR DATE(T1.project_end_date) >= CURDATE())
+                                                    THEN 'Активен' 
+                                                    ELSE 'Завершен'
+                                                END AS 'Статус',
+                                                students_in_projects.team AS 'Команда',
+                                                students_in_projects.is_curator AS 'Куратор'
+                                            FROM students_in_projects
+                                            LEFT JOIN   (
+                                                            SELECT 
+                                                                projects.project_id,
+                                                                projects.is_frozen,
+                                                                projects.project_end_date
+                                                            FROM projects 
+                                                        ) AS T1
+                                                ON students_in_projects.project_id = T1.project_id;
+                                            """,
                 "managers_in_projects"  :   """
                                             SELECT
                                                 managers_in_projects.project_id AS 'ID проекта',

@@ -1,11 +1,10 @@
 import streamlit as st
 from streamlit import session_state as session
 import utils as utils
-from my_query import query_dict
 import pandas as pd
 import numpy as np
+from datetime import date
 import plotly.express as px
-from connectdb import mysql_conn
 from datetime import datetime
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
@@ -28,48 +27,43 @@ def main():
         students_in_projects_df = utils.load_people_in_projects()
     with st.spinner('Изучаем требования стейкхолдеров...'):
         teachers_in_projects_df = utils.load_people_in_projects(teachers=True)
-    with st.spinner('Изучаем требования стейкхолдеров...'):
+    with st.spinner('Еще чуть-чуть и прямо в рай...'):
         students_df = utils.load_students()
+    with st.spinner('Нежно обращаемся к базе данных...'):
+        universities_df = utils.load_universities()
     # Ряд метрик
     with st.container():
         col1, col2, col3, col4, col5, col6 = st.columns(6)
-        #Готово
-        delta1 = projects_df.loc[projects_df['Статус'] == 'Завершен']['Статус'].value_counts().sum()
+        # Проекты в работы ( активно vs. завершено )
         col1.metric(
             label       = 'Проектов в работе',
-            value       = int(projects_df.loc[projects_df['Статус'] == 'Активен']['Статус'].value_counts().sum()),
-            delta       = f'{delta1} завершено',
+            value       = projects_df[projects_df['Статус'] == 'Активен'].shape[0],
+            delta       = '{} за все время'.format(projects_df[projects_df['Статус'] == 'Завершен'].shape[0]),
             delta_color = 'normal')
-        #Дельта - количество уникальных студентов в активных проектах (уникальне из students_in_projects , статус проекта "Активен")
-        #Заголовок метрики должен быть "Студентов приняло участие" но он не влезает (Это хз как решить, пусть висит)
-        delta2 = 10 # Не готово
+        # Уникальных студентов ( активно vs. побывало )
         col2.metric(
             label       = 'Студентов задействовано',
-            value       = students_in_projects_df['ID студента'].nunique(),
-            delta       = f'{delta2} за все время',
+            value       = students_in_projects_df['ID студента'].loc[students_in_projects_df['Статус'] == 'Активен'].nunique(),
+            delta       = '{} за все время'.format(students_in_projects_df['ID студента'].nunique()),
             delta_color = 'normal')
-        #Готово
-        delta3 = 123 # Не готово
+        # Компаний партнеров ( всего vs. новых в этом году )
         col3.metric(
             label       = 'Компаний-партнёров', 
             value       = projects_df['Название компании'].nunique(),
-            delta       = f'+ {delta3} в этому году',
+            delta       = '{} новых в этому году'.format(projects_df[['Дата начала','Название компании']].sort_values('Дата начала').drop_duplicates(subset='Название компании', keep='first').loc[projects_df['Дата начала'] >= date(date.today().year, 1, 1)].shape[0]),
             delta_color = 'normal')
-        
-        #Отображать количество Университетов-партнёров
-        delta4 = 1234 #Готово
+        # Университетов партнеров ( количество, регионы )
         col4.metric(
             label       = 'Университетов-партнёров',
-            value       = 1234,
-            delta       = f'{delta4} в этому году',
+            value       = universities_df.shape[0],
+            delta       = 'из {} регионов(-а)'.format(universities_df['Регион'].drop_duplicates().shape[0]),
             delta_color = 'normal')
-        
-        #Готово
+        # Направления и сферы
         delta5 = projects_df['Макро-направление'].nunique()
         col5.metric(
             label       = 'Уникальных направлений',
             value       = projects_df['Микро-направление'].nunique(),
-            delta       = f'В {delta5} сферах',
+            delta       = 'из {} сфер'.format(projects_df['Макро-направление'].nunique()),
             delta_color = 'normal')
         #Отображать количество мероприятий (количество записей из таблицы events)
         #Дельта - сумма записей из таблицы event_participants (Возможно стоит считать только уникальных, не знаю)

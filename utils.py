@@ -111,21 +111,19 @@ def load_students():
     return query_data(query_dict['students'])
 
 @st.experimental_memo(show_spinner=False)
+def load_universities():
+    return query_data(query_dict['universities'])
+
+@st.experimental_memo(show_spinner=False)
 def load_companies():
     df = query_data(query_dict['companies'])
     return df
 
 @st.experimental_memo(show_spinner=False)
-def load_students_in_projects(all=True, selected_projects: pd.DataFrame = None):
-    # Load data from database
+def load_students_in_projects(all=True, selected_projects: list = False):
     df = query_data(query_dict['students_in_projects']).merge(query_data(query_dict['students']), on='ID студента', how='left')
-    # df.set_index('ID проекта', drop=True, inplace=True)
-    if not all:
-        try:
-            df = selected_projects.merge(df, how='left', left_index=True, right_index=True)
-            df.dropna(axis=0, subset=['Команда', 'ID студента'], inplace=True)
-        except Exception as err:
-            return err
+    if selected_projects:
+        df = df.loc[df['ID проекта'].isin(selected_projects)]
     return df
 
 @st.experimental_memo(show_spinner=False)
@@ -146,8 +144,6 @@ def load_people_in_projects(teachers=False):
         b = 'students'
         c = 'ID студента'  
     df = query_data(query_dict[a]).merge(query_data(query_dict[b]), on=c, how='left')
-    # df.dropna(axis=0, subset=['Команда'], inplace=True)
-    df.set_index('ID проекта', drop=True, inplace=True)
     return df
     
 ####################################################################################################################################

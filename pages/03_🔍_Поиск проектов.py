@@ -30,7 +30,12 @@ def search_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
 # Apply filters and return filtered dataset
 def filter_dataframe(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
-    df = df.copy()
+    cols_in_df      = df.columns.values
+    cols_dict       = {}
+    for col_name in cols_in_df:
+        cols_dict[col_name] = st.sidebar.checkbox(col_name, True, key=f"display_{col_name}")
+    cols_to_display = [k for k, v in cols_dict.items() if v]
+    df = df[cols_to_display].copy()
     # Try to convert datetimes into a standard format (datetime, no timezone)
     for col in df.columns:
         if is_object_dtype(df[col]):
@@ -121,7 +126,7 @@ def run():
     if df_search_applied.shape[0]:
         df_filters_applied  = filter_dataframe(df_search_applied)
         # if filters have results -> draw DF, download btn and analytics
-        if df_filters_applied.shape[0]:
+        if 0 not in df_filters_applied.shape:
             tab1, tab2 = st.tabs(["Данные", "Аналитика"])
             with tab1:
                 st.dataframe(df_filters_applied)
