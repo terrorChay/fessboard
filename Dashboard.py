@@ -46,11 +46,13 @@ def main():
             value       = students_in_projects_df['ID студента'].loc[students_in_projects_df['Статус'] == 'Активен'].nunique(),
             delta       = '{} за все время'.format(students_in_projects_df['ID студента'].nunique()),
             delta_color = 'normal')
-        # Компаний партнеров ( всего vs. новых в этом году )
+        # Компаний партнеров ( всего vs. отрасли )
+        ## Новых компаний в этом году:
+        ## projects_df[['Дата начала','Название компании']].sort_values('Дата начала').drop_duplicates(subset='Название компании', keep='first').loc[projects_df['Дата начала'] >= date(date.today().year, 1, 1)].shape[0]
         col3.metric(
             label       = 'Компаний-партнёров', 
             value       = projects_df['Название компании'].nunique(),
-            delta       = '{} новых в этому году'.format(projects_df[['Дата начала','Название компании']].sort_values('Дата начала').drop_duplicates(subset='Название компании', keep='first').loc[projects_df['Дата начала'] >= date(date.today().year, 1, 1)].shape[0]),
+            delta       = 'из {} отраслей(-и)'.format(projects_df['Отрасль'].nunique()),
             delta_color = 'normal')
         # Университетов партнеров ( количество, регионы )
         col4.metric(
@@ -62,7 +64,7 @@ def main():
         col5.metric(
             label       = 'Уникальных направлений',
             value       = projects_df['Микро-направление'].nunique(),
-            delta       = 'из {} сфер'.format(projects_df['Макро-направление'].nunique()),
+            delta       = 'из {} сфер(-ы)'.format(projects_df['Макро-направление'].nunique()),
             delta_color = 'normal')
         #Отображать количество мероприятий (количество записей из таблицы events)
         #Дельта - сумма записей из таблицы event_participants (Возможно стоит считать только уникальных, не знаю)
@@ -254,14 +256,11 @@ def main():
             delta1 = projects_df.loc[projects_df['Статус'] == 'Завершен']['Статус'].value_counts().sum()
             st.metric(
             label       = 'Проектов в работе',
-            value       = int(projects_df.loc[projects_df['Статус'] == 'Активен']['Статус'].value_counts().sum()),
-            label_visibility="collapsed")
+            value       = int(projects_df.loc[projects_df['Статус'] == 'Активен']['Статус'].value_counts().sum()))
             st.markdown('**Малый и средний бизнес**')
             st.metric(
             label       = 'Проектов в работе',
-            value       = 10,
-            label_visibility="collapsed"
-)
+            value       = 10)
     
     with col2:
         with st.container():

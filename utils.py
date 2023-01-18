@@ -89,13 +89,15 @@ def query_data(query):
 @st.experimental_memo(show_spinner=False)
 def load_projects():
     # Load data from database
-    projects_df = query_data(query_dict['projects'])
-    managers_df = query_data(query_dict['managers_in_projects']).merge(query_data(query_dict['students']), on='ID студента', how='left')
-    teachers_df = query_data(query_dict['teachers_in_projects']).merge(query_data(query_dict['teachers']), on='ID преподавателя', how='left')
+    projects_df     = query_data(query_dict['projects'])
+    managers_df     = query_data(query_dict['managers_in_projects']).merge(query_data(query_dict['students']), on='ID студента', how='left')
+    teachers_df     = query_data(query_dict['teachers_in_projects']).merge(query_data(query_dict['teachers']), on='ID преподавателя', how='left')
+    # universities_df = query_data(query_dict['universities_in_projects']).merge(query_data(query_dict['universities']), on='ID вуза', how='left')
 
     # Join multiple managers and teachers into list values
     managers_df = managers_df.groupby(['ID проекта'])['ФИО студента'].apply(list).reset_index()
     teachers_df = teachers_df.groupby(['ID проекта'])['ФИО преподавателя'].apply(list).reset_index()
+    # universities_df = universities_df.groupby(['ID проекта'])['Название вуза'].apply(list).reset_index()
 
     # Left join dataframes to create consolidated one
     projects_df = projects_df.merge(managers_df, on='ID проекта', how='left')

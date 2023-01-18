@@ -103,7 +103,7 @@ query_dict =    {
                 "universities"          :   """
                                             SELECT
                                             universities.university_id AS 'ID вуза',
-                                            universities.university_name AS 'Название',
+                                            universities.university_name AS 'Название вуза',
                                             T0.region AS 'Регион'
                                             FROM universities
                                             LEFT JOIN   (SELECT regions.region_id, regions.region FROM regions) AS T0
@@ -114,6 +114,7 @@ query_dict =    {
                                             SELECT
                                                 students_in_projects.project_id AS 'ID проекта',
                                                 students_in_projects.student_id AS 'ID студента',
+                                                T1.project_end_date AS 'Дата окончания',
                                                 CASE
                                                     WHEN
                                                         T1.is_frozen = 1
@@ -141,6 +142,13 @@ query_dict =    {
                                                 managers_in_projects.student_id AS 'ID студента'
                                             FROM managers_in_projects;
                                             """,
+
+                # "universities_in_projects"  :   """
+                #                             SELECT
+                #                                 AS 'ID проекта',
+                #                                 AS 'ID студента',
+                #                                 AS 'Название вуза'
+                #                             """,                
 
                 "teachers_in_projects"  :   """
                                             SELECT
