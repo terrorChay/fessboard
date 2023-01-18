@@ -56,10 +56,9 @@ def main():
         col4.metric(
             label       = 'Университетов-партнёров',
             value       = universities_df.shape[0],
-            delta       = 'из {} регионов(-а)'.format(universities_df['Регион'].drop_duplicates().shape[0]),
+            delta       = 'из {} регионов(-а)'.format(universities_df['Регион'].nunique()),
             delta_color = 'normal')
         # Направления и сферы
-        delta5 = projects_df['Макро-направление'].nunique()
         col5.metric(
             label       = 'Уникальных направлений',
             value       = projects_df['Микро-направление'].nunique(),
