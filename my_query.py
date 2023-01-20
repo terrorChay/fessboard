@@ -1,48 +1,34 @@
 query_dict =    {
                 "projects"              :   """
                                             SELECT
-                                                projects.project_id AS 'ID проекта',
-                                                T1.company_id AS 'ID компании',
-                                                T1.company_name AS 'Название компании',
-                                                T2.company_type AS 'Тип компании',
-                                                T3.company_sphere AS 'Отрасль',
-                                                projects.project_name AS 'Название проекта',
-                                                projects.project_description AS 'Описание',
-                                                projects.project_result AS 'Результат',
-                                                projects.project_start_date AS 'Дата начала',
-                                                projects.project_end_date AS 'Дата окончания',
-                                                project_grades.grade AS 'Грейд',
-                                                T00.sphere AS 'Макро-направление',
-                                                T0.field AS 'Микро-направление',
-                                                CASE
-                                                    WHEN
-                                                        projects.is_frozen = 1
-                                                    THEN 'Заморожен'
-                                                    WHEN
-                                                        projects.is_frozen != 1 AND (DAYNAME(projects.project_end_date) IS NULL OR DATE(projects.project_end_date) >= CURDATE())
-                                                    THEN 'Активен' 
-                                                    ELSE 'Завершен'
-                                                END AS 'Статус'
-                                            FROM projects 
-                                            LEFT JOIN project_grades
-                                                ON projects.project_grade_id   = project_grades.grade_id
-                                            LEFT JOIN   (
-                                                            (SELECT project_fields.field_id, project_fields.field, project_fields.sphere_id FROM project_fields) AS T0
-                                                                LEFT JOIN
-                                                                    (SELECT field_spheres.sphere_id, field_spheres.sphere FROM field_spheres) AS T00
-                                                                ON T0.sphere_id = T00.sphere_id
-                                                        )
-                                                ON projects.project_field_id = T0.field_id
-                                            LEFT JOIN   (
-                                                            (SELECT companies.company_id, companies.company_name, companies.company_type_id, companies.company_sphere_id FROM companies) AS T1
-                                                                LEFT JOIN 
-                                                                    (SELECT company_types.company_type_id, company_types.company_type FROM company_types) AS T2
-                                                                    ON T1.company_type_id = T2.company_type_id
-                                                                LEFT JOIN
-                                                                    (SELECT company_spheres.company_sphere_id, company_spheres.company_sphere FROM company_spheres) AS T3
-                                                                    ON T1.company_sphere_id = T3.company_sphere_id
-                                                        )
-                                                ON projects.project_company_id = T1.company_id;
+                                                projects.project_id AS `ID проекта`,
+                                                projects.project_name AS `Название проекта`,
+                                                projects.project_description AS Описание,
+                                                projects.project_result AS Результат,
+                                                projects.project_start_date AS `Дата начала`,
+                                                projects.project_end_date AS `Дата окончания`,
+                                                companies.company_name AS `Название компании`,
+                                                company_types.company_type AS `Тип компании`,
+                                                company_spheres.company_sphere AS Отрасль,
+                                                project_grades.grade AS Грейд,
+                                                project_fields.field AS `Микро-направление`,
+                                                field_spheres.sphere AS `Макро-направление`,
+                                                CASE WHEN projects.is_frozen = 1 THEN 'Заморожен' WHEN projects.is_frozen <> 1 AND
+                                                    (DAYNAME(projects.project_end_date) IS NULL OR
+                                                    DATE(projects.project_end_date) >= CURDATE()) THEN 'Активен' ELSE 'Завершен' END AS Статус
+                                            FROM projects
+                                            INNER JOIN project_grades
+                                                ON projects.project_grade_id = project_grades.grade_id
+                                            INNER JOIN project_fields
+                                                ON projects.project_field_id = project_fields.field_id
+                                            INNER JOIN field_spheres
+                                                ON project_fields.sphere_id = field_spheres.sphere_id
+                                            INNER JOIN companies
+                                                ON projects.project_company_id = companies.company_id
+                                            INNER JOIN company_spheres
+                                                ON companies.company_sphere_id = company_spheres.company_sphere_id
+                                            INNER JOIN company_types
+                                                ON companies.company_type_id = company_types.company_type_id;
                                             """,
 
                 "students"              :   """
