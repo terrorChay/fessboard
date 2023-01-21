@@ -7,6 +7,14 @@ query_dict =    {
                                                 projects.project_result AS Результат,
                                                 projects.project_start_date AS `Дата начала`,
                                                 projects.project_end_date AS `Дата окончания`,
+                                                CASE
+                                                    WHEN ISDATE(projects.project_start_date) <> 1
+                                                        THEN projects.project_start_date
+                                                    WHEN MONTH(projects.project_start_date) > 8
+                                                        THEN 'cur - higher'
+                                                    ELSE
+                                                        THEN 'lower - cur'
+                                                END AS 'Академический год',
                                                 companies.company_name AS `Название компании`,
                                                 company_types.company_type AS `Тип компании`,
                                                 company_spheres.company_sphere AS Отрасль,
