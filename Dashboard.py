@@ -10,11 +10,20 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
 #Наборы цветов
-colors = ['#ED1C24','#F85546','#FF7C68','#FF9E8C','#FFBFB1','#FFDFD7']
+colors0 = ['#FF7C68','#FF9E8C','#FFBFB1','#FFDFD7','#F85546','#ED1C24',]
 colors1 = ['#ED1C24','#F2595F','#C9A0DC','#F0DC82','#FFDAB9','#0ABCFF','#556832']
-colors2 = px.colors.qualitative.Dark24
+colors2 = px.colors.qualitative.Light24
 colors3 = ['#ED1C24','#F2595F']
+colors4 = ['#3A42FF','#FB832A','#D0455E','#82CD97','#45B0D0','#7A45D0','#88B1FF','#2227A7']
+colors40 = ['#3A42FF','#45B0D0','#7A45D0','#88B1FF','#2227A7','#FB832A','#D0455E','#82CD97']
+colors5 = ['#ED1C24','#F7A3A6']
+test = ['#5E60CE','#5390D9','#4EA8DE','#48BFE3','#56CFE1','#64DFDF','#72EFDD','#80FFDB','#7400B8','#6930C3',]
+colors6 = ['#FF5744','#F2595F','#C9A0DC','#F0DC82','#FFDAB9','#0ABCFF','#556832']
+
 tr='rgba(0,0,0,0)'
+colors = colors0
+marker = colors[5]
+
 
 font="Source Sans Pro"
 config = {'staticPlot': False,'displayModeBar': False}
@@ -125,7 +134,7 @@ def main():
 # add first bar trace at row = 1, col = 1
             fig.add_trace(go.Bar(x=test_df['Год'], y=test_df['Количество'],
                      name='Проектов',
-                     marker_color = '#ED1C24',
+                     marker_color = marker,
                      opacity=1,
                      marker_line_width=2,
                      text=list(test_df['Количество']),
@@ -173,7 +182,7 @@ def main():
 # add first bar trace at row = 1, col = 1
             fig.add_trace(go.Bar(x=test_df['Год'], y=test_df['Количество'],
                      name='Групп',
-                     marker_color = '#ED1C24',
+                     marker_color = marker,
                      opacity=1,
                      marker_line_width=2,
                      text=list(test_df['Количество']),
@@ -252,23 +261,14 @@ def main():
     col1, col2,col3,col4,col5 = st.columns([1, 2,1,1,1])
     with col1:
         with st.container():
-            st.markdown('**Международных компаний**')
-            delta1 = projects_df.loc[projects_df['Статус'] == 'Завершен']['Статус'].value_counts().sum()
-            st.metric(
-            label       = 'Проектов в работе',
-            value       = int(projects_df.loc[projects_df['Статус'] == 'Активен']['Статус'].value_counts().sum()))
-            st.markdown('**Малый и средний бизнес**')
-            st.metric(
-            label       = 'Проектов в работе',
-            value       = 10)
-    
+            st.markdown('**Количество повторных обращений (топ заказчиков)**')
     with col2:
         with st.container():
             st.markdown('**Рост количества компаний-партнёров (накопительным итогом)**')
             
     with col3:
         with st.container():
-            st.markdown('**Типы компаний (пайчарт)**')
+            st.markdown('**Проекты по типу компании-заказчика**')
             data    = {'Регион': ['Москва', 'Нижний Новгород', 'Казань','Калининград','Сарапул'],'Количество': [10, 3, 1,3,1]}
             events_regions_df = pd.DataFrame(data)
 
@@ -305,7 +305,16 @@ def main():
             st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False}) 
     with col4:
         with st.container():
-            st.markdown('**Топ заказчиков (пайчарт с топ 5 + другие)**')
+            st.markdown('**Международных компаний**')
+            delta1 = projects_df.loc[projects_df['Статус'] == 'Завершен']['Статус'].value_counts().sum()
+            st.metric(
+            label       = 'Проектов в работе',
+            value       = int(projects_df.loc[projects_df['Статус'] == 'Активен']['Статус'].value_counts().sum()))
+            st.markdown('**российских компаний**')
+            st.metric(
+            label       = 'Проектов в работе',
+            value       = 10)
+    
     with col5:
         with st.container():
             st.markdown('**Наши партнёры**')  
@@ -330,7 +339,7 @@ Segezha Xiaomi Schneider Студия имени горького')
 # add first bar trace at row = 1, col = 1
             fig.add_trace(go.Bar(x=test_df['Год'], y=test_df['Количество'],
                      name='Участников',
-                     marker_color = '#ED1C24',
+                     marker_color = marker,
                      opacity=1,
                      marker_line_width=2,
                      text=list(test_df['Количество']),
@@ -409,13 +418,13 @@ Segezha Xiaomi Schneider Студия имени горького')
                 st.plotly_chart(fig, use_container_width=True,config=config)
     with col3:
         with st.container():
-            st.markdown('**Вовлечённость потока**')   
+            st.markdown('**Разделение по курсам**')   
     with col4:
         with st.container():
-            st.markdown('**Вовлечённость потока**')
+            st.markdown('**Доля студентов 4 курса кто хотя бы раз учавствовал в проектах**')
     with col5:
         with st.container():
-            st.markdown('**Наши партнёры**')
+            st.markdown('**Наши партнёры (ВУЗы)**')
     #Ряд интерактивов
     col1, col2 = st.columns([2, 4])
     
