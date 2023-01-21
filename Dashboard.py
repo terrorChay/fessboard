@@ -126,15 +126,19 @@ def main():
     with col2:
         with st.container():
             st.markdown('**Число проектов в год**')
-
-            data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [16, 24, 37,45,63],'Прирост':
-            [16,8,13,8,18]}
-            test_df = pd.DataFrame(data)
+            df = projects_df[['Академический год']].copy()
+            df.dropna(inplace=True)
+            df = df.sort_values('Академический год').value_counts(sort=False).reset_index(name='Количество')
+            df['Темп прироста'] = df['Количество'].pct_change().fill_na(0)
+            data = df
+            # data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [16, 24, 37,45,63],'Прирост':
+            # [16,8,13,8,18]}
+            # test_df = pd.DataFrame(data)
 
             fig = make_subplots(1,1)
 
 # add first bar trace at row = 1, col = 1
-            fig.add_trace(go.Bar(x=test_df['Год'], y=test_df['Количество'],
+            fig.add_trace(go.Bar(x=test_df['Академический год'], y=test_df['Количество'],
                      name='Проектов',
                      marker_color = marker,
                      opacity=1,
