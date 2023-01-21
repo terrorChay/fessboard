@@ -258,9 +258,47 @@ def main():
                 )
 
             st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+    #Ряд логотипов
+    col1, col2,col3,col4,col5,col6 = st.columns([1, 1,1,1,1,1])
 
+    with col1:
+        with st.container():
+            st.image(
+                image = r'img\sber_logo.png',
+                use_column_width = 'auto',
+            )
+    with col2:
+        with st.container():
+            st.image(
+                image = r'img\mik_logo.png',
+                use_column_width = 'auto',
+            )
+    with col3:
+        with st.container():
+            st.image(
+                image = r'img\bosch_logo.png',
+                use_column_width = 'auto',
+            )
+    with col4:
+        with st.container():
+            st.image(
+                image = r'img\schneider_logo.png',
+                use_column_width = 'auto',
+            )
+    with col5:
+        with st.container():
+            st.image(
+                image = r'img\xiaomi_logo.png',
+                use_column_width = 'auto',
+            )
+    with col6:
+        with st.container():
+            st.image(
+                image = r'img\segezha_logo.png',
+                use_column_width = 'auto',
+            )
     # Ряд Компаний-парнёров      
-    col1, col2,col3,col4,col5 = st.columns([1, 2,1,1,1])
+    col1, col2,col3,col4 = st.columns([1, 2,2,1])
     with col1:
         with st.container():
             st.markdown('**Количество повторных обращений (топ заказчиков)**')
@@ -271,20 +309,19 @@ def main():
     with col3:
         with st.container():
             st.markdown('**Проекты по типу компании-заказчика**')
-            data    = {'Регион': ['Москва', 'Нижний Новгород', 'Казань','Калининград','Сарапул'],'Количество': [10, 3, 1,3,1]}
-            events_regions_df = pd.DataFrame(data)
+            data = projects_df['Тип компании']
 
-            fig = px.pie(events_regions_df,
-            values                  = events_regions_df['Количество'],
-            names                   = events_regions_df['Регион'],
+            fig = px.pie(data,
+            values                  = data.value_counts(),
+            names                   = data.value_counts().index,
             color_discrete_sequence = colors,
             hole                    = .4
             )
 
             fig.update_traces(
                 textposition  = 'inside',
-                textinfo      = 'label',
-                hovertemplate = "<b>%{label}.</b> Мероприятий: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+                textinfo      = 'percent',
+                hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
                 textfont_size = 14
                 
                 )
@@ -293,7 +330,7 @@ def main():
                 # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
                 plot_bgcolor            = tr,
                 paper_bgcolor           = tr,
-                #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
+                legend                  = dict(orientation="v",itemwidth=70,yanchor="bottom", y=1.02,xanchor="right",x=1),
                 showlegend              = False,
                 font_family             = font,
                 title_font_family       = font,
@@ -308,7 +345,6 @@ def main():
     with col4:
         with st.container():
             st.markdown('**Международных компаний**')
-            delta1 = projects_df.loc[projects_df['Статус'] == 'Завершен']['Статус'].value_counts().sum()
             st.metric(
             label       = 'Проектов в работе',
             value       = int(projects_df.loc[projects_df['Статус'] == 'Активен']['Статус'].value_counts().sum()))
@@ -317,15 +353,15 @@ def main():
             label       = 'Проектов в работе',
             value       = 10)
     
-    with col5:
-        with st.container():
-            st.markdown('**Наши партнёры**')  
-            st.image(
-                image = r'img\sber_logo.png',
-                use_column_width = 'auto',
-            )
-            st.write('СБЕР Агентство Инноваций Москвы (Московский инновационный кластер) BMW (?)\nBOSCH\
-Segezha Xiaomi Schneider Студия имени горького')
+#     with col5:
+#         with st.container():
+#             st.markdown('**Наши партнёры**')  
+#             st.image(
+#                 image = r'img\sber_logo.png',
+#                 use_column_width = 'auto',
+#             )
+#             st.write('СБЕР Агентство Инноваций Москвы (Московский инновационный кластер) BMW (?)\nBOSCH\
+# Segezha Xiaomi Schneider Студия имени горького')
     
     # Ряд студентов
     col1, col2,col3,col4,col5 = st.columns([1, 2,1,1,1])
