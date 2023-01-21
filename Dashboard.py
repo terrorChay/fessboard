@@ -31,15 +31,19 @@ config = {'staticPlot': False,'displayModeBar': False}
 def main():
     # load data
     with st.spinner('Читаем PMI и PMBOK...'):
-        projects_df = utils.load_projects()
+        projects_df             = utils.load_projects()
     with st.spinner('Происходит аджайл...'):
         students_in_projects_df = utils.load_people_in_projects()
     with st.spinner('Изучаем требования стейкхолдеров...'):
         teachers_in_projects_df = utils.load_people_in_projects(teachers=True)
     with st.spinner('Еще чуть-чуть и прямо в рай...'):
-        students_df = utils.load_students()
+        students_df             = utils.load_students()
     with st.spinner('Нежно обращаемся к базе данных...'):
-        universities_df = utils.load_universities()
+        universities_df         = utils.load_universities()
+    with st.spinner('Собираем встречу выпускников...'):
+        events_df               = utils.load_events()
+    with st.spinner('Советуемся с ChatGPT...'):
+        students_in_events_df   = utils.load_students_in_events()
     # Ряд метрик
     with st.container():
         col1, col2, col3, col4, col5, col6 = st.columns(6)
@@ -75,13 +79,11 @@ def main():
             value       = projects_df['Микро-направление'].nunique(),
             delta       = 'из {} сфер(-ы)'.format(projects_df['Макро-направление'].nunique()),
             delta_color = 'normal')
-        #Отображать количество мероприятий (количество записей из таблицы events)
-        #Дельта - сумма записей из таблицы event_participants (Возможно стоит считать только уникальных, не знаю)
-        delta6 = 1234 #Не готово
+        # Мероприятия
         col6.metric(
             label       = 'Мероприятий проведено',
-            value       = 1234,
-            delta       = f'{delta6} участников',
+            value       = events_df.shape[0],
+            delta       = '{} участников(-а)'.format(students_in_events_df.shape[0]),
             delta_color = 'normal')
     # Ряд проектов
     col1, col2,col3,col5 = st.columns([1, 2,2,1])

@@ -147,7 +147,16 @@ def load_people_in_projects(teachers=False):
         c = 'ID студента'  
     df = query_data(query_dict[a]).merge(query_data(query_dict[b]), on=c, how='left')
     return df
-    
+
+@st.experimental_memo(show_spinner=False)
+def load_students_in_events():
+    df = query_data(query_dict['students_in_events'])
+    return df
+
+@st.experimental_memo(show_spinner=False)
+def load_events():
+    df = query_data(query_dict['events'])
+    return df
 ####################################################################################################################################
 #                                                        DATAFRAME DOWNLOAD UTILS
 ####################################################################################################################################

@@ -30,6 +30,14 @@ query_dict =    {
                                             INNER JOIN company_types
                                                 ON companies.company_type_id = company_types.company_type_id;
                                             """,
+                "events"                :   """
+                                            SELECT
+                                                events.event_id AS `ID мероприятия`,
+                                                regions.region AS Регион
+                                            FROM events
+                                            INNER JOIN regions
+                                                ON events.event_region_id = regions.region_id;
+                                            """,
 
                 "students"              :   """
                                             SELECT
@@ -169,5 +177,28 @@ query_dict =    {
                                             FROM project_fields
                                             LEFT JOIN
                                                 field_spheres ON project_fields.sphere_id   = field_spheres.sphere_id;
+                                            """,
+
+                "students_in_events"    :   """
+                                            SELECT
+                                                students.student_surname AS `Фамилия студента`,
+                                                students.student_name AS `Имя студента`,
+                                                students.student_midname AS `Отчество студента`,
+                                                events.event_name AS `Название мероприятия`,
+                                                students.student_id AS `ID студента`,
+                                                events.event_id AS `ID мероприятия`,
+                                                regions.region AS Регион,
+                                                events.event_start_date AS `Дата начала мероприятия`,
+                                                events.event_end_date AS `Дата окончания мероприятия`,
+                                                events.event_description AS `Описание мероприятия`,
+                                                events.is_frozen AS Заморожен,
+                                                events.event_region_id AS `ID региона`
+                                            FROM participants_in_events
+                                            INNER JOIN events
+                                                ON participants_in_events.event_id = events.event_id
+                                            INNER JOIN students
+                                                ON participants_in_events.student_id = students.student_id
+                                            INNER JOIN regions
+                                                ON events.event_region_id = regions.region_id;
                                             """,
 }
