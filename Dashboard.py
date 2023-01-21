@@ -129,8 +129,8 @@ def main():
             df = projects_df[['Академический год']].copy()
             df.dropna(inplace=True)
             df = df.sort_values('Академический год').value_counts(sort=False).reset_index(name='Количество')
-            df['Темп прироста'] = df['Количество'].pct_change().fill_na(0)
-            data = df
+            df['Темп прироста'] = df['Количество'].pct_change().fillna(0)
+            test_df = df
             # data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [16, 24, 37,45,63],'Прирост':
             # [16,8,13,8,18]}
             # test_df = pd.DataFrame(data)
@@ -173,7 +173,7 @@ def main():
                  )
             fig['data'][0].width=0.7
 # add first scatter trace at row = 1, col = 1
-            fig.add_trace(go.Scatter(x=test_df['Год'], y=test_df['Прирост'], line=dict(color='#07C607'), name='Прирост'),
+            fig.add_trace(go.Scatter(x=test_df['Академический год'], y=test_df['Темп прироста'], line=dict(color='#07C607'), name='Темп прироста'),
               row = 1, col = 1)
             st.plotly_chart(fig,use_container_width=True,config=config)
     with col3:
