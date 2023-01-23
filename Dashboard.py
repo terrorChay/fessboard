@@ -85,9 +85,10 @@ def main():
             value       = events_df.shape[0],
             delta       = '{} участников(-а)'.format(students_in_events_df.shape[0]),
             delta_color = 'normal')
-    # Ряд проектов
+    # Ряд графиков о проектах
     col1, col2,col3,col5 = st.columns([1, 2,2,1])
     with col1:
+        ## Распределение грейдов
         with st.container():
             st.markdown('**Грейды проектов**')
             a   = projects_df['Грейд']
@@ -124,65 +125,75 @@ def main():
 
             st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
     with col2:
+        ## Число и темп прироста проектов
         with st.container():
-            st.markdown('**Число проектов в год**')
+            st.markdown('**Число и темп прироста проектов**')
             df = projects_df[['Академический год']].copy()
             df.dropna(inplace=True)
             df = df.sort_values('Академический год').value_counts(sort=False).reset_index(name='Количество')
             df['Темп прироста'] = df['Количество'].pct_change().fillna(0)
-            test_df = df
-            # data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [16, 24, 37,45,63],'Прирост':
-            # [16,8,13,8,18]}
-            # test_df = pd.DataFrame(data)
+            test_df = df.iloc[-5:]
 
-            fig = make_subplots(1,1)
+            # Figure with two Y axes
+            fig = make_subplots(specs=[[{"secondary_y": True}]])
 
-# add first bar trace at row = 1, col = 1
-            fig.add_trace(go.Bar(x=test_df['Академический год'], y=test_df['Количество'],
-                     name='Проектов',
-                     marker_color = marker,
-                     opacity=1,
-                     marker_line_width=2,
-                     text=list(test_df['Количество']),
-                     hovertext= ''
-                     
-),
-              row = 1, col = 1)
+            # bar plot (secondary_y = False)
+            fig.add_trace(go.Bar(
+                    x                   = test_df['Академический год'],
+                    y                   = test_df['Количество'],
+                    width               = 0.7,
+                    name                = 'Проектов',
+                    marker_color        = marker,
+                    opacity             = 1,
+                    marker_line_width   = 2,
+                    text                = list(test_df['Количество']),
+                    ),
+                secondary_y = False)
             fig.update_layout(
-                 font_family   = font,
-                 font_size     = 13,
-                 paper_bgcolor = tr,
-                 plot_bgcolor  = tr,
-                 margin        = dict(t=0, l=0, r=0, b=0),
-                 yaxis_title     = "",
-                 xaxis_title     = "",
-                 width = 10,
-                 height = 220,
-                 xaxis_visible   = True,
-                 yaxis_visible   = True,
-                 xaxis=dict(showgrid=False), 
-                 yaxis=dict(showgrid=False),
-                 showlegend       = False,
-                 
+                 font_family    = font,
+                 font_size      = 13,
+                 paper_bgcolor  = tr,
+                 plot_bgcolor   = tr,
+                 margin         = dict(t=0, l=0, r=0, b=0),
+                 yaxis_title    = "",
+                 xaxis_title    = "",
+                 width          = 10,
+                 height         = 220,
+                 xaxis_visible  = True,
+                 yaxis_visible  = True,
+                 xaxis          = dict(showgrid=False), 
+                 yaxis          = dict(showgrid=False),
+                 showlegend     = False
                  )
             fig.update_traces(
-                textfont_size = 14,
-                 textangle     = 0,
-                 textposition  = "inside",
-                 cliponaxis    = False,
+                textfont_size   = 14,
+                 textangle      = 0,
+                 textposition   = "auto",
+                 cliponaxis     = False,
                  )
-            fig['data'][0].width=0.7
-# add first scatter trace at row = 1, col = 1
-            fig.add_trace(go.Scatter(x=test_df['Академический год'], y=test_df['Темп прироста'], line=dict(color='#07C607'), name='Темп прироста'),
-              row = 1, col = 1)
+            # fig['data'][0].width=0.7
+            # scatter plot (secondary_y = True)
+            fig.add_trace(go.Scatter(
+                    x       = test_df['Академический год'],
+                    y       = test_df['Темп прироста'],
+                    line    = dict(color='#07C607'),
+                    name    = 'Темп прироста',
+                    ),
+                secondary_y = True)
+            fig.update_yaxes(
+                hoverformat = ',.0%',
+                tickformat  = ',.0%',
+                secondary_y = True
+            )
+
             st.plotly_chart(fig,use_container_width=True,config=config)
     with col3:
+        ## Число проектных групп в год
         with st.container():
             st.markdown('**Число проектных групп в год**')  
             data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [17, 28, 42,50,70],'Прирост':
             [17,11,14,8,20]}
             test_df = pd.DataFrame(data)
-
             fig = make_subplots(1,1)
 
 # add first bar trace at row = 1, col = 1
@@ -224,8 +235,8 @@ def main():
             fig.add_trace(go.Scatter(x=test_df['Год'], y=test_df['Прирост'], line=dict(color='#07C607'), name='Прирост'),
               row = 1, col = 1)
             st.plotly_chart(fig,use_container_width=True,config=config)
-
     with col5:
+        ## Регионы мероприятий
         with st.container():
             st.markdown('**Регионы мероприятий**')
             data    = {'Регион': ['Москва', 'Нижний Новгород', 'Казань','Калининград','Сарапул'],'Количество': [10, 3, 1,3,1]}
@@ -262,9 +273,8 @@ def main():
                 )
 
             st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
-    #Ряд логотипов
+    # Ряд логотипов
     col1, col2,col3,col4,col5,col6 = st.columns([1, 1,1,1,1,1])
-
     with col1:
         with st.container():
             st.image(
