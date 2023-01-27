@@ -319,6 +319,7 @@ def main():
     with col2:
         with st.container():
             st.markdown('**Рост количества компаний-партнёров (накопительным итогом)**')
+              
             
     with col3:
         with st.container():
@@ -381,7 +382,7 @@ def main():
     col1, col2,col3,col4,col5 = st.columns([1, 2,1,1,1])
     with col1:
         with st.container():
-            st.markdown('**Число участников проектной деятельности в год**')
+            st.markdown('**Участников в проектах**')
 
             data    = {'Год': ['2020-2021','2021-2022','2022-2023'],'Количество': [370,450,630],'Прирост':
             [130,80,180]}
@@ -460,7 +461,7 @@ def main():
                     font_family      = font,
                     plot_bgcolor     = tr,
                     # font_size        = 7,
-                    height = 220,
+                    height = 160,
                     margin           = dict(t=0, l=0, r=0, b=0),
                     xaxis_visible   = False,
                     )
@@ -470,10 +471,72 @@ def main():
                 st.plotly_chart(fig, use_container_width=True,config=config)
     with col3:
         with st.container():
-            st.markdown('**Разделение по курсам**')   
+            st.markdown('**Разделение по курсам**')
+            fig = px.pie(a,
+            values                  = a.value_counts(),
+            names                   = a.value_counts().index,
+            color_discrete_sequence = colors,
+            hole                    = .4
+            )
+
+            fig.update_traces(
+                textposition  = 'inside',
+                textinfo      = 'label',
+                hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+                textfont_size = 14
+                
+                )
+
+            fig.update_layout(
+                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
+                plot_bgcolor            = tr,
+                paper_bgcolor           = tr,
+                #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
+                showlegend              = False,
+                font_family             = font,
+                title_font_family       = font,
+                title_font_color        = "white",
+                legend_title_font_color = "white",
+                height                  = 220,
+                margin                  = dict(t=0, l=0, r=0, b=0),
+                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
+                )
+
+            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})  
     with col4:
         with st.container():
-            st.markdown('**Доля студентов 4 курса кто хотя бы раз учавствовал в проектах**')
+            st.markdown('**Доля студентов 4 курса**')
+            fig = px.pie(
+            values                  = [94,27],
+            names                   = ['Участвовали в проектах','Не участвовали в проектах'],
+            color_discrete_sequence = colors,
+            hole                    = .6
+            )
+
+            fig.update_traces(
+                textposition  = 'inside',
+                textinfo      = 'percent',
+                hovertemplate = "<b>%{label}.</b><br><b>%{percent}</b> от студентов 4 курса",
+                textfont_size = 14
+                
+                )
+
+            fig.update_layout(
+                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
+                plot_bgcolor            = tr,
+                paper_bgcolor           = tr,
+                #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
+                showlegend              = False,
+                font_family             = font,
+                title_font_family       = font,
+                title_font_color        = "white",
+                legend_title_font_color = "white",
+                height                  = 220,
+                margin                  = dict(t=0, l=0, r=0, b=0),
+                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
+                )
+
+            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
     with col5:
         with st.container():
             st.markdown('**Наши партнёры (ВУЗы)**')
@@ -547,39 +610,6 @@ def main():
             fig['data'][0].width=0.4
             # display the plot
             chart_container.plotly_chart(fig, use_container_width=True, config=config)
-
-    col1, col2 = st.columns([1,1])
-    with col1:
-        with st.container():
-            data = projects_df['Тип компании']
-            data1 = projects_df['Отрасль']
-            fig = make_subplots(1,2,specs=[[{'type':'domain'}, {'type':'domain'}]],
-                    )
-            fig.add_trace(go.Pie(values= data.value_counts(),labels= data.value_counts().index, marker_colors=colors,hole=.4),1,1)
-            fig.add_trace(go.Pie(values= data1.value_counts(),labels= data1.value_counts().index, marker_colors=colors,hole=.4),1,2)
-            fig.update_layout(
-                plot_bgcolor            = tr,
-                paper_bgcolor           = tr,
-                #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
-                showlegend              = False,
-                font_family             = font,
-                title_font_family       = font,
-                legend_title_font_color = "white",
-                height                  = 220,
-                font_size     = 18,
-                margin                  = dict(t=0, l=0, r=0, b=0),
-                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
-                )
-            fig.update_traces(
-                textposition  = 'inside',
-                textinfo      = 'percent',
-                hovertemplate = "Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от проектов в работе",
-                textfont_size = 18
-                
-                )
-
-            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
-
 
 if __name__ == "__main__":
     # page setup

@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit import session_state as session
-import streamlit_setup as setup
+# import streamlit_setup as setup
+import utils as utils
 import pandas as pd
 import numpy as np
 import re
@@ -16,7 +17,27 @@ from pandas.api.types import (
 import plotly.express as px
 from connectdb import mysql_conn
 from datetime import date
- 
+
+#Наборы цветов
+colors0 = ['#FF7C68','#FF9E8C','#FFBFB1','#FFDFD7','#F85546','#ED1C24',]
+colors1 = ['#ED1C24','#F2595F','#C9A0DC','#F0DC82','#FFDAB9','#0ABCFF','#556832']
+colors2 = px.colors.qualitative.Light24
+colors3 = ['#ED1C24','#F2595F']
+colors4 = ['#3A42FF','#FB832A','#D0455E','#82CD97','#45B0D0','#7A45D0','#88B1FF','#2227A7']
+colors40 = ['#3A42FF','#45B0D0','#7A45D0','#88B1FF','#2227A7','#FB832A','#D0455E','#82CD97']
+colors5 = ['#ED1C24','#F7A3A6']
+test = ['#5E60CE','#5390D9','#4EA8DE','#48BFE3','#56CFE1','#64DFDF','#72EFDD','#80FFDB','#7400B8','#6930C3',]
+colors6 = ['#FF5744','#F2595F','#C9A0DC','#F0DC82','#FFDAB9','#0ABCFF','#556832']
+
+tr='rgba(0,0,0,0)'
+colors = colors0
+marker = colors[5]
+
+
+font="Source Sans Pro"
+config = {'staticPlot': False,'displayModeBar': False}
+
+
  # Database Query
 @st.experimental_memo(ttl=600)
 def query_data(query):
@@ -158,15 +179,28 @@ def convert_df(df: pd.DataFrame, to_excel=False):
 # App launch
 def run():
     # Load dataframe
-    projects_df = load_projects()
+    # projects_df = load_projects()
     st.title('Карточка студента')
     st.write('''
             #### На данной странице можно ознакомиться со всей информацией по выбранному студенту!
             ''')
     # Draw search filters and return filtered df
     st.error('В разработке...')
+    with st.container():
+        col1, col2 = st.columns([1,1])
+        with col1:
+            with st.container():
+                st.markdown('**Распределение проектов студента по макронаправлениям**')
+                data = {'sphere' : ['HR','Data Science','Management','Marketing','Development','Design','Banking&Finance'],
+            'number' : [1,2,1,2,1,0,0]}
+                df = pd.DataFrame(data)
+                fig = px.line_polar(df,r='number',theta='sphere',line_close=True,color_discrete_sequence=colors)
+                fig.update_traces(fill='toself',mode='lines+markers',cliponaxis=False)
+                fig.update_layout(
+                    font_family=font,paper_bgcolor=tr,plot_bgcolor = tr, height = 200)
+                st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})   
 
 if __name__ == "__main__":
-    setup.page_config(layout='centered', title='Поиск проектов')
-    setup.remove_footer()
+    utils.page_config(layout='centered', title='Поиск проектов')
+    utils.remove_footer()
     run()
