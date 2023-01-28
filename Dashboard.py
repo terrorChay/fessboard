@@ -311,6 +311,10 @@ def main():
                 image = r'img\segezha_logo.png',
                 use_column_width = 'auto',
             )
+    with st.container():
+        st.image(
+                image = r'img\companies.png',
+                use_column_width = 'auto',)
     # Ряд Компаний-парнёров      
     col1, col2,col3,col4 = st.columns([1, 2,2,1])
     with col1:

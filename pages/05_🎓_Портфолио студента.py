@@ -187,7 +187,7 @@ def run():
     # Draw search filters and return filtered df
     st.error('В разработке...')
     with st.container():
-        col1, col2 = st.columns([1,1])
+        col1, col2 = st.columns([1,2])
         with col1:
             with st.container():
                 st.markdown('**Распределение проектов студента по макронаправлениям**')
@@ -197,7 +197,12 @@ def run():
                 fig = px.line_polar(df,r='number',theta='sphere',line_close=True,color_discrete_sequence=colors)
                 fig.update_traces(fill='toself',mode='lines+markers',cliponaxis=False)
                 fig.update_layout(
-                    font_family=font,paper_bgcolor=tr,plot_bgcolor = tr, height = 200)
+                    font_family=font,
+                    font_size = 10,
+                    paper_bgcolor=tr,
+                    plot_bgcolor = tr,
+                    height = 320,
+                    yaxis_visible   = False,)
                 st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})   
 
 if __name__ == "__main__":
