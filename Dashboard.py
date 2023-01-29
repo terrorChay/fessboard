@@ -33,9 +33,9 @@ def main():
     with st.spinner('Читаем PMI и PMBOK...'):
         projects_df             = utils.load_projects()
     with st.spinner('Происходит аджайл...'):
-        students_in_projects_df = utils.load_people_in_projects()
+        students_in_projects_df = utils.load_students_in_projects()
     with st.spinner('Изучаем требования стейкхолдеров...'):
-        teachers_in_projects_df = utils.load_people_in_projects(teachers=True)
+        teachers_in_projects_df = utils.load_teachers_in_projects()
     with st.spinner('Еще чуть-чуть и прямо в рай...'):
         students_df             = utils.load_students()
     with st.spinner('Нежно обращаемся к базе данных...'):

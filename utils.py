@@ -127,16 +127,8 @@ def load_students_in_project(project_id):
     return df
 
 @st.experimental_memo(show_spinner=False)
-def load_people_in_projects(teachers=False):
-    if teachers:
-        a = 'teachers_in_projects'
-        b = 'teachers'
-        c = 'ID преподавателя'
-    else:
-        a = 'students_in_projects'
-        b = 'students'
-        c = 'ID студента'  
-    df = query_data(query_dict[a]).merge(query_data(query_dict[b]), on=c, how='left')
+def load_teachers_in_projects():
+    df = query_data(query_dict['teachers_in_projects']).merge(query_data(query_dict['teachers']), on='ID преподавателя', how='left')
     # df.dropna(axis=0, subset=['Команда'], inplace=True)
     df.set_index('ID проекта', drop=True, inplace=True)
     return df
