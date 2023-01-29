@@ -199,8 +199,8 @@ def run():
                         fig.update_layout(
                             font_family=font,
                             font_size = 10,
-                            paper_bgcolor=tr,
-                            plot_bgcolor = tr,
+                            paper_bgcolor = tr,
+                            plot_bgcolor  = tr,
                             height = 320,
                             yaxis_visible   = False,)
                         st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})   
