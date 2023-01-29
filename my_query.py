@@ -14,6 +14,7 @@ query_dict =    {
                                                         THEN CONCAT_WS(' - ', YEAR(projects.project_start_date), YEAR(projects.project_start_date)+1)
                                                     ELSE CONCAT_WS(' - ', YEAR(projects.project_start_date)-1, YEAR(projects.project_start_date))
                                                 END AS `Академический год`,
+                                                projects.project_company_id AS `ID компании`,
                                                 companies.company_name AS `Название компании`,
                                                 company_types.company_type AS `Тип компании`,
                                                 company_spheres.company_sphere AS Отрасль,
@@ -111,32 +112,32 @@ query_dict =    {
                                                 ON universities.university_id = T0.region_id;
                                             """,
 
-                "students_in_projects"  :   """
-                                            SELECT
-                                                students_in_projects.project_id AS 'ID проекта',
-                                                students_in_projects.student_id AS 'ID студента',
-                                                T1.project_end_date AS 'Дата окончания',
-                                                CASE
-                                                    WHEN
-                                                        T1.is_frozen = 1
-                                                    THEN 'Заморожен'
-                                                    WHEN
-                                                        T1.is_frozen != 1 AND (DAYNAME(T1.project_end_date) IS NULL OR DATE(T1.project_end_date) >= CURDATE())
-                                                    THEN 'Активен' 
-                                                    ELSE 'Завершен'
-                                                END AS 'Статус',
-                                                students_in_projects.team AS 'Команда',
-                                                students_in_projects.is_curator AS 'Куратор'
-                                            FROM students_in_projects
-                                            LEFT JOIN   (
-                                                            SELECT 
-                                                                projects.project_id,
-                                                                projects.is_frozen,
-                                                                projects.project_end_date
-                                                            FROM projects 
-                                                        ) AS T1
-                                                ON students_in_projects.project_id = T1.project_id;
-                                            """,
+                # "students_in_projects"  :   """
+                #                             SELECT
+                #                                 students_in_projects.project_id AS 'ID проекта',
+                #                                 students_in_projects.student_id AS 'ID студента',
+                #                                 T1.project_end_date AS 'Дата окончания',
+                #                                 CASE
+                #                                     WHEN
+                #                                         T1.is_frozen = 1
+                #                                     THEN 'Заморожен'
+                #                                     WHEN
+                #                                         T1.is_frozen != 1 AND (DAYNAME(T1.project_end_date) IS NULL OR DATE(T1.project_end_date) >= CURDATE())
+                #                                     THEN 'Активен' 
+                #                                     ELSE 'Завершен'
+                #                                 END AS 'Статус',
+                #                                 students_in_projects.team AS 'Команда',
+                #                                 students_in_projects.is_curator AS 'Куратор'
+                #                             FROM students_in_projects
+                #                             LEFT JOIN   (
+                #                                             SELECT 
+                #                                                 projects.project_id,
+                #                                                 projects.is_frozen,
+                #                                                 projects.project_end_date
+                #                                             FROM projects 
+                #                                         ) AS T1
+                #                                 ON students_in_projects.project_id = T1.project_id;
+                #                             """,
                 "managers_in_projects"  :   """
                                             SELECT
                                                 managers_in_projects.project_id AS 'ID проекта',
@@ -208,59 +209,58 @@ query_dict =    {
                                             INNER JOIN regions
                                                 ON events.event_region_id = regions.region_id;
                                             """,
-                # "studinpr": """SELECT
-                #                 projects.project_id AS `ID проекта`,
-                #                 students.student_id AS `ID студента`,
-                #                 projects.project_end_date AS `Дата окончания`,
-                #                 projects.is_frozen AS Статус,
-                #                 students_in_projects.team AS Команда,
-                #                 students_in_projects.is_curator AS Куратор,
-                #                 CONCAT_WS(
-                #                     ' ',
-                #                     students.student_surname,
-                #                     students.student_name,
-                #                     students.student_midname) AS 'ФИО студента',
-                #                 CASE WHEN students.student_id IN (SELECT
-                #                         managers_in_projects.student_id
-                #                         FROM managers_in_projects) THEN 1 ELSE 0 END AS `Опыт менеджера`,
-                #                 CASE WHEN students.student_id IN (SELECT
-                #                         students_in_projects.student_id
-                #                         FROM students_in_projects
-                #                         WHERE students_in_projects.is_curator = 1) THEN 1 ELSE 0 END AS `Опыт куратора`,
-                #                 Бакалавры.university_name AS Бакалавриат,
-                #                 Бакалавры.region AS `Бак. регион`,
-                #                 students.bachelors_start_year AS `Бак. год`,
-                #                 Магистры.university_name AS Магистратура,
-                #                 Магистры.region AS `Маг. регион`,
-                #                 students.masters_start_year AS `Маг. год`,
-                #                 students.is_banned AS Отстранен
-                #                 FROM students_in_projects
-                #                 LEFT OUTER JOIN projects
-                #                     ON students_in_projects.project_id = projects.project_id
-                #                 LEFT OUTER JOIN students
-                #                     ON students_in_projects.student_id = students.student_id
-                #                 LEFT OUTER JOIN (SELECT
-                #                     students.student_id,
-                #                     universities.university_name,
-                #                     regions.region
-                #                     FROM students
-                #                     INNER JOIN universities
-                #                         ON students.bachelors_university_id = universities.university_id
-                #                     INNER JOIN regions
-                #                         ON universities.university_region_id = regions.region_id) Бакалавры
-                #                     ON students.student_id = Бакалавры.student_id
-                #                 LEFT OUTER JOIN (SELECT
-                #                     students.student_id,
-                #                     universities.university_name,
-                #                     regions.region
-                #                     FROM students
-                #                     INNER JOIN universities
-                #                         ON students.masters_university_id = universities.university_id
-                #                     INNER JOIN regions
-                #                         ON universities.university_region_id = regions.region_id) Магистры
-                #                     ON students.student_id = Магистры.student_id
-                #                 LEFT OUTER JOIN managers_in_projects
-                #                     ON projects.project_id = managers_in_projects.project_id;
-                #             """,
+                "students_in_projects"  :   """
+                                        SELECT
+                                        projects.project_id AS `ID проекта`,
+                                        students.student_id AS `ID студента`,
+                                        projects.project_end_date AS `Дата окончания`,
+                                        projects.is_frozen AS Статус,
+                                        students_in_projects.team AS Команда,
+                                        students_in_projects.is_curator AS Куратор,
+                                        CONCAT_WS(
+                                        ' ',
+                                        students.student_surname,
+                                        students.student_name,
+                                        students.student_midname) AS 'ФИО студента',
+                                        CASE WHEN students.student_id IN (SELECT
+                                                managers_in_projects.student_id
+                                                FROM managers_in_projects) THEN 1 ELSE 0 END AS `Опыт менеджера`,
+                                        CASE WHEN students.student_id IN (SELECT
+                                                students_in_projects.student_id
+                                                FROM students_in_projects
+                                                WHERE students_in_projects.is_curator = 1) THEN 1 ELSE 0 END AS `Опыт куратора`,
+                                        Бакалавры.university_name AS Бакалавриат,
+                                        Бакалавры.region AS `Бак. регион`,
+                                        students.bachelors_start_year AS `Бак. год`,
+                                        Магистры.university_name AS Магистратура,
+                                        Магистры.region AS `Маг. регион`,
+                                        students.masters_start_year AS `Маг. год`,
+                                        students.is_banned AS Отстранен
+                                        FROM students_in_projects
+                                        LEFT OUTER JOIN projects
+                                            ON students_in_projects.project_id = projects.project_id
+                                        LEFT OUTER JOIN students
+                                            ON students_in_projects.student_id = students.student_id
+                                        LEFT OUTER JOIN (SELECT
+                                            students.student_id,
+                                            universities.university_name,
+                                            regions.region
+                                            FROM students
+                                            INNER JOIN universities
+                                                ON students.bachelors_university_id = universities.university_id
+                                            INNER JOIN regions
+                                                ON universities.university_region_id = regions.region_id) Бакалавры
+                                            ON students.student_id = Бакалавры.student_id
+                                        LEFT OUTER JOIN (SELECT
+                                            students.student_id,
+                                            universities.university_name,
+                                            regions.region
+                                            FROM students
+                                            INNER JOIN universities
+                                                ON students.masters_university_id = universities.university_id
+                                            INNER JOIN regions
+                                                ON universities.university_region_id = regions.region_id) Магистры
+                                            ON students.student_id = Магистры.student_id;
+                                            """,
                 
 }

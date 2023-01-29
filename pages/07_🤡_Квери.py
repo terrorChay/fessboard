@@ -21,6 +21,9 @@ def run():
             df = pd.read_sql(query, conn)
         st.dataframe(df)
 
+    k = utils.load_students_in_projects()
+    k
+
 if __name__ == "__main__":
     utils.page_config(layout='wide', title='Поиск проектов')
     utils.load_local_css('css/project.css')

@@ -113,7 +113,7 @@ def load_companies():
 
 @st.experimental_memo(show_spinner=False)
 def load_students_in_projects():
-    df = query_data(query_dict['students_in_projects']).merge(query_data(query_dict['students']), on='ID студента', how='left')
+    df = query_data(query_dict['students_in_projects'])
     df.dropna(axis=0, subset=['Команда', 'ID студента'], inplace=True)
     df['ID студента'] = df['ID студента'].astype(int)
     df['ID проекта'] = df['ID проекта'].astype(int)
