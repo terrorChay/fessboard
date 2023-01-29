@@ -30,49 +30,8 @@ tr='rgba(0,0,0,0)'
 colors = colors0
 marker = colors[5]
 
-
 font="Source Sans Pro"
 config = {'staticPlot': False,'displayModeBar': False}
-
-
- # Database Query
-@st.experimental_memo(ttl=600)
-def query_data(query):
-    with mysql_conn() as conn:
-        df = pd.read_sql(query, conn)
-    return df
-
-# Load projects dataset
-@st.experimental_memo
-def load_projects():
-    query   =   """
-                SELECT
-                    projects.project_id 'ID',
-                    companies.company_name 'Заказчик',
-                    company_types.company_type 'Тип компании',
-                    projects.project_name 'Название',
-                    projects.project_description 'Описание',
-                    projects.project_result 'Результат',
-                    projects.project_start_date 'Дата начала',
-                    projects.project_end_date 'Дата окончания',
-                    project_grades.grade 'Грейд',
-                    project_fields.field 'Направление',
-                    projects.is_frozen 'Заморожен'
-                FROM projects 
-                LEFT JOIN project_grades
-                    ON projects.project_grade   = project_grades.grade_id
-                LEFT JOIN project_fields
-                    ON projects.project_field   = project_fields.field_id
-                LEFT JOIN (companies
-                            LEFT JOIN company_types
-                                ON companies.company_type = company_types.company_type_id)
-                    ON projects.project_company = companies.company_id;
-                """
-    projects_df = query_data(query)
-    projects_df['Дата окончания']   = pd.to_datetime(projects_df['Дата окончания'], format='%Y-%m-%d')
-    projects_df['Дата начала']      = pd.to_datetime(projects_df['Дата начала'], format='%Y-%m-%d')
-    projects_df['ID']               = pd.to_numeric(projects_df['ID'])
-    return projects_df
 
 # Apply search filters and return filtered dataset
 def search_dataframe(df: pd.DataFrame, label='Поиск') -> pd.DataFrame:
@@ -198,32 +157,8 @@ def run():
         students_in_projects_df = utils.load_students_in_projects()
     with st.spinner('Еще чуть-чуть и прямо в рай...'):
         students_df             = utils.load_students()
-    # Load dataframe
-    # projects_df = load_projects()
-    st.title('Карточка студента')
-    st.write('''
-            #### На данной странице можно ознакомиться со всей информацией по выбранному студенту!
-            ''')
-    # Draw search filters and return filtered df
-    st.error('В разработке...')
-    with st.container():
-        col1, col2 = st.columns([1,2])
-        with col1:
-            with st.container():
-                st.markdown('**Распределение проектов студента по макронаправлениям**')
-                data = {'sphere' : ['HR','Data Science','Management','Marketing','Development','Design','Banking&Finance'],
-            'number' : [1,2,1,2,1,0,0]}
-                df = pd.DataFrame(data)
-                fig = px.line_polar(df,r='number',theta='sphere',line_close=True,color_discrete_sequence=colors)
-                fig.update_traces(fill='toself',mode='lines+markers',cliponaxis=False)
-                fig.update_layout(
-                    font_family=font,
-                    font_size = 10,
-                    paper_bgcolor=tr,
-                    plot_bgcolor = tr,
-                    height = 320,
-                    yaxis_visible   = False,)
-                st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})   
+    with st.spinner('Звоним в деканат...'):
+        fields_df               = utils.load_fields()
 
     st.title('Портфолио студента')
     st.write('''
@@ -250,6 +185,25 @@ def run():
             if curated_ids.shape[0] > 0:
                 curated_projects_df = projects_df.loc[projects_df['ID проекта'].isin(curated_ids)]
                 tab2.dataframe(curated_projects_df)
+            # Spider chart
+            with st.container():
+                col1, col2 = st.columns([1,2])
+                with col1:
+                    with st.container():
+                        st.markdown('**Распределение проектов студента по макронаправлениям**')
+                        data = projects_df.loc[projects_df['ID проекта'].isin(projects_with_student_df['ID проекта'])]['Макро-направление'].value_counts().reset_index(name='Количество')
+                        data = data.rename(columns={'index':'Макро'})
+                        data = data.drop_duplicates().merge(fields_df['Макро'].drop_duplicates(), on='Макро', how='right').fillna(0)
+                        fig = px.line_polar(data,r='Количество',theta='Макро',line_close=True,color_discrete_sequence=colors)
+                        fig.update_traces(fill='toself',mode='lines+markers',cliponaxis=False)
+                        fig.update_layout(
+                            font_family=font,
+                            font_size = 10,
+                            paper_bgcolor=tr,
+                            plot_bgcolor = tr,
+                            height = 320,
+                            yaxis_visible   = False,)
+                        st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})   
         else:
             st.warning('Проекты не найдены')
     else:

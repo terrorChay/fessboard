@@ -154,6 +154,10 @@ def load_events():
 @st.experimental_memo(show_spinner=False)
 def load_universities():
     return query_data(query_dict['universities'])
+
+@st.experimental_memo(show_spinner=False)
+def load_fields():
+    return query_data(query_dict['project_fields'])
 ####################################################################################################################################
 #                                                        DATAFRAME DOWNLOAD UTILS
 ####################################################################################################################################
