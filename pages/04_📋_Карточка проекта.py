@@ -239,7 +239,7 @@ def run():
                     for group_idx in unique_groups_idx:
                         st.text(f'Проектная команда {group_counter+1}')
                         students_in_the_group   = students[students['Команда'] == group_idx]
-                        for i in students_in_the_group[['ФИО студента', 'isCurator']].values:
+                        for i in students_in_the_group[['ФИО студента', 'Опыт куратора']].values:
                             if i[1] == 1:
                                 st.caption(f':bust_in_silhouette: {i[0]} (Куратор)')
                             else:
