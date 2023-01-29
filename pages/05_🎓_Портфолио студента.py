@@ -185,7 +185,7 @@ def run():
             if curated_ids.shape[0] > 0:
                 curated_projects_df = projects_df.loc[projects_df['ID проекта'].isin(curated_ids)]
                 tab2.dataframe(curated_projects_df)
-            # Spider chart
+            # Radar chart
             with st.container():
                 col1, col2 = st.columns([1,2])
                 with col1:
