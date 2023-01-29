@@ -193,7 +193,7 @@ def run():
                         st.markdown('**Распределение проектов студента по макронаправлениям**')
                         data = projects_df.loc[projects_df['ID проекта'].isin(projects_with_student_df['ID проекта'])]['Макро-направление'].value_counts().reset_index(name='Количество')
                         data = data.rename(columns={'index':'Макро'})
-                        data = data.drop_duplicates().merge(fields_df['Макро'].drop_duplicates(), on='Макро', how='right').fillna(0)
+                        data = data.drop_duplicates().merge(fields_df['Макро'].drop_duplicates(), on='Макро', how='right').fillna(0).sort_values(by='Количество')
                         fig = px.line_polar(data,r='Количество',theta='Макро',line_close=True,color_discrete_sequence=colors)
                         fig.update_traces(fill='toself',mode='lines+markers',cliponaxis=False)
                         fig.update_layout(
