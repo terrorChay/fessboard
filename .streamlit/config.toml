@@ -1,9 +1,7 @@
 [theme]
-base="dark"
-primaryColor="#ed1c24"
-backgroundColor="#0e1117"
-secondaryBackgroundColor="#31333F"
-textColor="#fafafa"
+base="light"
+backgroundColor="#f3f4f6"
+secondaryBackgroundColor="#e5e7eb"
 font="sans serif"
 
 # Below are all the sections and options you can have in ~/.streamlit/config.toml.

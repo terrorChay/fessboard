@@ -46,12 +46,8 @@ def remove_table_indice():
                 """, unsafe_allow_html=True)
 
 # set logo
-def set_logo(dark=False):
-    if dark:
-        logo_url = 'https://github.com/terrorChay/FESSBoard/blob/master/img/logo_dark.png?raw=true'
-    else:
-        logo_url = 'https://github.com/terrorChay/FESSBoard/blob/master/img/logo_light.png?raw=true'
-
+def set_logo():
+    logo_url = 'https://github.com/terrorChay/FESSBoard/blob/master/img/logo_dark.png?raw=true'
     st.markdown(
         f"""
         <style>
@@ -108,7 +104,7 @@ def load_projects():
 
 @st.experimental_memo(show_spinner=False)
 def load_students():
-    return query_data(query_dict['students'])
+    return query_data(query_dict['students']).sort_values(by=['ФИО студента'])
 
 @st.experimental_memo(show_spinner=False)
 def load_companies():
@@ -116,16 +112,11 @@ def load_companies():
     return df
 
 @st.experimental_memo(show_spinner=False)
-def load_students_in_projects(all=True, selected_projects: pd.DataFrame = None):
-    # Load data from database
+def load_students_in_projects():
     df = query_data(query_dict['students_in_projects']).merge(query_data(query_dict['students']), on='ID студента', how='left')
-    # df.set_index('ID проекта', drop=True, inplace=True)
-    if not all:
-        try:
-            df = selected_projects.merge(df, how='left', left_index=True, right_index=True)
-            df.dropna(axis=0, subset=['Команда', 'ID студента'], inplace=True)
-        except Exception as err:
-            return err
+    df.dropna(axis=0, subset=['Команда', 'ID студента'], inplace=True)
+    df['ID студента'] = df['ID студента'].astype(int)
+    df['ID проекта'] = df['ID проекта'].astype(int)
     return df
 
 @st.experimental_memo(show_spinner=False)
