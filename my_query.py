@@ -208,4 +208,56 @@ query_dict =    {
                                             INNER JOIN regions
                                                 ON events.event_region_id = regions.region_id;
                                             """,
+                "studinpr": """SELECT
+                                projects.project_id AS `ID проекта`,
+                                students.student_id AS `ID студента`,
+                                projects.project_end_date AS `Дата окончания`,
+                                projects.is_frozen AS Статус,
+                                students_in_projects.team AS Команда,
+                                students_in_projects.is_curator AS Куратор,
+                                students.student_surname AS Фамилия,
+                                students.student_name AS Имя,
+                                students.student_midname AS Отчество,
+                                CASE WHEN students.student_id IN (SELECT
+                                        managers_in_projects.student_id
+                                        FROM managers_in_projects) THEN 1 ELSE 0 END AS `Опыт менеджера`,
+                                CASE WHEN students.student_id IN (SELECT
+                                        students_in_projects.student_id
+                                        FROM students_in_projects
+                                        WHERE students_in_projects.is_curator = 1) THEN 1 ELSE 0 END AS `Опыт куратора`,
+                                Бакалавры.university_name AS Бакалавриат,
+                                Бакалавры.region AS `Бак. регион`,
+                                students.bachelors_start_year AS `Бак. год`,
+                                Магистры.university_name AS Магистратура,
+                                Магистры.region AS `Маг. регион`,
+                                students.masters_start_year AS `Маг. год`,
+                                students.is_banned AS Отстранен
+                                FROM students_in_projects
+                                LEFT OUTER JOIN projects
+                                    ON students_in_projects.project_id = projects.project_id
+                                LEFT OUTER JOIN students
+                                    ON students_in_projects.student_id = students.student_id
+                                LEFT OUTER JOIN (SELECT
+                                    students.student_id,
+                                    universities.university_name,
+                                    regions.region
+                                    FROM students
+                                    INNER JOIN universities
+                                        ON students.bachelors_university_id = universities.university_id
+                                    INNER JOIN regions
+                                        ON universities.university_region_id = regions.region_id) Бакалавры
+                                    ON students.student_id = Бакалавры.student_id
+                                LEFT OUTER JOIN (SELECT
+                                    students.student_id,
+                                    universities.university_name,
+                                    regions.region
+                                    FROM students
+                                    INNER JOIN universities
+                                        ON students.masters_university_id = universities.university_id
+                                    INNER JOIN regions
+                                        ON universities.university_region_id = regions.region_id) Магистры
+                                    ON students.student_id = Магистры.student_id
+                                LEFT OUTER JOIN managers_in_projects
+                                    ON projects.project_id = managers_in_projects.project_id;
+                            """,
 }

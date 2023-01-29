@@ -140,7 +140,20 @@ def load_people_in_projects(teachers=False):
     # df.dropna(axis=0, subset=['Команда'], inplace=True)
     df.set_index('ID проекта', drop=True, inplace=True)
     return df
-    
+
+@st.experimental_memo(show_spinner=False)
+def load_students_in_events():
+    df = query_data(query_dict['students_in_events'])
+    return df
+
+@st.experimental_memo(show_spinner=False)
+def load_events():
+    df = query_data(query_dict['events'])
+    return df
+
+@st.experimental_memo(show_spinner=False)
+def load_universities():
+    return query_data(query_dict['universities'])
 ####################################################################################################################################
 #                                                        DATAFRAME DOWNLOAD UTILS
 ####################################################################################################################################
