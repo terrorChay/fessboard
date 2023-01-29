@@ -90,7 +90,7 @@ def main():
     with col1:
         ## Распределение грейдов
         with st.container():
-            st.markdown('**Грейды проектов**')
+            st.markdown('<p class="tooltip"><strong>Грейды проектов</strong></p><span class="tooltiptext">Показывает чудеса грейдного членения</span>', unsafe_allow_html=True)
             a   = projects_df['Грейд']
 
             fig = px.pie(a,
