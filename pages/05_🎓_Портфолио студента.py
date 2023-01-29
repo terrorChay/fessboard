@@ -108,11 +108,21 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore: list) -> pd.DataFrame:
 
 # Apply filters and return company name
 def select_student(df: pd.DataFrame):
+    student_id = False
     df = df[['ID студента', 'ФИО студента']].copy().dropna().drop_duplicates()
     df.insert(0, 'Составной ключ', df['ID студента'].astype('str') + ' - ' + df['ФИО студента'])
-    student_id = False
-    selected_student = st.selectbox(label='Студент', options=df['Составной ключ'])
-    if selected_student:
+    options = np.insert(df['Составной ключ'].unique(), 0, 'Не выбрано', axis=0)
+
+    ## preselection tweak once again to preserve selected company in case related filters get adjusted
+    preselection = 0
+    if 'student_selectbox' in session:
+        try:
+            preselection = int(np.where(options == session['student_selectbox'])[0][0])
+        except:
+            pass
+
+    selected_student = st.selectbox("Студент", options, index=preselection,key='student_selectbox', )
+    if selected_student and selected_student != 'Не выбрано':
         student_id = int(selected_student.split(' - ')[0])
 
     return student_id
@@ -154,7 +164,7 @@ def run():
         st.markdown(f"<h4 style='text-align: center;'>Выберите студента 😎</h4>", unsafe_allow_html=True)
     
 if __name__ == "__main__":
-    utils.page_config(layout='centered', title='Портфолио компании')
+    utils.page_config(layout='wide', title='Портфолио компании')
     utils.remove_footer()
     utils.set_logo()
     run()
