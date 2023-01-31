@@ -452,7 +452,6 @@ def main():
                 data = selected_students_in_projects.groupby('Курс в моменте')['ID студента'].nunique().reset_index(name='Количество')
                 data['Вовлечённость'] = (data['Количество']/selected_students.nunique()) # Вовлеченность
                 data = pd.DataFrame(index=['1','2','3','4']).merge(data.drop('Количество', axis=1).set_index('Курс в моменте'), how='left', left_index=True, right_index=True).fillna(0)
-                data
                 
                 fig = px.bar(data, color_discrete_sequence=colors,)
                 fig.update_yaxes(range = [0,1])
