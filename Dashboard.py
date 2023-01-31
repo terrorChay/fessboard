@@ -445,24 +445,14 @@ def main():
             # year = int(year[:4])
             if year:
                 # Айди студентов выбранного потока
-                kk = students_fesn.loc[students_fesn['Поток'] == year]['ID студента']
+                selected_students = students_fesn.loc[students_fesn['Поток'] == year]['ID студента']
                 # Айди проектов, в которых они участвовали
-                jj = students_in_projects_df.loc[students_in_projects_df['ID студента'].isin(kk)]
+                selected_students_in_projects = students_in_projects_df.loc[students_in_projects_df['ID студента'].isin(selected_students)]
                 # Курс - Количество уникальных проектеров - Вовлеченность
-                oo = jj.groupby('Курс в моменте')['ID студента'].nunique().reset_index(name='Количество')
-                oo['Вовлечённость'] = (oo['Количество']/kk.nunique()) # Вовлеченность
-                data = oo.drop('Количество', axis=1).set_index('Курс в моменте')
-                # m = students_fesn['ID студента'].nunique()
-                # l = []
-                # for i in range(0, 4):
-                #     e = students_in_projects_df.loc[
-                #             (students_in_projects_df['Бак. год'] == year)
-                #         &   (students_in_projects_df['Бакалавриат'] == 'ФЭСН РАНХиГС')
-                #         &   (students_in_projects_df['Дата окончания'].between(datetime.strptime(f'{year+i}-09-01', '%Y-%m-%d').date(), datetime.strptime(f'{year+i+1}-09-01', '%Y-%m-%d').date()))
-                #         ]['ID студента'].nunique()
-                #     # e - Кол-во уникальных студентов с потока N, приниваших участие в проектах за i курс
-                #     l.append(e/m)
-                # data = pd.Series(l, (f'1 курс ({year}-{year+1})',f'2 курс ({year+1}-{year+2})',f'3 курс ({year+2}-{year+3})',f'4 курс ({year+3}-{year+4})'))
+                data = selected_students_in_projects.groupby('Курс в моменте')['ID студента'].nunique().reset_index(name='Количество')
+                data['Вовлечённость'] = (data['Количество']/selected_students.nunique()) # Вовлеченность
+                data = pd.DataFrame(index=['1','2','3','4']).merge(data.drop('Количество', axis=1).set_index('Курс в моменте'), how='left', left_index=True, right_index=True).fillna(0)
+                data
                 
                 fig = px.bar(data, color_discrete_sequence=colors,)
                 fig.update_yaxes(range = [0,1])
@@ -481,7 +471,7 @@ def main():
                     xaxis_visible   = False,
                     )
                 
-                fig.update_traces(hovertemplate = "<b>%{label}.</b> Вовлечённость: <b>%{value}</b>",cliponaxis    = False)
+                fig.update_traces(hovertemplate = "<b>На %{label} курсе - %{value}</b>",cliponaxis    = False)
         
                 st.plotly_chart(fig, use_container_width=True,config=config)
     with col3:
