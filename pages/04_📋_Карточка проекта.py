@@ -101,7 +101,7 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore: list) -> pd.DataFrame:
 
 # Apply filters and return company name
 def project_selection(df: pd.DataFrame):
-    df = df[['ID проекта', 'Название проекта', 'Название компании', 'Грейд', 'Макро-направление', 'Микро-направление', 'Статус']].copy()
+    df = df[['ID проекта', 'Название проекта', 'Название компании', 'Грейд', 'Макро-направление', 'Микро-направление', 'Статус']].sort_values(by='ID проекта', ascending=False).copy()
     df.insert(0, 'Составной ключ', df['ID проекта'].astype('str') + ' - ' + df['Название проекта'])
     selected_project = False
 
@@ -157,12 +157,16 @@ def project_selection(df: pd.DataFrame):
 # App launch
 def run():
     # Load dataframe
-    projects_df = utils.load_projects()
-    students_in_projects = utils.load_students_in_projects()
+    with st.spinner('Читаем НИР...'):
+        projects_df = utils.load_projects()
+    with st.spinner('Заглядываем во все 6 шляп...'):
+        students_in_all_projects = utils.load_students_in_projects()
+
     st.title('Карточка проекта')
     st.write('''
             #### На данной странице можно ознакомиться со всей информацией по выбранному проекту!
             ''')
+    # user input
     selected_project = project_selection(projects_df)
     # Draw search filters and return filtered df
     if not selected_project:
@@ -197,7 +201,7 @@ def run():
             left, right = st.columns(2)
             with left:
                 # with st.expander('Задача проекта', True):
-                st.write('Поставленная задача')
+                st.markdown('**Поставленная задача**')
                 res = output['Описание']
                 if res != '':
                     st.caption(res)
@@ -205,7 +209,7 @@ def run():
                     st.warning('Данных нет, но вы держитесь...')
             with right:
                 # with st.expander('Результат проекта', True):
-                st.write('Достижения')
+                st.markdown('**Достижения**')
                 res = output['Результат']
                 if res != '':
                     st.caption(res)
@@ -216,34 +220,34 @@ def run():
             left, right = st.columns(2)
             with left:
                 # Managers
-                st.text('Менеджеры проекта')
+                st.markdown('**Менеджеры проекта**')
                 managers = output['Менеджеры']
                 if type(managers) != list:
                     st.warning('Данных нет, но вы держитесь...')
                 else:
                     for i in managers:
-                        st.caption(f':bust_in_silhouette: {i}')
+                        st.text(f'🧑‍💼 {i}')
                 # Teachers
-                st.text('Курирующие преподаватели')
+                st.markdown('**Курирующие преподаватели**')
                 teachers = output['Преподаватели']
                 if type(teachers) != list:
                     st.warning('Данных нет, но вы держитесь...')
                 else:
                     for i in teachers:
-                        st.caption(f':bust_in_silhouette: {i}')
+                        st.text(f'🧑‍🏫 {i}')
             with right:
-                students = students_in_projects.loc[students_in_projects['ID проекта'] == project_id]
-                unique_groups_idx = students['Команда'].unique()
+                students_in_project = students_in_all_projects.loc[students_in_all_projects['ID проекта'] == project_id]
+                unique_groups_idx = students_in_project['Команда'].unique()
                 if len(unique_groups_idx) > 0:
                     group_counter = 0
                     for group_idx in unique_groups_idx:
-                        st.text(f'Проектная команда {group_counter+1}')
-                        students_in_the_group   = students[students['Команда'] == group_idx]
-                        for i in students_in_the_group[['ФИО студента', 'Опыт куратора']].values:
+                        st.markdown(f'**Проектная команда {group_counter+1}**')
+                        students_in_the_group   = students_in_project[students_in_project['Команда'] == group_idx]
+                        for i in students_in_the_group[['ФИО студента', 'Куратор']].values:
                             if i[1] == 1:
-                                st.caption(f':bust_in_silhouette: {i[0]} (Куратор)')
+                                st.text(f'🧑‍🚒 {i[0]} (Куратор)')
                             else:
-                                st.caption(f':bust_in_silhouette: {i[0]}') 
+                                st.text(f'🧑‍🎓 {i[0]}') 
                         group_counter += 1
                 else:
                     st.warning('Данных нет, но вы держитесь...')

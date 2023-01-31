@@ -30,6 +30,7 @@ def search_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
 # Apply filters and return filtered dataset
 def filter_dataframe(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
+    st.sidebar.write('Вывести столбцы')
     cols_in_df      = df.columns.values
     cols_dict       = {}
     for col_name in cols_in_df:
@@ -50,7 +51,7 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
     modification_container = st.container()
     with modification_container:
         cols = [col for col in df.columns if col not in cols_to_ignore]
-        to_filter_columns = st.multiselect("Параметры фильтрации", cols)
+        to_filter_columns = st.multiselect("Параметры фильтрации", cols, key='select_filters')
         for column in to_filter_columns:
             left, right = st.columns((1, 20))
             left.write("└")
