@@ -17,5 +17,12 @@
       <jdbc-url>jdbc:mysql://31.31.196.139:3306/u1815885_fessboard_dev</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="u1815885_django_test@31.31.196.139" uuid="3c364fc0-0434-421c-a03c-d3422b02477a">
+      <driver-ref>mysql.8</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://31.31.196.139:3306/u1815885_django_test?enabledTLSProtocols=TLSv1.2</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

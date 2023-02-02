@@ -1,0 +1,85 @@
+{% load static %}
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'js/addproject_script.js' %}"></script>
+    <style>
+        /* center the elements */
+        h1, form {
+            text-align: center;
+        }
+
+        /* add some borders */
+        table {
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* make the form more stylish */
+        .form-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            width: 100%;
+            text-align: left;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="m-5">
+        <h1>Add Project</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <h2>Students</h2>
+            {{ formset.management_form }}
+            <div>
+                <input type="hidden" name="students-TOTAL_FORMS" value="{{ formset.total_form_count }}" id="id_students-TOTAL_FORMS">
+                <input type="hidden" name="students-INITIAL_FORMS" value="{{ formset.initial_form_count }}" id="id_students-INITIAL_FORMS">
+                <input type="hidden" name="students-MIN_NUM_FORMS" id="id_students-MIN_NUM_FORMS">
+                <input type="hidden" name="students-MAX_NUM_FORMS" id="id_students-MAX_NUM_FORMS">
+            </div>
+            <table class="table" id="formset-container">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Group Number</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for form in formset %}
+                        <tr>
+                            <td>{{ form.student }}</td>
+                            <td>{{ form.group_number }}</td>
+                            <td><button type="button" class="btn btn-danger btn-sm delete-form">Delete</button></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <input type="button" value="Add form" id="add-form-button" class="btn btn-success">
+            <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+        </form>
+    </div>
+
+</body>
