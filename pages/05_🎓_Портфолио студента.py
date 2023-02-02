@@ -203,7 +203,42 @@ def run():
                             plot_bgcolor  = tr,
                             height = 320,
                             yaxis_visible   = False,)
-                        st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})   
+                        st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+                        
+                with col2:
+                    with st.container():
+                        data = projects_df.loc[projects_df['ID проекта'].isin(projects_with_student_df['ID проекта'])]['Микро-направление'].value_counts().reset_index(name='Количество')
+                        data = data.rename(columns={'index':'Микро'})
+                        st.markdown('**Распределение проектов студента по микронаправлениям**')
+                        fig = px.pie(data,
+                        values                  = data['Количество'],
+                        names                   = data['Микро'],
+                        color_discrete_sequence = colors,
+                        )
+
+                        fig.update_traces(
+                            textposition  = 'inside',
+                            textinfo      = 'label',
+                            hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+                            textfont_size = 14
+                            
+                            )
+
+                        fig.update_layout(
+                            plot_bgcolor            = tr,
+                            paper_bgcolor           = tr,
+                            showlegend              = False,
+                            font_family             = font,
+                            title_font_family       = font,
+                            title_font_color        = "white",
+                            legend_title_font_color = "white",
+                            height                  = 320,
+                            margin                  = dict(t=70, l=0, r=0, b=60),
+                            title = ''
+                        
+                            )
+
+                        st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
         else:
             st.warning('Проекты не найдены')
     else:

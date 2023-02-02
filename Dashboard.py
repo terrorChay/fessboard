@@ -274,47 +274,43 @@ def main():
 
             st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
     # Ряд логотипов
-    # col1, col2,col3,col4,col5,col6 = st.columns([1, 1,1,1,1,1])
-    # with col1:
-    #     with st.container():
-    #         st.image(
-    #             image = r'img\sber_logo.png',
-    #             use_column_width = 'auto',
-    #         )
-    # with col2:
-    #     with st.container():
-    #         st.image(
-    #             image = r'img\mik_logo.png',
-    #             use_column_width = 'auto',
-    #         )
-    # with col3:
-    #     with st.container():
-    #         st.image(
-    #             image = r'img\bosch_logo.png',
-    #             use_column_width = 'auto',
-    #         )
-    # with col4:
-    #     with st.container():
-    #         st.image(
-    #             image = r'img\schneider_logo.png',
-    #             use_column_width = 'auto',
-    #         )
-    # with col5:
-    #     with st.container():
-    #         st.image(
-    #             image = r'img\xiaomi_logo.png',
-    #             use_column_width = 'auto',
-    #         )
-    # with col6:
-    #     with st.container():
-    #         st.image(
-    #             image = r'img\segezha_logo.png',
-    #             use_column_width = 'auto',
-    #         )
-    # with st.container():
-    #     st.image(
-    #             image = r'img\companies.png',
-    #             use_column_width = 'auto',)
+    col1, col2,col3,col4,col5,col6 = st.columns([1,1,1,1,1,1])
+    with col1:
+        with st.container():
+            st.image(
+                image = r'img\sber_logo.png',
+                use_column_width = 'auto',
+            )
+    with col2:
+        with st.container():
+            st.image(
+                image = r'img\mik_logo.png',
+                use_column_width = 'auto',
+            )
+    with col3:
+        with st.container():
+            st.image(
+                image = r'img\segezha_logo.png',
+                use_column_width = 'auto',
+            )
+    with col4:
+        with st.container():
+            st.image(
+                image = r'img\schneider_logo.png',
+                use_column_width = 'auto',
+            )
+    with col5:
+        with st.container():
+            st.image(
+                image = r'img\xiaomi_logo.png',
+                use_column_width = 'auto',
+            )
+    with col6:
+        with st.container():
+            st.image(
+                image = r'img\bosch_logo.png',
+                use_column_width = 'auto',
+            )
     # # Ряд Компаний-парнёров      
     col1, col2,col3,col4 = st.columns([1, 2,2,1])
     with col1:
@@ -476,9 +472,12 @@ def main():
     with col3:
         with st.container():
             st.markdown('**Разделение по курсам**')
+            data = {'Курс':['1 курс','2 курс','3 курс','4 курс','1 курс маг','2 курс маг'],
+                    'Количество' : [60,80,70,40,10,5]}
+            a = pd.DataFrame(data)
             fig = px.pie(a,
-            values                  = a.value_counts(),
-            names                   = a.value_counts().index,
+            values                  = a['Количество'],
+            names                   = a['Курс'],
             color_discrete_sequence = colors,
             hole                    = .4
             )
@@ -486,7 +485,7 @@ def main():
             fig.update_traces(
                 textposition  = 'inside',
                 textinfo      = 'label',
-                hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+                hovertemplate = "<b>%{label}.</b> Участников: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
                 textfont_size = 14
                 
                 )
