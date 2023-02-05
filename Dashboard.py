@@ -308,7 +308,7 @@ def main():
     with col6:
         with st.container():
             st.image(
-                image = r'img\bosch_logo.png',
+                image = 'https://github.com/terrorChay/FESSBoard/blob/skuvshin0v_branch/img/bosch_logo.png?raw=true',
                 use_column_width = 'auto',
             )
     # # Ряд Компаний-парнёров      
@@ -345,14 +345,14 @@ def main():
                 # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
                 plot_bgcolor            = tr,
                 paper_bgcolor           = tr,
-                legend                  = dict(orientation="v",itemwidth=70,yanchor="bottom", y=1.02,xanchor="right",x=1),
-                showlegend              = False,
+                legend                  = dict(orientation="v",itemwidth=30,yanchor="top", y=0.7,xanchor="left",x=1),
+                showlegend              = True,
                 font_family             = font,
                 title_font_family       = font,
                 title_font_color        = "white",
                 legend_title_font_color = "white",
                 height                  = 220,
-                margin                  = dict(t=0, l=0, r=0, b=0),
+                margin                  = dict(t=0, l=0, r=200, b=0),
                 #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
                 )
 
@@ -418,7 +418,7 @@ def main():
                  
                  )
             fig.update_traces(
-                textfont_size = 14,
+                 textfont_size = 14,
                  textangle     = 0,
                  textposition  = "inside",
                  cliponaxis    = False,

@@ -14,6 +14,8 @@ from pandas.api.types import (
 import plotly.express as px
 from connectdb import mysql_conn
 from datetime import date
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 #Наборы цветов
 colors0 = ['#FF7C68','#FF9E8C','#FFBFB1','#FFDFD7','#F85546','#ED1C24',]
@@ -187,7 +189,7 @@ def run():
                 tab2.dataframe(curated_projects_df)
             # Radar chart
             with st.container():
-                col1, col2 = st.columns([1,2])
+                col1, col2, col3 = st.columns([1,1,1])
                 with col1:
                     with st.container():
                         st.markdown('**Распределение проектов студента по макронаправлениям**')
@@ -239,6 +241,10 @@ def run():
                             )
 
                         st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+                with col3:
+                    with st.container():
+                        st.markdown('**Вовлеченность студента в проекты по курсам**')
+
         else:
             st.warning('Проекты не найдены')
     else:
