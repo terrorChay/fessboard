@@ -320,8 +320,18 @@ query_dict =    {
                                             AS 'ФИО студента',
                                             students_in_projects.team AS Команда,
                                             students_in_projects.is_curator AS Куратор,
-                                            CONCAT(FLOOR(RAND()*(5-1)+1), '') AS `Курс в моменте`,
-                                            'Бакалавриат' AS `Программа в моменте`
+                                            CASE WHEN students.masters_start_year = 0 OR
+                                            students.masters_start_year IS NULL OR
+                                            projects.project_start_date < STR_TO_DATE(CONCAT(students.masters_start_year, '-09-01'), '%Y-%m-%d') THEN CASE WHEN STR_TO_DATE(CONCAT(students.bachelors_start_year, '-09-01'), '%Y-%m-%d') <= projects.project_start_date AND
+                                                projects.project_start_date < STR_TO_DATE(CONCAT(students.bachelors_start_year + 1, '-09-01'), '%Y-%m-%d') THEN '1' WHEN STR_TO_DATE(CONCAT(students.bachelors_start_year + 1, '-09-01'), '%Y-%m-%d') <= projects.project_start_date AND
+                                                projects.project_start_date < STR_TO_DATE(CONCAT(students.bachelors_start_year + 2, '-09-01'), '%Y-%m-%d') THEN '2' WHEN STR_TO_DATE(CONCAT(students.bachelors_start_year + 2, '-09-01'), '%Y-%m-%d') <= projects.project_start_date AND
+                                                projects.project_start_date < STR_TO_DATE(CONCAT(students.bachelors_start_year + 3, '-09-01'), '%Y-%m-%d') THEN '3' WHEN STR_TO_DATE(CONCAT(students.bachelors_start_year + 3, '-09-01'), '%Y-%m-%d') <= projects.project_start_date AND
+                                                projects.project_start_date < STR_TO_DATE(CONCAT(students.bachelors_start_year + 4, '-09-01'), '%Y-%m-%d') THEN '4' ELSE NULL END ELSE CASE WHEN STR_TO_DATE(CONCAT(students.masters_start_year, '-09-01'), '%Y-%m-%d') <= projects.project_start_date AND
+                                                projects.project_start_date < STR_TO_DATE(CONCAT(students.masters_start_year + 1, '-09-01'), '%Y-%m-%d') THEN '1' WHEN STR_TO_DATE(CONCAT(students.masters_start_year + 1, '-09-01'), '%Y-%m-%d') <= projects.project_start_date AND
+                                                projects.project_start_date < STR_TO_DATE(CONCAT(students.masters_start_year + 2, '-09-01'), '%Y-%m-%d') THEN '2' ELSE NULL END END AS 'Курс в моменте',
+                                            CASE WHEN students.masters_start_year = 0 OR
+                                            students.masters_start_year IS NULL OR
+                                            projects.project_start_date < STR_TO_DATE(CONCAT(students.masters_start_year, '-09-01'), '%Y-%m-%d') THEN 'Бакалавриат' ELSE 'Магистратура' END `Программа в моменте`
                                             FROM students_in_projects
                                             LEFT OUTER JOIN projects
                                                 ON students_in_projects.project_id = projects.project_id
