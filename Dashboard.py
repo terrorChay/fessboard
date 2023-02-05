@@ -147,7 +147,7 @@ def main():
                     name                = 'Проектов',
                     marker_color        = marker,
                     opacity             = 1,
-                    marker_line_width   = 2,
+                    marker_line_width   = 0,
                     text                = list(test_df['Количество']),
                     ),
                 secondary_y = False)
@@ -353,7 +353,7 @@ def main():
             st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})  
     with col2:
         with st.container():
-            st.markdown('**Рост количества компаний-партнёров (накопительным итогом)**')
+            st.markdown('**Рост количества компаний-партнёров**')
             data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [17, 28, 42,50,70],'Прирост':
             [17,11,14,8,20]}
             test_df = pd.DataFrame(data)
