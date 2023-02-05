@@ -66,8 +66,8 @@ def main():
         ## projects_df[['Дата начала','Название компании']].sort_values('Дата начала').drop_duplicates(subset='Название компании', keep='first').loc[projects_df['Дата начала'] >= date(date.today().year, 1, 1)].shape[0]
         col3.metric(
             label       = 'Компаний-партнёров', 
-            value       = companies_df['Название компании'].nunique(),
-            delta       = 'из {} отраслей(-и)'.format(companies_df['Отрасль'].nunique()),
+            value       = projects_df['Название компании'].nunique(),
+            delta       = 'из {} отраслей(-и)'.format(projects_df['Отрасль'].nunique()),
             delta_color = 'normal')
         # Университетов партнеров ( количество, регионы )
         col4.metric(
