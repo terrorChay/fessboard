@@ -695,7 +695,7 @@ def main():
                 textposition  = 'outside')
             fig['data'][0].width=0.6
             # display the plot
-            chart_container.plotly_chart(fig, use_container_width=True, config=config)
+            chart_container.plotly_chart(fig, use_container_width=True, config={'staticPlot': True,'displayModeBar': False})
 
 if __name__ == "__main__":
     # page setup
