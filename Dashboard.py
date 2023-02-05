@@ -44,6 +44,8 @@ def main():
         events_df               = utils.load_events()
     with st.spinner('Советуемся с ChatGPT...'):
         students_in_events_df   = utils.load_students_in_events()
+    with st.spinner('Звоним представителям компаний...'):
+        companies_df   = utils.load_companies()
     # Ряд метрик
     with st.container():
         col1, col2, col3, col4, col5, col6 = st.columns(6)
@@ -64,8 +66,8 @@ def main():
         ## projects_df[['Дата начала','Название компании']].sort_values('Дата начала').drop_duplicates(subset='Название компании', keep='first').loc[projects_df['Дата начала'] >= date(date.today().year, 1, 1)].shape[0]
         col3.metric(
             label       = 'Компаний-партнёров', 
-            value       = projects_df['Название компании'].nunique(),
-            delta       = 'из {} отраслей(-и)'.format(projects_df['Отрасль'].nunique()),
+            value       = companies_df['Название компании'].nunique(),
+            delta       = 'из {} отраслей(-и)'.format(companies_df['Отрасль'].nunique()),
             delta_color = 'normal')
         # Университетов партнеров ( количество, регионы )
         col4.metric(
@@ -274,56 +276,128 @@ def main():
 
             st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
     # Ряд логотипов
-    # col1, col2,col3,col4,col5,col6 = st.columns([1, 1,1,1,1,1])
-    # with col1:
-    #     with st.container():
-    #         st.image(
-    #             image = r'img\sber_logo.png',
-    #             use_column_width = 'auto',
-    #         )
-    # with col2:
-    #     with st.container():
-    #         st.image(
-    #             image = r'img\mik_logo.png',
-    #             use_column_width = 'auto',
-    #         )
-    # with col3:
-    #     with st.container():
-    #         st.image(
-    #             image = r'img\bosch_logo.png',
-    #             use_column_width = 'auto',
-    #         )
-    # with col4:
-    #     with st.container():
-    #         st.image(
-    #             image = r'img\schneider_logo.png',
-    #             use_column_width = 'auto',
-    #         )
-    # with col5:
-    #     with st.container():
-    #         st.image(
-    #             image = r'img\xiaomi_logo.png',
-    #             use_column_width = 'auto',
-    #         )
-    # with col6:
-    #     with st.container():
-    #         st.image(
-    #             image = r'img\segezha_logo.png',
-    #             use_column_width = 'auto',
-    #         )
-    # with st.container():
-    #     st.image(
-    #             image = r'img\companies.png',
-    #             use_column_width = 'auto',)
+    col1, col2,col3,col4,col5,col6 = st.columns([1,1,1,1,1,1])
+    with col1:
+        with st.container():
+            st.image(
+                image = 'https://github.com/terrorChay/FESSBoard/blob/master/img/sber_logo.png?raw=true',
+                use_column_width = 'auto',
+            )
+    with col2:
+        with st.container():
+            st.image(
+                image = 'https://github.com/terrorChay/FESSBoard/blob/master/img/mik_logo.png?raw=true',
+                use_column_width = 'auto',
+            )
+    with col3:
+        with st.container():
+            st.image(
+                image = 'https://github.com/terrorChay/FESSBoard/blob/master/img/segezha_logo.png?raw=true',
+                use_column_width = 'auto',
+            )
+    with col4:
+        with st.container():
+            st.image(
+                image = 'https://github.com/terrorChay/FESSBoard/blob/master/img/schneider_logo.png?raw=true',
+                use_column_width = 'auto',
+            )
+    with col5:
+        with st.container():
+            st.image(
+                image = 'https://github.com/terrorChay/FESSBoard/blob/master/img/xiaomi_logo.png?raw=true',
+                use_column_width = 'auto',
+            )
+    with col6:
+        with st.container():
+            st.image(
+                image = 'https://github.com/terrorChay/FESSBoard/blob/master/img/bosch_logo.png?raw=true',
+                use_column_width = 'auto',
+            )
     # # Ряд Компаний-парнёров      
     col1, col2,col3,col4 = st.columns([1, 2,2,1])
     with col1:
         with st.container():
-            st.markdown('**Количество повторных обращений (топ заказчиков)**')
+            st.markdown('**Топ заказчиков**')
+            data = {'Компания':['Сбер','BMW','Bosch','DeLonghi','Xiaomi','BSGames'],
+                    'Количество' : [20,15,12,10,7,5]}
+            a = pd.DataFrame(data)
+            fig = px.pie(a,
+            values                  = a['Количество'],
+            names                   = a['Компания'],
+            color_discrete_sequence = colors,
+            hole                    = .4
+            )
+
+            fig.update_traces(
+                textposition  = 'inside',
+                textinfo      = 'label',
+                hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b>",
+                textfont_size = 14
+                
+                )
+
+            fig.update_layout(
+                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
+                plot_bgcolor            = tr,
+                paper_bgcolor           = tr,
+                #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
+                showlegend              = False,
+                font_family             = font,
+                title_font_family       = font,
+                title_font_color        = "white",
+                legend_title_font_color = "white",
+                height                  = 220,
+                margin                  = dict(t=0, l=0, r=0, b=0),
+                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
+                )
+            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})  
     with col2:
         with st.container():
             st.markdown('**Рост количества компаний-партнёров (накопительным итогом)**')
-              
+            data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [17, 28, 42,50,70],'Прирост':
+            [17,11,14,8,20]}
+            test_df = pd.DataFrame(data)
+            fig = make_subplots(1,1)
+
+# add first bar trace at row = 1, col = 1
+            fig.add_trace(go.Bar(x=test_df['Год'], y=test_df['Количество'],
+                     name='Партнёров',
+                     marker_color = marker,
+                     opacity=1,
+                     marker_line_width=2,
+                     text=list(test_df['Количество']),
+                     hovertext= ''
+                     
+),
+              row = 1, col = 1)
+            fig.update_layout(
+                 font_family   = font,
+                 font_size     = 13,
+                 paper_bgcolor = tr,
+                 plot_bgcolor  = tr,
+                 margin        = dict(t=0, l=0, r=0, b=0),
+                 yaxis_title     = "",
+                 xaxis_title     = "",
+                 width = 10,
+                 height = 220,
+                 xaxis_visible   = True,
+                 yaxis_visible   = True,
+                 xaxis=dict(showgrid=False), 
+                 yaxis=dict(showgrid=False),
+                 showlegend       = False,
+                 
+                 )
+            fig.update_traces(
+                textfont_size = 14,
+                 textangle     = 0,
+                 textposition  = "inside",
+                 cliponaxis    = False,
+                 )
+            fig['data'][0].width=0.7
+# add first scatter trace at row = 1, col = 1
+            fig.add_trace(go.Scatter(x=test_df['Год'], y=test_df['Прирост'], line=dict(color='#07C607'), name='Прирост'),
+              row = 1, col = 1)
+            st.plotly_chart(fig,use_container_width=True,config=config) 
             
     with col3:
         with st.container():
@@ -349,28 +423,34 @@ def main():
                 # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
                 plot_bgcolor            = tr,
                 paper_bgcolor           = tr,
-                legend                  = dict(orientation="v",itemwidth=70,yanchor="bottom", y=1.02,xanchor="right",x=1),
-                showlegend              = False,
+                legend                  = dict(orientation="v",itemwidth=30,yanchor="top", y=0.7,xanchor="left",x=1),
+                showlegend              = True,
                 font_family             = font,
                 title_font_family       = font,
                 title_font_color        = "white",
                 legend_title_font_color = "white",
                 height                  = 220,
-                margin                  = dict(t=0, l=0, r=0, b=0),
+                margin                  = dict(t=0, l=0, r=200, b=0),
                 #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
                 )
 
             st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False}) 
     with col4:
         with st.container():
+            a = companies_df['Тип компании'].value_counts()
+            rus = a['Крупный российский бизнес'] + a['Малый и средний российский бизнес'] + a['Государственная структура']
+            foreign = a['Малый и средний международный бизнес'] + a['Крупный международный бизнес']
+            
+            st.markdown('**Российских компаний**')
+            st.metric(
+            label       = '',
+            value       = rus,
+            label_visibility = 'collapsed')            
             st.markdown('**Международных компаний**')
             st.metric(
-            label       = 'Проектов в работе',
-            value       = int(projects_df.loc[projects_df['Статус'] == 'Активен']['Статус'].value_counts().sum()))
-            st.markdown('**российских компаний**')
-            st.metric(
-            label       = 'Проектов в работе',
-            value       = 10)
+            label       = ' ',
+            value       = foreign,
+            label_visibility = 'collapsed')
     
 #     with col5:
 #         with st.container():
@@ -383,14 +463,51 @@ def main():
 # Segezha Xiaomi Schneider Студия имени горького')
     
     # Ряд студентов
-    col1, col2,col3,col4,col5 = st.columns([1, 2,1,1,1])
+    col1, col2,col3,col4 = st.columns([1, 2,2,1])
     with col1:
+        with st.container():
+            st.markdown('**Разделение по курсам**')
+            data = {'Курс':['1 курс','2 курс','3 курс','4 курс','1 курс маг','2 курс маг'],
+                    'Количество' : [60,80,70,40,10,5]}
+            a = pd.DataFrame(data)
+            fig = px.pie(a,
+            values                  = a['Количество'],
+            names                   = a['Курс'],
+            color_discrete_sequence = colors,
+            hole                    = .4
+            )
+
+            fig.update_traces(
+                textposition  = 'inside',
+                textinfo      = 'label',
+                hovertemplate = "<b>%{label}.</b> Участников: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+                textfont_size = 14
+                
+                )
+
+            fig.update_layout(
+                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
+                plot_bgcolor            = tr,
+                paper_bgcolor           = tr,
+                #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
+                showlegend              = False,
+                font_family             = font,
+                title_font_family       = font,
+                title_font_color        = "white",
+                legend_title_font_color = "white",
+                height                  = 220,
+                margin                  = dict(t=0, l=0, r=0, b=0),
+                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
+                )
+
+            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})  
+    with col2:
         with st.container():
             st.markdown('**Участников в проектах**')
 
-            data    = {'Год': ['2020-2021','2021-2022','2022-2023'],'Количество': [370,450,630],'Прирост':
-            [130,80,180]}
-            test_df = pd.DataFrame(data)		
+            data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [17, 28, 42,50,70],'Прирост':
+            [17,11,14,8,20]}
+            test_df = pd.DataFrame(data)
             fig = make_subplots(1,1)
 
 # add first bar trace at row = 1, col = 1
@@ -415,10 +532,10 @@ def main():
                  width = 10,
                  height = 220,
                  xaxis_visible   = True,
-                 showlegend       = False,
-                 yaxis_visible   = False,
+                 yaxis_visible   = True,
                  xaxis=dict(showgrid=False), 
                  yaxis=dict(showgrid=False),
+                 showlegend       = False,
                  
                  )
             fig.update_traces(
@@ -434,7 +551,7 @@ def main():
             st.plotly_chart(fig,use_container_width=True,config=config)
 
         
-    with col2:
+    with col3:
         with st.container():
             st.markdown('**Вовлечённость потока**')
             students_fesn = students_df.loc[(students_df['Программа'] == 'Бакалавриат') & (students_df['ВУЗ'] == 'ФЭСН РАНХиГС')]
@@ -473,40 +590,7 @@ def main():
                 fig.update_traces(hovertemplate = "<b>На %{label} курсе - %{value}</b>",cliponaxis    = False)
         
                 st.plotly_chart(fig, use_container_width=True,config=config)
-    with col3:
-        with st.container():
-            st.markdown('**Разделение по курсам**')
-            fig = px.pie(a,
-            values                  = a.value_counts(),
-            names                   = a.value_counts().index,
-            color_discrete_sequence = colors,
-            hole                    = .4
-            )
-
-            fig.update_traces(
-                textposition  = 'inside',
-                textinfo      = 'label',
-                hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
-                textfont_size = 14
-                
-                )
-
-            fig.update_layout(
-                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
-                plot_bgcolor            = tr,
-                paper_bgcolor           = tr,
-                #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
-                showlegend              = False,
-                font_family             = font,
-                title_font_family       = font,
-                title_font_color        = "white",
-                legend_title_font_color = "white",
-                height                  = 220,
-                margin                  = dict(t=0, l=0, r=0, b=0),
-                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
-                )
-
-            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})  
+    
     with col4:
         with st.container():
             st.markdown('**Доля студентов 4 курса**')
@@ -541,9 +625,6 @@ def main():
                 )
 
             st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
-    with col5:
-        with st.container():
-            st.markdown('**Наши партнёры (ВУЗы)**')
     #Ряд интерактивов
     col1, col2 = st.columns([2, 4])
     
@@ -596,7 +677,7 @@ def main():
             else:
                 data = students_in_projects_df.value_counts(subset='ФИО студента', ascending=sort_asc).iloc[:display_limit]
             # set up a plot
-            fig = px.bar(data, orientation='h', color_discrete_sequence=colors)
+            fig = px.bar(data, orientation='h', color_discrete_sequence=colors,text_auto=True)
             fig.update_layout(
                 yaxis=dict(autorange="reversed"),
                 showlegend      = False,
@@ -611,10 +692,10 @@ def main():
                 # title = f'Топ {display_limit} {rating_subject}',
                 )
             fig.update_traces(
-                textposition  = "inside",)
-            fig['data'][0].width=0.4
+                textposition  = 'outside')
+            fig['data'][0].width=0.6
             # display the plot
-            chart_container.plotly_chart(fig, use_container_width=True, config=config)
+            chart_container.plotly_chart(fig, use_container_width=True, config={'staticPlot': True,'displayModeBar': False})
 
 if __name__ == "__main__":
     # page setup

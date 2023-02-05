@@ -14,6 +14,8 @@ from pandas.api.types import (
 import plotly.express as px
 from connectdb import mysql_conn
 from datetime import date
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 #Наборы цветов
 colors0 = ['#FF7C68','#FF9E8C','#FFBFB1','#FFDFD7','#F85546','#ED1C24',]
@@ -187,7 +189,7 @@ def run():
                 tab2.dataframe(curated_projects_df)
             # Radar chart
             with st.container():
-                col1, col2 = st.columns([1,2])
+                col1, col2, col3 = st.columns([1,1,1])
                 with col1:
                     with st.container():
                         st.markdown('**Распределение проектов студента по макронаправлениям**')
@@ -203,7 +205,48 @@ def run():
                             plot_bgcolor  = tr,
                             height = 320,
                             yaxis_visible   = False,)
-                        st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})   
+                        fig.update_layout(polar = dict(radialaxis = dict(showticklabels = False,tick0=0,dtick=1)))
+                        st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+                        
+                with col2:
+                    with st.container():
+                        data = projects_df.loc[projects_df['ID проекта'].isin(projects_with_student_df['ID проекта'])]['Микро-направление'].value_counts().reset_index(name='Количество')
+                        data = data.rename(columns={'index':'Микро'})
+                        st.markdown('**Распределение проектов студента по микронаправлениям**')
+                        fig = px.pie(data,
+                        values                  = data['Количество'],
+                        names                   = data['Микро'],
+                        color_discrete_sequence = colors,
+                        )
+
+                        fig.update_traces(
+                            textposition  = 'inside',
+                            textinfo      = 'percent',
+                            hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+                            textfont_size = 20,
+                            insidetextorientation = 'auto',
+                            
+                            )
+
+                        fig.update_layout(
+                            plot_bgcolor            = tr,
+                            paper_bgcolor           = tr,
+                            showlegend              = False,
+                            font_family             = font,
+                            title_font_family       = font,
+                            title_font_color        = "white",
+                            legend_title_font_color = "white",
+                            height                  = 320,
+                            margin                  = dict(t=70, l=0, r=0, b=60),
+                            title = ''
+                        
+                            )
+
+                        st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+                with col3:
+                    with st.container():
+                        st.markdown('**Вовлеченность студента в проекты по курсам**')
+
         else:
             st.warning('Проекты не найдены')
     else:
