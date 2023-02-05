@@ -205,6 +205,7 @@ def run():
                             plot_bgcolor  = tr,
                             height = 320,
                             yaxis_visible   = False,)
+                        fig.update_layout(polar = dict(radialaxis = dict(showticklabels = False,tick0=0,dtick=1)))
                         st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
                         
                 with col2:
@@ -220,9 +221,10 @@ def run():
 
                         fig.update_traces(
                             textposition  = 'inside',
-                            textinfo      = 'label',
+                            textinfo      = 'percent',
                             hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
-                            textfont_size = 14
+                            textfont_size = 20,
+                            insidetextorientation = 'auto',
                             
                             )
 
