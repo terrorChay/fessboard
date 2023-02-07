@@ -57,7 +57,7 @@ def main():
             delta_color = 'normal')
         # Уникальных студентов ( активно vs. побывало )
         col2.metric(
-            label       = 'Студентов задействовано',
+            label       = 'Студентов активно',
             value       = students_in_projects_df['ID студента'].loc[students_in_projects_df['Статус'] == 'Активен'].nunique(),
             delta       = '{} за все время'.format(students_in_projects_df['ID студента'].nunique()),
             delta_color = 'normal')
@@ -65,25 +65,25 @@ def main():
         ## Новых компаний в этом году:
         ## projects_df[['Дата начала','Название компании']].sort_values('Дата начала').drop_duplicates(subset='Название компании', keep='first').loc[projects_df['Дата начала'] >= date(date.today().year, 1, 1)].shape[0]
         col3.metric(
-            label       = 'Компаний-партнёров', 
-            value       = companies_df['Название компании'].nunique(),
-            delta       = 'из {} отраслей(-и)'.format(companies_df['Отрасль'].nunique()),
+            label       = 'Компаний', 
+            value       = projects_df['Название компании'].nunique(),
+            delta       = 'из {} отраслей(-и)'.format(projects_df['Отрасль'].nunique()),
             delta_color = 'normal')
         # Университетов партнеров ( количество, регионы )
         col4.metric(
-            label       = 'Университетов-партнёров',
+            label       = 'ВУЗов-партнёров',
             value       = universities_df.shape[0],
             delta       = 'из {} регионов(-а)'.format(universities_df['Регион'].nunique()),
             delta_color = 'normal')
         # Направления и сферы
         col5.metric(
-            label       = 'Уникальных направлений',
+            label       = 'Направлений',
             value       = projects_df['Микро-направление'].nunique(),
             delta       = 'из {} сфер(-ы)'.format(projects_df['Макро-направление'].nunique()),
             delta_color = 'normal')
         # Мероприятия
         col6.metric(
-            label       = 'Мероприятий проведено',
+            label       = 'Мероприятий',
             value       = events_df.shape[0],
             delta       = '{} участников(-а)'.format(students_in_events_df.shape[0]),
             delta_color = 'normal')
@@ -240,13 +240,14 @@ def main():
     with col5:
         ## Регионы мероприятий
         with st.container():
-            st.markdown('**Регионы мероприятий**')
+            st.markdown('**Регионы ивентов**')
+            events_regions_df = events_df['Регион']
             data    = {'Регион': ['Москва', 'Нижний Новгород', 'Казань','Калининград','Сарапул'],'Количество': [10, 3, 1,3,1]}
-            events_regions_df = pd.DataFrame(data)
+
 
             fig = px.pie(events_regions_df,
-            values                  = events_regions_df['Количество'],
-            names                   = events_regions_df['Регион'],
+            values                  = events_regions_df.value_counts(),
+            names                   = events_regions_df.value_counts().index,
             color_discrete_sequence = colors,
             hole                    = .4
             )
@@ -318,12 +319,10 @@ def main():
     with col1:
         with st.container():
             st.markdown('**Топ заказчиков**')
-            data = {'Компания':['Сбер','BMW','Bosch','DeLonghi','Xiaomi','BSGames'],
-                    'Количество' : [20,15,12,10,7,5]}
-            a = pd.DataFrame(data)
-            fig = px.pie(a,
-            values                  = a['Количество'],
-            names                   = a['Компания'],
+            top_companies_df = projects_df['Название компании'].value_counts().head(5)
+            fig = px.pie(top_companies_df.values,
+            values                  = top_companies_df.values,
+            names                   = top_companies_df.index,
             color_discrete_sequence = colors,
             hole                    = .4
             )
@@ -403,7 +402,6 @@ def main():
         with st.container():
             st.markdown('**Проекты по типу компании-заказчика**')
             data = projects_df['Тип компании']
-
             fig = px.pie(data,
             values                  = data.value_counts(),
             names                   = data.value_counts().index,
@@ -462,17 +460,18 @@ def main():
 #             st.write('СБЕР Агентство Инноваций Москвы (Московский инновационный кластер) BMW (?)\nBOSCH\
 # Segezha Xiaomi Schneider Студия имени горького')
     
-    # Ряд студентов
+    # Ряд студентовтоп
     col1, col2,col3,col4 = st.columns([1, 2,2,1])
     with col1:
         with st.container():
             st.markdown('**Разделение по курсам**')
-            data = {'Курс':['1 курс','2 курс','3 курс','4 курс','1 курс маг','2 курс маг'],
-                    'Количество' : [60,80,70,40,10,5]}
-            a = pd.DataFrame(data)
-            fig = px.pie(a,
-            values                  = a['Количество'],
-            names                   = a['Курс'],
+            courses_df = students_in_projects_df[['Статус','ID студента','Курс в моменте','Программа в моменте']].loc[(students_in_projects_df['Статус'] == 'Активен')]
+            courses_df['Курс'] = courses_df[['Курс в моменте','Программа в моменте']].agg(' '.join,axis=1).map(lambda x:x[:5]+'.')
+            courses_df = courses_df[['ID студента','Курс']].drop_duplicates(subset = ['ID студента','Курс'], keep=False)
+            # courses_df
+            fig = px.pie(courses_df,
+            values                  = courses_df['Курс'].value_counts(),
+            names                   = courses_df['Курс'].value_counts().index,
             color_discrete_sequence = colors,
             hole                    = .4
             )
@@ -593,9 +592,16 @@ def main():
     
     with col4:
         with st.container():
-            st.markdown('**Доля студентов 4 курса**')
+            st.markdown('**Студенты 4 курса**')
+            course_4_df = students_df.loc[(students_df['Курс'] == '4') & (students_df['Программа'] == 'Бакалавриат'),'ID студента']
+            merged_df = pd.merge(course_4_df, students_in_projects_df, on='ID студента', how='left')
+            merged_df = merged_df[merged_df['ID проекта'].notna()]
+            #Сколько людей принимали участие
+            tp = merged_df['ID студента'].nunique()
+            #Сколько людей не принимали участие
+            dtp = course_4_df.count() - tp
             fig = px.pie(
-            values                  = [94,27],
+            values                  = [tp,dtp],
             names                   = ['Участвовали в проектах','Не участвовали в проектах'],
             color_discrete_sequence = colors,
             hole                    = .6
@@ -603,7 +609,7 @@ def main():
 
             fig.update_traces(
                 textposition  = 'inside',
-                textinfo      = 'percent',
+                textinfo      = 'value',
                 hovertemplate = "<b>%{label}.</b><br><b>%{percent}</b> от студентов 4 курса",
                 textfont_size = 14
                 
