@@ -247,6 +247,49 @@ def run():
                 with col3:
                     with st.container():
                         st.markdown('**Вовлеченность студента в проекты по курсам**')
+                        projects_by_year_df = projects_with_student_df
+                        projects_by_year_df['Курс'] = projects_by_year_df[['Курс в моменте','Программа в моменте']].agg(' '.join,axis=1).map(lambda x:x[:5]+'.')
+                        projects_by_year_df = projects_by_year_df[['Курс']].copy().sort_values('Курс').value_counts(sort=True).reset_index(name='Количество')
+                        df = pd.DataFrame(data=['1 Бак.','2 Бак.','3 Бак.','4 Бак.','1 Маг.','2 Маг.'],columns=['Курс'])
+                        df = df.merge(projects_by_year_df,how='left',on='Курс')
+                        df['Количество'] = df['Количество'].fillna(0).map(lambda x:int(x))
+                        fig = go.Figure()
+
+                        fig.add_trace(go.Bar(
+                                x                   = df['Курс'],
+                                y                   = df['Количество'],
+                                width               = 0.7,
+                                name                = 'Проектов',
+                                marker_color        = marker,
+                                opacity             = 1,
+                                marker_line_width   = 0,
+                                text                = list(df['Количество']),
+                                ))
+                            
+                        fig.update_layout(
+                            font_family    = font,
+                            font_size      = 13,
+                            paper_bgcolor  = tr,
+                            plot_bgcolor   = tr,
+                            margin         = dict(t=0, l=0, r=0, b=0),
+                            yaxis_title    = "",
+                            xaxis_title    = "",
+                            width          = 10,
+                            height         = 220,
+                            xaxis_visible  = True,
+                            yaxis_visible  = True,
+                            xaxis          = dict(showgrid=False), 
+                            yaxis          = dict(showgrid=True),
+                            showlegend     = False
+                            )
+                        fig.update_traces(
+                            textfont_size   = 14,
+                            textangle      = 0,
+                            textposition   = "auto",
+                            cliponaxis     = False,
+                            )
+                        
+                        st.plotly_chart(fig,use_container_width=True,config={'staticPlot': True,'displayModeBar': False})  
 
         else:
             st.warning('Проекты не найдены')
