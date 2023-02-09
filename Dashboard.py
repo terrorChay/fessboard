@@ -10,19 +10,20 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
 #Наборы цветов
-colors0 = ['#FF7C68','#FF9E8C','#FFBFB1','#FFDFD7','#F85546','#ED1C24',]
-colors1 = ['#ED1C24','#F2595F','#C9A0DC','#F0DC82','#FFDAB9','#0ABCFF','#556832']
-colors2 = px.colors.qualitative.Light24
-colors3 = ['#ED1C24','#F2595F']
-colors4 = ['#3A42FF','#FB832A','#D0455E','#82CD97','#45B0D0','#7A45D0','#88B1FF','#2227A7']
-colors40 = ['#3A42FF','#45B0D0','#7A45D0','#88B1FF','#2227A7','#FB832A','#D0455E','#82CD97']
-colors5 = ['#ED1C24','#F7A3A6']
-test = ['#5E60CE','#5390D9','#4EA8DE','#48BFE3','#56CFE1','#64DFDF','#72EFDD','#80FFDB','#7400B8','#6930C3',]
-colors6 = ['#FF5744','#F2595F','#C9A0DC','#F0DC82','#FFDAB9','#0ABCFF','#556832']
 
+color_themes = {'colors0':['#FF7C68','#FF9E8C','#FFBFB1','#FFDFD7','#F85546','#ED1C24',],
+                'colors1':['#ED1C24','#F2595F','#C9A0DC','#F0DC82','#FFDAB9','#0ABCFF','#556832'],
+                'colors2':px.colors.qualitative.Light24,
+                'colors3':['#ED1C24','#F2595F'],
+                'colors4':['#3A42FF','#FB832A','#D0455E','#82CD97','#45B0D0','#7A45D0','#88B1FF','#2227A7'],
+                'colors4':['#3A42FF','#45B0D0','#7A45D0','#88B1FF','#2227A7','#FB832A','#D0455E','#82CD97'],
+                'colors5':['#ED1C24','#F7A3A6'],
+                'test':['#5E60CE','#5390D9','#4EA8DE','#48BFE3','#56CFE1','#64DFDF','#72EFDD','#80FFDB','#7400B8','#6930C3',],
+                'colors6':['#FF5744','#F2595F','#C9A0DC','#F0DC82','#FFDAB9','#0ABCFF','#556832']
+                }
 tr='rgba(0,0,0,0)'
-colors = colors0
-marker = colors[5]
+
+
 
 
 font="Source Sans Pro"
@@ -46,6 +47,10 @@ def main():
         students_in_events_df   = utils.load_students_in_events()
     with st.spinner('Звоним представителям компаний...'):
         companies_df   = utils.load_companies()
+    
+    selection = st.sidebar.selectbox(options =color_themes.keys(),label='Выберите тему')
+    colors = color_themes[selection]
+    marker = colors[0]
     # Ряд метрик
     with st.container():
         col1, col2, col3, col4, col5, col6 = st.columns(6)
