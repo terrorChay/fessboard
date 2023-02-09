@@ -221,7 +221,7 @@ def run():
 
                         fig.update_traces(
                             textposition  = 'inside',
-                            textinfo      = 'percent',
+                            textinfo      = 'value',
                             hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
                             textfont_size = 20,
                             insidetextorientation = 'auto',
@@ -229,18 +229,19 @@ def run():
                             )
 
                         fig.update_layout(
-                            plot_bgcolor            = tr,
-                            paper_bgcolor           = tr,
-                            showlegend              = False,
-                            font_family             = font,
-                            title_font_family       = font,
-                            title_font_color        = "white",
-                            legend_title_font_color = "white",
-                            height                  = 320,
-                            margin                  = dict(t=70, l=0, r=0, b=60),
-                            title = ''
-                        
-                            )
+                        # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
+                        plot_bgcolor            = tr,
+                        paper_bgcolor           = tr,
+                        legend                  = dict(orientation="v",itemwidth=30,yanchor="top", y=0.7,xanchor="left",x=1),
+                        showlegend              = True,
+                        font_family             = font,
+                        title_font_family       = font,
+                        title_font_color        = "white",
+                        legend_title_font_color = "white",
+                        height                  = 220,
+                        margin                  = dict(t=0, l=0, r=200, b=0),
+                        #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
+                        )
 
                         st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
                 with col3:
