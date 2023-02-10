@@ -448,12 +448,16 @@ def main():
             st.metric(
             label       = '',
             value       = rus,
-            label_visibility = 'collapsed')            
+            # label_visibility = 'collapsed' ХЗ ПОЧЕМУ НО МНЕ ВЫДАЁТ ОШИБКУ
+            )            
             st.markdown('**Международных компаний**')
             st.metric(
-            label       = ' ',
+            label       = '',
             value       = foreign,
-            label_visibility = 'collapsed')
+            
+            # label_visibility = 'collapsed'
+            
+            )
     
 #     with col5:
 #         with st.container():
