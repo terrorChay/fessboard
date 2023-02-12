@@ -107,7 +107,7 @@ def main():
             values                  = a.value_counts(),
             names                   = a.value_counts().index,
             color_discrete_sequence = colors,
-            hole                    = .4
+            hole                    = .6
             )
 
             fig.update_traces(
@@ -257,7 +257,7 @@ def main():
             values                  = events_regions_df.value_counts(),
             names                   = events_regions_df.value_counts().index,
             color_discrete_sequence = colors,
-            hole                    = .4
+            hole                    = .6
             )
 
             fig.update_traces(
@@ -332,7 +332,7 @@ def main():
             values                  = top_companies_df.values,
             names                   = top_companies_df.index,
             color_discrete_sequence = colors,
-            hole                    = .4
+            hole                    = .6
             )
 
             fig.update_traces(
@@ -414,7 +414,7 @@ def main():
             values                  = data.value_counts(),
             names                   = data.value_counts().index,
             color_discrete_sequence = colors,
-            hole                    = .4
+            hole                    = .6
             )
 
             fig.update_traces(
@@ -485,7 +485,7 @@ def main():
             values                  = courses_df['Курс'].value_counts(),
             names                   = courses_df['Курс'].value_counts().index,
             color_discrete_sequence = colors,
-            hole                    = .4
+            hole                    = .6
             )
 
             fig.update_traces(
@@ -687,12 +687,12 @@ def main():
             st.markdown('**Интерактивные рейтинги**')
             _col1, _col2, _col3 = st.columns(3)
             with _col1:
-                rating_subject  = st.selectbox(label='Роль', options=['Участники', 'Кураторы', 'Модераторы', 'Преподаватели'])
+                rating_subject  = st.selectbox(label='Роль', options=['Участники', 'Кураторы', 'Модераторы', 'Преподаватели'],index=0)
             with _col3:
-                sort_asc = st.selectbox(label='Сортировать', options=['Возрастание', 'Убывание'])
+                sort_asc = st.selectbox(label='Сортировать', options=['Возрастание', 'Убывание'],index=1)
                 sort_asc = True if sort_asc == 'Возрастание' else False
             with _col2:
-                display_limit = st.selectbox(label='Топ', options=[5,10,15])
+                display_limit = st.selectbox(label='Топ', options=[5,10,15],index=1)
             # data selection
             if rating_subject == 'Преподаватели':
                 data = teachers_in_projects_df.value_counts(subset='ФИО преподавателя', ascending=sort_asc).iloc[:display_limit]
@@ -713,7 +713,7 @@ def main():
                 font_size       = 15,
                 xaxis_visible   = False,
                 yaxis_title     = "",
-                height          = 250,
+                height          = 300,
                 margin          = dict(t=0, b=0,l=0,r=0),
                 # title = f'Топ {display_limit} {rating_subject}',
                 )
