@@ -10,19 +10,20 @@ from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
 #Наборы цветов
-colors0 = ['#FF7C68','#FF9E8C','#FFBFB1','#FFDFD7','#F85546','#ED1C24',]
-colors1 = ['#ED1C24','#F2595F','#C9A0DC','#F0DC82','#FFDAB9','#0ABCFF','#556832']
-colors2 = px.colors.qualitative.Light24
-colors3 = ['#ED1C24','#F2595F']
-colors4 = ['#3A42FF','#FB832A','#D0455E','#82CD97','#45B0D0','#7A45D0','#88B1FF','#2227A7']
-colors40 = ['#3A42FF','#45B0D0','#7A45D0','#88B1FF','#2227A7','#FB832A','#D0455E','#82CD97']
-colors5 = ['#ED1C24','#F7A3A6']
-test = ['#5E60CE','#5390D9','#4EA8DE','#48BFE3','#56CFE1','#64DFDF','#72EFDD','#80FFDB','#7400B8','#6930C3',]
-colors6 = ['#FF5744','#F2595F','#C9A0DC','#F0DC82','#FFDAB9','#0ABCFF','#556832']
 
+color_themes = {'colors0':['#FF7C68','#FF9E8C','#FFBFB1','#FFDFD7','#F85546','#ED1C24',],
+                'colors1':['#ED1C24','#F2595F','#C9A0DC','#F0DC82','#FFDAB9','#0ABCFF','#556832'],
+                'colors2':px.colors.qualitative.Light24,
+                'colors3':['#ED1C24','#F2595F'],
+                'colors4':['#3A42FF','#FB832A','#D0455E','#82CD97','#45B0D0','#7A45D0','#88B1FF','#2227A7'],
+                'colors4':['#3A42FF','#45B0D0','#7A45D0','#88B1FF','#2227A7','#FB832A','#D0455E','#82CD97'],
+                'colors5':['#ED1C24','#F7A3A6'],
+                'test':['#5E60CE','#5390D9','#4EA8DE','#48BFE3','#56CFE1','#64DFDF','#72EFDD','#80FFDB','#7400B8','#6930C3',],
+                'colors6':['#FF5744','#F2595F','#C9A0DC','#F0DC82','#FFDAB9','#0ABCFF','#556832']
+                }
 tr='rgba(0,0,0,0)'
-colors = colors0
-marker = colors[5]
+
+
 
 
 font="Source Sans Pro"
@@ -33,7 +34,10 @@ def main():
     with st.spinner('Читаем PMI и PMBOK...'):
         projects_df             = utils.load_projects()
     with st.spinner('Происходит аджайл...'):
-        students_in_projects_df = utils.load_students_in_projects()
+        students_in_projects_df     = utils.load_students_in_projects()
+        moderators_in_projects_df   = students_in_projects_df.loc[students_in_projects_df['Модератор'] == 1]
+        curators_in_projects_df     = students_in_projects_df.loc[students_in_projects_df['Куратор'] == 1]
+        students_in_projects_df     = students_in_projects_df.loc[(students_in_projects_df['Куратор'] == 0) & (students_in_projects_df['Модератор'] == 0)]
     with st.spinner('Изучаем требования стейкхолдеров...'):
         teachers_in_projects_df = utils.load_teachers_in_projects()
     with st.spinner('Еще чуть-чуть и прямо в рай...'):
@@ -46,6 +50,10 @@ def main():
         students_in_events_df   = utils.load_students_in_events()
     with st.spinner('Звоним представителям компаний...'):
         companies_df   = utils.load_companies()
+    
+    selection = st.sidebar.selectbox(options =color_themes.keys(),label='Выберите тему')
+    colors = color_themes[selection]
+    marker = colors[0]
     # Ряд метрик
     with st.container():
         col1, col2, col3, col4, col5, col6 = st.columns(6)
@@ -57,7 +65,7 @@ def main():
             delta_color = 'normal')
         # Уникальных студентов ( активно vs. побывало )
         col2.metric(
-            label       = 'Студентов задействовано',
+            label       = 'Студентов активно',
             value       = students_in_projects_df['ID студента'].loc[students_in_projects_df['Статус'] == 'Активен'].nunique(),
             delta       = '{} за все время'.format(students_in_projects_df['ID студента'].nunique()),
             delta_color = 'normal')
@@ -65,25 +73,25 @@ def main():
         ## Новых компаний в этом году:
         ## projects_df[['Дата начала','Название компании']].sort_values('Дата начала').drop_duplicates(subset='Название компании', keep='first').loc[projects_df['Дата начала'] >= date(date.today().year, 1, 1)].shape[0]
         col3.metric(
-            label       = 'Компаний-партнёров', 
+            label       = 'Компаний', 
             value       = projects_df['Название компании'].nunique(),
             delta       = 'из {} отраслей(-и)'.format(projects_df['Отрасль'].nunique()),
             delta_color = 'normal')
         # Университетов партнеров ( количество, регионы )
         col4.metric(
-            label       = 'Университетов-партнёров',
+            label       = 'ВУЗов-партнёров',
             value       = universities_df.shape[0],
             delta       = 'из {} регионов(-а)'.format(universities_df['Регион'].nunique()),
             delta_color = 'normal')
         # Направления и сферы
         col5.metric(
-            label       = 'Уникальных направлений',
+            label       = 'Направлений',
             value       = projects_df['Микро-направление'].nunique(),
             delta       = 'из {} сфер(-ы)'.format(projects_df['Макро-направление'].nunique()),
             delta_color = 'normal')
         # Мероприятия
         col6.metric(
-            label       = 'Мероприятий проведено',
+            label       = 'Мероприятий',
             value       = events_df.shape[0],
             delta       = '{} участников(-а)'.format(students_in_events_df.shape[0]),
             delta_color = 'normal')
@@ -99,7 +107,7 @@ def main():
             values                  = a.value_counts(),
             names                   = a.value_counts().index,
             color_discrete_sequence = colors,
-            hole                    = .4
+            hole                    = .6
             )
 
             fig.update_traces(
@@ -147,7 +155,7 @@ def main():
                     name                = 'Проектов',
                     marker_color        = marker,
                     opacity             = 1,
-                    marker_line_width   = 2,
+                    marker_line_width   = 0,
                     text                = list(test_df['Количество']),
                     ),
                 secondary_y = False)
@@ -240,15 +248,16 @@ def main():
     with col5:
         ## Регионы мероприятий
         with st.container():
-            st.markdown('**Регионы мероприятий**')
+            st.markdown('**Регионы ивентов**')
+            events_regions_df = events_df['Регион']
             data    = {'Регион': ['Москва', 'Нижний Новгород', 'Казань','Калининград','Сарапул'],'Количество': [10, 3, 1,3,1]}
-            events_regions_df = pd.DataFrame(data)
+
 
             fig = px.pie(events_regions_df,
-            values                  = events_regions_df['Количество'],
-            names                   = events_regions_df['Регион'],
+            values                  = events_regions_df.value_counts(),
+            names                   = events_regions_df.value_counts().index,
             color_discrete_sequence = colors,
-            hole                    = .4
+            hole                    = .6
             )
 
             fig.update_traces(
@@ -318,14 +327,12 @@ def main():
     with col1:
         with st.container():
             st.markdown('**Топ заказчиков**')
-            data = {'Компания':['Сбер','BMW','Bosch','DeLonghi','Xiaomi','BSGames'],
-                    'Количество' : [20,15,12,10,7,5]}
-            a = pd.DataFrame(data)
-            fig = px.pie(a,
-            values                  = a['Количество'],
-            names                   = a['Компания'],
+            top_companies_df = projects_df['Название компании'].value_counts().head(5)
+            fig = px.pie(top_companies_df.values,
+            values                  = top_companies_df.values,
+            names                   = top_companies_df.index,
             color_discrete_sequence = colors,
-            hole                    = .4
+            hole                    = .6
             )
 
             fig.update_traces(
@@ -353,7 +360,7 @@ def main():
             st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})  
     with col2:
         with st.container():
-            st.markdown('**Рост количества компаний-партнёров (накопительным итогом)**')
+            st.markdown('**Рост количества компаний-партнёров**')
             data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [17, 28, 42,50,70],'Прирост':
             [17,11,14,8,20]}
             test_df = pd.DataFrame(data)
@@ -403,12 +410,11 @@ def main():
         with st.container():
             st.markdown('**Проекты по типу компании-заказчика**')
             data = projects_df['Тип компании']
-
             fig = px.pie(data,
             values                  = data.value_counts(),
             names                   = data.value_counts().index,
             color_discrete_sequence = colors,
-            hole                    = .4
+            hole                    = .6
             )
 
             fig.update_traces(
@@ -445,12 +451,16 @@ def main():
             st.metric(
             label       = '',
             value       = rus,
-            label_visibility = 'collapsed')            
+            # label_visibility = 'collapsed' ХЗ ПОЧЕМУ НО МНЕ ВЫДАЁТ ОШИБКУ
+            )            
             st.markdown('**Международных компаний**')
             st.metric(
-            label       = ' ',
+            label       = '',
             value       = foreign,
-            label_visibility = 'collapsed')
+            
+            # label_visibility = 'collapsed'
+            
+            )
     
 #     with col5:
 #         with st.container():
@@ -462,19 +472,20 @@ def main():
 #             st.write('СБЕР Агентство Инноваций Москвы (Московский инновационный кластер) BMW (?)\nBOSCH\
 # Segezha Xiaomi Schneider Студия имени горького')
     
-    # Ряд студентов
+    # Ряд студентовтоп
     col1, col2,col3,col4 = st.columns([1, 2,2,1])
     with col1:
         with st.container():
             st.markdown('**Разделение по курсам**')
-            data = {'Курс':['1 курс','2 курс','3 курс','4 курс','1 курс маг','2 курс маг'],
-                    'Количество' : [60,80,70,40,10,5]}
-            a = pd.DataFrame(data)
-            fig = px.pie(a,
-            values                  = a['Количество'],
-            names                   = a['Курс'],
+            courses_df = students_in_projects_df[['Статус','ID студента','Курс в моменте','Программа в моменте']].loc[(students_in_projects_df['Статус'] == 'Активен')]
+            courses_df['Курс'] = courses_df[['Курс в моменте','Программа в моменте']].agg(' '.join,axis=1).map(lambda x:x[:5]+'.')
+            courses_df = courses_df[['ID студента','Курс']].drop_duplicates(subset = ['ID студента','Курс'], keep=False)
+            # courses_df
+            fig = px.pie(courses_df,
+            values                  = courses_df['Курс'].value_counts(),
+            names                   = courses_df['Курс'].value_counts().index,
             color_discrete_sequence = colors,
-            hole                    = .4
+            hole                    = .6
             )
 
             fig.update_traces(
@@ -593,9 +604,16 @@ def main():
     
     with col4:
         with st.container():
-            st.markdown('**Доля студентов 4 курса**')
+            st.markdown('**Студенты 4 курса**')
+            course_4_df = students_df.loc[(students_df['Курс'] == '4') & (students_df['Программа'] == 'Бакалавриат'),'ID студента']
+            merged_df = pd.merge(course_4_df, students_in_projects_df, on='ID студента', how='left')
+            merged_df = merged_df[merged_df['ID проекта'].notna()]
+            #Сколько людей принимали участие
+            tp = merged_df['ID студента'].nunique()
+            #Сколько людей не принимали участие
+            dtp = course_4_df.count() - tp
             fig = px.pie(
-            values                  = [94,27],
+            values                  = [tp,dtp],
             names                   = ['Участвовали в проектах','Не участвовали в проектах'],
             color_discrete_sequence = colors,
             hole                    = .6
@@ -603,7 +621,7 @@ def main():
 
             fig.update_traces(
                 textposition  = 'inside',
-                textinfo      = 'percent',
+                textinfo      = 'value',
                 hovertemplate = "<b>%{label}.</b><br><b>%{percent}</b> от студентов 4 курса",
                 textfont_size = 14
                 
@@ -667,15 +685,23 @@ def main():
     with col2:
         with st.container():
             st.markdown('**Интерактивные рейтинги**')
-            rating_subject  = st.selectbox(label='Показывать топ', options=['Студентов','Преподавателей', ], index=0, label_visibility="collapsed")
-            sort_asc = st.checkbox('По возрастанию',False,'sort_cb')
-            chart_container = st.container()
-            display_limit   = st.slider(label='Ограничить вывод', min_value=1, max_value=15, value=10, label_visibility="collapsed")
+            _col1, _col2, _col3 = st.columns(3)
+            with _col1:
+                rating_subject  = st.selectbox(label='Роль', options=['Участники', 'Кураторы', 'Модераторы', 'Преподаватели'],index=0)
+            with _col3:
+                sort_asc = st.selectbox(label='Сортировать', options=['Возрастание', 'Убывание'],index=1)
+                sort_asc = True if sort_asc == 'Возрастание' else False
+            with _col2:
+                display_limit = st.selectbox(label='Топ', options=[5,10,15],index=1)
             # data selection
-            if rating_subject == 'Преподавателей':
+            if rating_subject == 'Преподаватели':
                 data = teachers_in_projects_df.value_counts(subset='ФИО преподавателя', ascending=sort_asc).iloc[:display_limit]
-            else:
+            elif rating_subject == 'Участники':
                 data = students_in_projects_df.value_counts(subset='ФИО студента', ascending=sort_asc).iloc[:display_limit]
+            elif rating_subject == 'Кураторы':
+                data = curators_in_projects_df.value_counts(subset='ФИО студента', ascending=sort_asc).iloc[:display_limit]
+            elif rating_subject == 'Модераторы':
+                data = moderators_in_projects_df.value_counts(subset='ФИО студента', ascending=sort_asc).iloc[:display_limit]
             # set up a plot
             fig = px.bar(data, orientation='h', color_discrete_sequence=colors,text_auto=True)
             fig.update_layout(
@@ -687,7 +713,7 @@ def main():
                 font_size       = 15,
                 xaxis_visible   = False,
                 yaxis_title     = "",
-                height          = 250,
+                height          = 300,
                 margin          = dict(t=0, b=0,l=0,r=0),
                 # title = f'Топ {display_limit} {rating_subject}',
                 )
@@ -695,7 +721,7 @@ def main():
                 textposition  = 'outside')
             fig['data'][0].width=0.6
             # display the plot
-            chart_container.plotly_chart(fig, use_container_width=True, config={'staticPlot': True,'displayModeBar': False})
+            st.plotly_chart(fig, use_container_width=True, config={'staticPlot': True,'displayModeBar': False})
 
 if __name__ == "__main__":
     # page setup

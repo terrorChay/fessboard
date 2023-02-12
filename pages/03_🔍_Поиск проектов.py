@@ -55,7 +55,7 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
         for column in to_filter_columns:
             left, right = st.columns((1, 20))
             left.write("└")
-            if 'Менеджер' in df[column].name or 'Преподаватели' in df[column].name:
+            if 'Модераторы' in df[column].name or 'Кураторы' in df[column].name or 'Преподаватели' in df[column].name:
                 options = pd.Series([x for _list in df[column][df[column].notna()] for x in _list]).unique()
                 user_cat_input = right.multiselect(
                     f"{column}",
@@ -131,9 +131,9 @@ def run():
             tab1, tab2 = st.tabs(["Данные", "Аналитика"])
             with tab1:
                 st.dataframe(df_filters_applied)
-                col1, col2, _col3, _col4, _col5, _col6 = st.columns([0.8, 1, 1, 1, 1, 1])
-                col1.download_button('💾 CSV', data=utils.convert_df(df_search_applied), file_name="fessboard_slice.csv", mime='text/csv')
-                col2.download_button('💾 Excel', data=utils.convert_df(df_search_applied, True), file_name="fessboard_slice.xlsx")
+                col1, col2, _col3, _col4, _col5, _col6 = st.columns(6)
+                col1.download_button('💾 CSV', data=utils.convert_df(df_search_applied), file_name="fessboard_slice.csv", mime='text/csv', use_container_width=True)
+                col2.download_button('💾 Excel', data=utils.convert_df(df_search_applied, True), file_name="fessboard_slice.xlsx", use_container_width=True)
             with tab2:
                 st.write('какая-то аналитика')
         else:
