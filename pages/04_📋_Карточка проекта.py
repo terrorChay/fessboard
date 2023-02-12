@@ -101,7 +101,7 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore: list) -> pd.DataFrame:
 
 # Apply filters and return company name
 def project_selection(df: pd.DataFrame):
-    df = df[['ID проекта', 'Название проекта', 'Название компании', 'Грейд', 'Макро-направление', 'Микро-направление', 'Статус']].sort_values(by='ID проекта', ascending=False).copy()
+    df = df[['ID проекта', 'Название проекта', 'Название компании', 'Грейд', 'Макро-направление', 'Статус', 'Микро-направление']].sort_values(by='ID проекта', ascending=False).copy()
     df.insert(0, 'Составной ключ', df['ID проекта'].astype('str') + ' - ' + df['Название проекта'])
     selected_project = False
 
@@ -142,9 +142,9 @@ def project_selection(df: pd.DataFrame):
                 preselection = int(np.where(options == session['project_selectbox'])[0][0])
             except:
                 pass
-
+        
         user_cat_input = st.selectbox(
-            "Выбранный проект",
+            "Выберите проект",
             options,
             index=preselection,
             key='project_selectbox',
@@ -184,18 +184,17 @@ def run():
         except:
             end_date = "..."
         # Company name, project name and grade
-        with st.container():
-            # st.subheader(output['Название проекта'])
-            st.markdown(f"<hr style='height:0.1rem;'/>", unsafe_allow_html=True)
-            left, center, right = st.columns([1,2,1])
-            with left:
-                st.markdown(f"<i><p style='text-align: left;'>{output['Название компании']}<br>{output['Тип компании']}</p></i>", unsafe_allow_html=True)
-            with center:
-                st.markdown(f"<h2 style='text-align: center;'>{output['Название проекта']}</h2>", unsafe_allow_html=True)
-            with right:
-                st.markdown(f"<i><p style='text-align: right;'>{output['Микро-направление']}<br>{output['Грейд']}</p></i>", unsafe_allow_html=True)
-            st.markdown(f"<p style='text-align: center;'>{start_date} — {end_date}<br>{output['Статус']}</p>", unsafe_allow_html=True)
-            st.markdown(f"<hr style='height:0.1rem;'/>", unsafe_allow_html=True)
+        # st.subheader(output['Название проекта'])
+        st.markdown(f"<hr style='height:0.1rem;'/>", unsafe_allow_html=True)
+        left, center, right = st.columns([1,2,1])
+        with left:
+            st.markdown(f"<i><p style='text-align: left;'>{output['Название компании']}<br>{output['Тип компании']}</p></i>", unsafe_allow_html=True)
+        with center:
+            st.markdown(f"<h2 style='text-align: center;'>{output['Название проекта']}</h2>", unsafe_allow_html=True)
+        with right:
+            st.markdown(f"<i><p style='text-align: right;'>{output['Микро-направление']}<br>{output['Грейд']}</p></i>", unsafe_allow_html=True)
+        st.markdown(f"<p style='text-align: center;'>{start_date} — {end_date}<br>{output['Статус']}</p>", unsafe_allow_html=True)
+        st.markdown(f"<hr style='height:0.1rem;'/>", unsafe_allow_html=True)
         # Project goals and result
         with st.container():
             left, right = st.columns(2)
@@ -220,13 +219,23 @@ def run():
             left, right = st.columns(2)
             with left:
                 # Managers
-                st.markdown('**Менеджеры проекта**')
-                managers = output['Менеджеры']
+                st.markdown('**Модераторы проекта**')
+                managers = output['Модераторы']
                 if type(managers) != list:
                     st.warning('Данных нет, но вы держитесь...')
                 else:
                     for i in managers:
                         st.text(f'🧑‍💼 {i}')
+                
+                # Curators
+                st.markdown('**Кураторы проекта**')
+                curators = output['Кураторы']
+                if type(curators) != list:
+                    st.warning('Данных нет, но вы держитесь...')
+                else:
+                    for i in managers:
+                        st.text(f'🧑‍💼 {i}')
+                
                 # Teachers
                 st.markdown('**Курирующие преподаватели**')
                 teachers = output['Преподаватели']
@@ -238,16 +247,14 @@ def run():
             with right:
                 students_in_project = students_in_all_projects.loc[students_in_all_projects['ID проекта'] == project_id]
                 unique_groups_idx = students_in_project['Команда'].unique()
+                st.markdown('**Участники проекта**')
                 if len(unique_groups_idx) > 0:
                     group_counter = 0
                     for group_idx in unique_groups_idx:
-                        st.markdown(f'**Проектная команда {group_counter+1}**')
+                        st.caption(f'Проектная команда {group_counter+1}')
                         students_in_the_group   = students_in_project[students_in_project['Команда'] == group_idx]
-                        for i in students_in_the_group[['ФИО студента', 'Куратор']].values:
-                            if i[1] == 1:
-                                st.text(f'🧑‍🚒 {i[0]} (Куратор)')
-                            else:
-                                st.text(f'🧑‍🎓 {i[0]}') 
+                        for i in students_in_the_group[['ФИО студента']].values:
+                            st.text(f'🧑‍🎓 {i[0]}') 
                         group_counter += 1
                 else:
                     st.warning('Данных нет, но вы держитесь...')

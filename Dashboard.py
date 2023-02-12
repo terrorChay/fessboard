@@ -34,7 +34,10 @@ def main():
     with st.spinner('Читаем PMI и PMBOK...'):
         projects_df             = utils.load_projects()
     with st.spinner('Происходит аджайл...'):
-        students_in_projects_df = utils.load_students_in_projects()
+        students_in_projects_df     = utils.load_students_in_projects()
+        moderators_in_projects_df   = students_in_projects_df.loc[students_in_projects_df['Модератор'] == 1]
+        curators_in_projects_df     = students_in_projects_df.loc[students_in_projects_df['Куратор'] == 1]
+        students_in_projects_df     = students_in_projects_df.loc[(students_in_projects_df['Куратор'] == 0) & (students_in_projects_df['Модератор'] == 0)]
     with st.spinner('Изучаем требования стейкхолдеров...'):
         teachers_in_projects_df = utils.load_teachers_in_projects()
     with st.spinner('Еще чуть-чуть и прямо в рай...'):
@@ -682,15 +685,23 @@ def main():
     with col2:
         with st.container():
             st.markdown('**Интерактивные рейтинги**')
-            rating_subject  = st.selectbox(label='Показывать топ', options=['Студентов','Преподавателей', ], index=0, label_visibility="collapsed")
-            sort_asc = st.checkbox('По возрастанию',False,'sort_cb')
-            chart_container = st.container()
-            display_limit   = st.slider(label='Ограничить вывод', min_value=1, max_value=15, value=10, label_visibility="collapsed")
+            _col1, _col2, _col3 = st.columns(3)
+            with _col1:
+                rating_subject  = st.selectbox(label='Роль', options=['Участники', 'Кураторы', 'Модераторы', 'Преподаватели'])
+            with _col3:
+                sort_asc = st.selectbox(label='Сортировать', options=['Возрастание', 'Убывание'])
+                sort_asc = True if sort_asc == 'Возрастание' else False
+            with _col2:
+                display_limit = st.selectbox(label='Топ', options=[5,10,15])
             # data selection
-            if rating_subject == 'Преподавателей':
+            if rating_subject == 'Преподаватели':
                 data = teachers_in_projects_df.value_counts(subset='ФИО преподавателя', ascending=sort_asc).iloc[:display_limit]
-            else:
+            elif rating_subject == 'Участники':
                 data = students_in_projects_df.value_counts(subset='ФИО студента', ascending=sort_asc).iloc[:display_limit]
+            elif rating_subject == 'Кураторы':
+                data = curators_in_projects_df.value_counts(subset='ФИО студента', ascending=sort_asc).iloc[:display_limit]
+            elif rating_subject == 'Модераторы':
+                data = moderators_in_projects_df.value_counts(subset='ФИО студента', ascending=sort_asc).iloc[:display_limit]
             # set up a plot
             fig = px.bar(data, orientation='h', color_discrete_sequence=colors,text_auto=True)
             fig.update_layout(
@@ -710,7 +721,7 @@ def main():
                 textposition  = 'outside')
             fig['data'][0].width=0.6
             # display the plot
-            chart_container.plotly_chart(fig, use_container_width=True, config={'staticPlot': True,'displayModeBar': False})
+            st.plotly_chart(fig, use_container_width=True, config={'staticPlot': True,'displayModeBar': False})
 
 if __name__ == "__main__":
     # page setup

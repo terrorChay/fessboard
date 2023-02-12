@@ -102,10 +102,10 @@ query_dict =    {
                                                     ELSE mast_reg_name
                                                 END AS 'Регион',
                                                 CASE
-                                                    WHEN students.student_id in (SELECT managers_in_projects.student_id FROM managers_in_projects)
+                                                    WHEN students.student_id in (SELECT students_in_projects.student_id FROM students_in_projects WHERE students_in_projects.is_moderator = 1)
                                                     THEN 1
                                                     ELSE 0
-                                                END AS 'Опыт менеджера',
+                                                END AS 'Опыт модератора',
                                                 CASE
                                                     WHEN students.student_id in (SELECT students_in_projects.student_id FROM students_in_projects WHERE students_in_projects.is_curator = 1)
                                                     THEN 1
@@ -178,12 +178,6 @@ query_dict =    {
                 #                                         ) AS T1
                 #                                 ON students_in_projects.project_id = T1.project_id;
                 #                             """,
-                "managers_in_projects"  :   """
-                                            SELECT
-                                                managers_in_projects.project_id AS 'ID проекта',
-                                                managers_in_projects.student_id AS 'ID студента'
-                                            FROM managers_in_projects;
-                                            """,
 
                 # "universities_in_projects"  :   """
                 #                             SELECT
@@ -195,8 +189,15 @@ query_dict =    {
                 "teachers_in_projects"  :   """
                                             SELECT
                                                 teachers_in_projects.project_id AS 'ID проекта',
+                                                CONCAT_WS(
+                                                    ' ',
+                                                    teachers.teacher_surname,
+                                                    teachers.teacher_name,
+                                                    teachers.teacher_midname) AS 'ФИО преподавателя',
                                                 teachers_in_projects.teacher_id AS 'ID преподавателя'
-                                            FROM teachers_in_projects;
+                                            FROM teachers_in_projects
+                                            LEFT JOIN
+                                                teachers ON teachers_in_projects.teacher_id = teachers.teacher_id;
                                             """,
                 
                 "companies"             :   """
@@ -320,6 +321,7 @@ query_dict =    {
                                             AS 'ФИО студента',
                                             students_in_projects.team AS Команда,
                                             students_in_projects.is_curator AS Куратор,
+                                            students_in_projects.is_moderator AS Модератор,
                                             CONCAT(FLOOR(RAND()*(5-1)+1), '') AS `Курс в моменте`,
                                             'Бакалавриат' AS `Программа в моменте`
                                             FROM students_in_projects

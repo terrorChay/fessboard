@@ -220,9 +220,9 @@ def run():
             ## if search has results draw dataframe and download buttons
             if df_search_applied.shape[0]:
                 st.dataframe(df_search_applied, use_container_width=True)
-                col1, col2, _col3, _col4, _col5, _col6 = st.columns([0.8, 1, 1, 1, 1, 1])
-                col1.download_button('💾 CSV', data=utils.convert_df(df_search_applied), file_name=f"{company}_slice.csv", mime='text/csv')
-                col2.download_button('💾 Excel', data=utils.convert_df(df_search_applied, True), file_name=f"{company}_slice.xlsx")
+                col1, col2, _col3, _col4, _col5, _col6 = st.columns(6)
+                col1.download_button('💾 CSV', data=utils.convert_df(df_search_applied), file_name=f"{company}_slice.csv", mime='text/csv', use_container_width=True)
+                col2.download_button('💾 Excel', data=utils.convert_df(df_search_applied, True), file_name=f"{company}_slice.xlsx", use_container_width=True)
             else:
                 st.warning('Проекты не найдены')
             # Project groups
@@ -255,9 +255,9 @@ def run():
             # if search has results draw dataframe and download buttons
             if df_search_applied.shape[0]:
                 st.dataframe(df_search_applied, use_container_width=True)
-                col1, col2, _col3, _col4, _col5, _col6 = st.columns([0.8, 1, 1, 1, 1, 1])
-                col1.download_button('💾 CSV', data=utils.convert_df(df_search_applied), file_name=f"{company}_students.csv", mime='text/csv')
-                col2.download_button('💾 Excel', data=utils.convert_df(df_search_applied, True), file_name=f"{company}_students.xlsx")
+                col1, col2, _col3, _col4, _col5, _col6 = st.columns(6)
+                col1.download_button('💾 CSV', data=utils.convert_df(df_search_applied), file_name=f"{company}_students.csv", mime='text/csv', use_container_width=True)
+                col2.download_button('💾 Excel', data=utils.convert_df(df_search_applied, True), file_name=f"{company}_students.xlsx", use_container_width=True)
             else:
                 st.warning('Студенты не найдены')
 

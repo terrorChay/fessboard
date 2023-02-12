@@ -1,18 +1,20 @@
 /* Контейнер метрики */
-[data-testid="metric-container"] {
+/* [data-testid="metric-container"] {
     justify-content: center;
-} 
+}  */
 
 /* Лейбл метрики */
-[data-testid="stMetricLabel"] > div:nth-child(1) {
-    justify-content: center;
+[data-testid="stMetricLabel"] [data-testid="stMarkdownContainer"] {
     text-transform: uppercase;
+    justify-content: center;
+    display: flex;
     font-weight: 500;
 }
 
 /* Значение метрики */
 [data-testid="stMetricValue"] > div:nth-child(1) {
     justify-content: center;
+    display: flex;
     font-weight: 600;
 }
 
@@ -37,6 +39,12 @@
     padding: 1em;
     background: white;
 }  
+
+/* Style columns inside columns */
+[data-testid="column"] [data-testid="column"] {
+    box-shadow: None !important;
+    padding: 0 !important;
+} 
 
 /* Tooltip container */
 .tooltip {
