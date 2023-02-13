@@ -2,7 +2,6 @@ import pandas as pd
 from django import forms
 from django.forms import formsets, BaseInlineFormSet, inlineformset_factory, formset_factory, BaseFormSet, \
     modelformset_factory
-
 from .models import *
 
 from datetime import datetime
@@ -46,18 +45,6 @@ class StudentsForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(StudentsForm, self).__init__(*args, **kwargs)
-        # self.fields['bachelors_university'] = forms.ModelChoiceField(queryset=Universities.objects.all(),
-        #                                                      to_field_name='university_name',
-        #                                                      empty_label='Выберите университет бакалавра',
-        #                                                      widget=forms.Select(attrs={'class': 'form-control'}))
-        # self.fields['masters_university'] = forms.ModelChoiceField(queryset=Universities.objects.all(),
-        #                                                      to_field_name='university_name',
-        #                                                      empty_label='Выберите университет магистратуры',
-        #                                                     widget=forms.Select(attrs={'class': 'form-control'}), required=False)
-        # self.fields['student_status'] = forms.ModelChoiceField(queryset=StudentStatuses.objects.all(),
-        #                                                            to_field_name='student_status',
-        #                                                            empty_label='Выберите статус студента',
-        #                                                            widget=forms.Select(attrs={'class': 'form-control'}))
 
 
 class ProjectForm(forms.ModelForm):

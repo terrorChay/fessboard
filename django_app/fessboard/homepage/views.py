@@ -63,20 +63,6 @@ def homepage(request):
     return render(request, 'homepage.html')
 
 
-def createProject(request):
-    form = ProjectForm(request.POST or None)
-    if request.method == 'POST':
-        pk = request.POST.get('project_name')
-        form.save()
-        pk = Projects.objects.get(project_name=pk).project_id
-        messages.success(request, "Form saved successfully!")
-        request.session['selected_project_id'] = pk
-        return redirect(reverse('add-groups-project-form'))
-    else:
-        form = ProjectForm()
-    return render(request, 'index.html', {'form': form})
-
-
 def add_groups_and_students_view(request, *args, **pk):
     pk = request.session.get('selected_project_id')
     project = Projects.objects.get(project_id=pk)
@@ -102,10 +88,8 @@ def add_groups_and_students_view(request, *args, **pk):
 def add_project(request):
     if request.method == 'POST':
         form = ProjectForm(request.POST)
-        formset = forms.formset_factory(StudentForm, formset=StudentFormSet, extra=2, can_delete=True)
-        formset = formset(request.POST, prefix='students')
-        #formset = StudentFormSet(request.POST)
-        if form.is_valid():
+        formset = StudentFormSet(request.POST)
+        if form.is_valid() and formset.is_valid():
             project = form.save()
             for student_form in formset:
                 print('Launched for')
@@ -119,3 +103,45 @@ def add_project(request):
         form = ProjectForm()
         formset = StudentFormSet()
     return render(request, 'add_project.html', {'form': form, 'formset': formset})
+
+
+def edit_project(request, pk):
+    project = Projects.objects.get(project_id=pk)
+    form = ProjectForm(instance=project)
+
+    if request.method == 'POST':
+        form = ProjectForm(request.POST, instance=project)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/project-hub/')
+
+    context = {'form': form, 'project': project}
+    return render(request, 'index.html', context)
+
+
+def delete_project(request, pk):
+    project = Projects.objects.get(project_id=pk)
+    context = {'item': project}
+    if request.method == 'POST':
+        project.delete()
+        return HttpResponseRedirect('/project-hub/')
+    return render(request, 'delete_project.html', context)
+
+
+def projectHub(request):
+    context = {'Projects': Projects.objects.all()}
+    return render(request, 'project_hub.html', context)
+
+
+def edit_students(request, pk):
+    students = Amogus.objects.query(project_id=pk)
+    #formset = StudentFormSet(request.POST, initial=)
+
+    if request.method == 'POST':
+        form = ProjectForm(request.POST, instance=project)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/project-hub/')
+
+    context = {'form': form, 'project': project}
+    return render(request, 'index.html', context)

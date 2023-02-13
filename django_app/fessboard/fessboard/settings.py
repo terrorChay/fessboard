@@ -75,8 +75,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'u1815885_django_test',
-        'USER': 'u1815885_testim',
-        'PASSWORD': '9XRF8rs62S6xzHd',
+        'USER': 'u1815885_djanger',
+        'PASSWORD': 'wI5qE9iE8vcI7lF6',
         'HOST': '31.31.196.139',
     }
 }
