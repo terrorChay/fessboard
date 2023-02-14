@@ -605,7 +605,7 @@ def main():
     with col4:
         with st.container():
             st.markdown('**Студенты 4 курса**')
-            course_4_df = students_df.loc[(students_df['Курс'] == '4') & (students_df['Программа'] == 'Бакалавриат'),'ID студента']
+            course_4_df = students_df.loc[(students_df['Курс'] == '4') & (students_df['Программа'] == 'Бакалавриат')&(students_df['ВУЗ']=='ФЭСН РАНХиГС'),'ID студента']
             merged_df = pd.merge(course_4_df, students_in_projects_df, on='ID студента', how='left')
             merged_df = merged_df[merged_df['ID проекта'].notna()]
             #Сколько людей принимали участие
