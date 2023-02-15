@@ -11,15 +11,9 @@ import plotly.graph_objects as go
 
 #Наборы цветов
 
-color_themes = {'colors0':['#FF7C68','#FF9E8C','#FFBFB1','#FFDFD7','#F85546','#ED1C24',],
-                'colors1':['#ED1C24','#F2595F','#C9A0DC','#F0DC82','#FFDAB9','#0ABCFF','#556832'],
-                'colors2':px.colors.qualitative.Light24,
-                'colors3':['#ED1C24','#F2595F'],
-                'colors4':['#3A42FF','#FB832A','#D0455E','#82CD97','#45B0D0','#7A45D0','#88B1FF','#2227A7'],
-                'colors4':['#3A42FF','#45B0D0','#7A45D0','#88B1FF','#2227A7','#FB832A','#D0455E','#82CD97'],
-                'colors5':['#ED1C24','#F7A3A6'],
-                'test':['#5E60CE','#5390D9','#4EA8DE','#48BFE3','#56CFE1','#64DFDF','#72EFDD','#80FFDB','#7400B8','#6930C3',],
-                'colors6':['#FF5744','#F2595F','#C9A0DC','#F0DC82','#FFDAB9','#0ABCFF','#556832']
+color_themes = {
+                'FESS'  : ['#ED1C24','#670004','#C53A40','#FCB6B9','#941B1E','#F85B61','#FFD5D7','#F78F92'],
+                'ЦПР'    :['#3A42FF','#00046F','#2227A7','#88B1FF','#D3E2FF','#C0C0C0','#969696','#5B5B5B','#222222','#FFFFFF','#FB832A']
                 }
 tr='rgba(0,0,0,0)'
 
@@ -650,6 +644,7 @@ def main():
     with col1:
         with st.container():
             st.markdown('**Направления проектов**')
+            sunburst = colors
 
             # fields_df               = utils.query_data(query_dict['project_fields'])
             # fields_df['Количество'] = fields_df['Микро'].map(projects_df['Направление'].value_counts())
@@ -664,7 +659,7 @@ def main():
             path                    = ['Макро-направление', 'Микро-направление'],
             values                  = 'Количество',
             branchvalues            = "total",
-            color_discrete_sequence = colors
+            color_discrete_sequence = sunburst
             )
 
             fig.update_layout(
@@ -672,13 +667,15 @@ def main():
                 paper_bgcolor = tr,
                 font_family   = font,
                 height = 400,
+                
                 )
     
             fig.update_traces(
                 hovertemplate         = "Направление <b>%{parent}</b><br><b>%{label}.</b> Проектов: <b>%{value}</b>",
                 insidetextorientation = 'auto',
                 opacity               = 1,
-                sort                  = True
+                sort                  = True,
+                leaf = {'opacity':0.8}
                 )
 
             st.plotly_chart(fig, use_container_width=True,config=config)
