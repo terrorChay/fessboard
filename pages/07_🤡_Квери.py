@@ -5,7 +5,7 @@ import pandas as pd
 from connectdb import mysql_conn
  
  # Database Query
-@st.experimental_memo(ttl=600)
+@st.cache_data
 def query_data(query):
     with mysql_conn() as conn:
         df = pd.read_sql(query, conn)

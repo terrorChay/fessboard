@@ -101,16 +101,17 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore: list) -> pd.DataFrame:
 
 # Apply filters and return company name
 def project_selection(df: pd.DataFrame):
-    df = df[['ID проекта', 'Название проекта', 'Название компании', 'Грейд', 'Макро-направление', 'Статус', 'Микро-направление']].sort_values(by='ID проекта', ascending=False).copy()
+    df = df[['ID проекта', 'Название проекта', 'Название компании', 'Грейд', 'Статус', 'Макро-направление', 'Микро-направление']].sort_values(by='ID проекта', ascending=False).copy()
     df.insert(0, 'Составной ключ', df['ID проекта'].astype('str') + ' - ' + df['Название проекта'])
     selected_project = False
 
     modification_container = st.container()
     with modification_container:
-        left, right = st.columns(2)
+        col01, col02, col03 = st.columns(3)
+        cols_list = [col01, col02, col03]
         # Filters for project selection
         ## df.columns[3:] so that the composite key, project id and project name are ignored
-        for idx, column in enumerate(df.columns[4:]):
+        for idx, column in enumerate(df.columns[3:]):
             options = df[column].unique()
             ### preselection tweak to preserve selected filter values in case related filters get adjusted
             cached_value_key = column+'-input'
@@ -123,7 +124,7 @@ def project_selection(df: pd.DataFrame):
                     except:
                         pass
             ### display every other input field on the right column, all the rest - on the left column
-            col = left if idx % 2 == 0 else right
+            col = cols_list[idx] if idx < 3 else cols_list[idx-3]
             user_cat_input = col.multiselect(
                 f"{column}",
                 options,
@@ -144,7 +145,7 @@ def project_selection(df: pd.DataFrame):
                 pass
         
         user_cat_input = st.selectbox(
-            "Выберите проект",
+            ":heavy_exclamation_mark: **Выберите проект**",
             options,
             index=preselection,
             key='project_selectbox',

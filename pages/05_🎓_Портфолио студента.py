@@ -156,7 +156,7 @@ def run():
     with st.spinner('Масштабируем Agile...'):
         projects_df             = utils.load_projects()
     with st.spinner('Принимаем сигналы из космоса...'):
-        students_in_projects_df = utils.load_students_in_projects()
+        students_in_projects_df = utils.load_students_in_projects().dropna(subset=['Курс в моменте'])
     with st.spinner('Еще чуть-чуть и прямо в рай...'):
         students_df             = utils.load_students()
     with st.spinner('Звоним в деканат...'):
@@ -174,123 +174,155 @@ def run():
 
     student_id = select_student(students_df)
     if student_id:
+        student_info = students_df.loc[students_df['ID студента'] == student_id]
         projects_with_student_df = students_in_projects_df.loc[students_in_projects_df['ID студента'] == student_id]
-        if projects_with_student_df.shape[0] > 0:
-            tab1, tab2 = st.tabs(['Участник', 'Куратор'])
-            # Display projects 
-            regular_ids = projects_with_student_df.loc[projects_with_student_df['Куратор'] == 0]['ID проекта']
-            if regular_ids.shape[0] > 0:
-                regular_projects_df = projects_df.loc[projects_df['ID проекта'].isin(regular_ids)]
-                tab1.dataframe(regular_projects_df)
-            # Display curated projects
-            curated_ids = projects_with_student_df.loc[projects_with_student_df['Куратор'] == 1]['ID проекта']
-            if curated_ids.shape[0] > 0:
-                curated_projects_df = projects_df.loc[projects_df['ID проекта'].isin(curated_ids)]
-                tab2.dataframe(curated_projects_df)
-            # Radar chart
-            with st.container():
-                col1, col2, col3 = st.columns([1,1,1])
+        if projects_with_student_df.shape[0] > 0:  
+            tab1, tab2, tab3, tab4 = st.tabs(['Аналитика', 'Проекты', 'Куратор', 'Модератор'])
+            # Display charts
+            with tab1:
+                st.subheader(student_info['ФИО студента'].values[0])
+                st.markdown(f"""
+                            **Университет:** {student_info['ВУЗ'].values[0]}, {student_info['Программа'].values[0]}  
+                            **Курс:** {student_info['Курс'].values[0]}  
+                            **Поток:** {student_info['Поток'].values[0]}
+                            """)
+                col01, col02, col03, col04 = st.columns(4)
+                with col01:
+                    st.metric('Выполнено проектов', projects_with_student_df.loc[projects_with_student_df['Статус'] == 'Завершен'].shape[0])
+                with col02:
+                    st.metric('Проектов в работе', projects_with_student_df.loc[projects_with_student_df['Статус'] == 'Активен'].shape[0])
+                with col03:
+                    st.metric('Любимая компания', projects_df.loc[projects_df['ID проекта'].isin(projects_with_student_df['ID проекта'])]['Название компании'].mode()[0])
+                with col04:
+                    st.metric('Активен с', f"{projects_with_student_df['Курс в моменте'].min()} курса")
+
+                col1, col2, col3 = st.columns(3)
                 with col1:
-                    with st.container():
-                        st.markdown('**Распределение проектов студента по макронаправлениям**')
-                        data = projects_df.loc[projects_df['ID проекта'].isin(projects_with_student_df['ID проекта'])]['Макро-направление'].value_counts().reset_index(name='Количество')
-                        data = data.rename(columns={'index':'Макро'})
-                        data = data.drop_duplicates().merge(fields_df['Макро'].drop_duplicates(), on='Макро', how='right').fillna(0).sort_values(by='Количество')
-                        fig = px.line_polar(data,r='Количество',theta='Макро',line_close=True,color_discrete_sequence=colors)
-                        fig.update_traces(fill='toself',mode='lines+markers',cliponaxis=False)
-                        fig.update_layout(
-                            font_family=font,
-                            font_size = 10,
-                            paper_bgcolor = tr,
-                            plot_bgcolor  = tr,
-                            height = 320,
-                            yaxis_visible   = False,)
-                        fig.update_layout(polar = dict(radialaxis = dict(showticklabels = False,tick0=0,dtick=1)))
-                        st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+                    st.markdown('**Распределение проектов студента по макронаправлениям**')
+                    data = projects_df.loc[projects_df['ID проекта'].isin(projects_with_student_df['ID проекта'])]['Макро-направление'].value_counts().reset_index(name='Количество')
+                    data = data.rename(columns={'index':'Макро'})
+                    data = data.drop_duplicates().merge(fields_df['Макро'].drop_duplicates(), on='Макро', how='right').fillna(0).sort_values(by='Количество')
+                    fig = px.line_polar(data,r='Количество',theta='Макро',line_close=True,color_discrete_sequence=colors)
+                    fig.update_traces(fill='toself',mode='lines+markers',cliponaxis=False)
+                    fig.update_layout(
+                        font_family=font,
+                        font_size = 10,
+                        paper_bgcolor = tr,
+                        plot_bgcolor  = tr,
+                        height = 320,
+                        yaxis_visible   = False,)
+                    fig.update_layout(polar = dict(radialaxis = dict(showticklabels = False,tick0=0,dtick=1)))
+                    st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
                         
                 with col2:
-                    with st.container():
-                        data = projects_df.loc[projects_df['ID проекта'].isin(projects_with_student_df['ID проекта'])]['Микро-направление'].value_counts().reset_index(name='Количество')
-                        data = data.rename(columns={'index':'Микро'})
-                        st.markdown('**Распределение проектов студента по микронаправлениям**')
-                        fig = px.pie(data,
-                        values                  = data['Количество'],
-                        names                   = data['Микро'],
-                        color_discrete_sequence = colors,
-                        )
+                    data = projects_df.loc[projects_df['ID проекта'].isin(projects_with_student_df['ID проекта'])]['Микро-направление'].value_counts().reset_index(name='Количество')
+                    data = data.rename(columns={'index':'Микро'})
+                    st.markdown('**Распределение проектов студента по микронаправлениям**')
+                    fig = px.pie(data,
+                    values                  = data['Количество'],
+                    names                   = data['Микро'],
+                    color_discrete_sequence = colors,
+                    )
 
-                        fig.update_traces(
-                            textposition  = 'inside',
-                            textinfo      = 'value',
-                            hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
-                            textfont_size = 20,
-                            insidetextorientation = 'auto',
-                            
-                            )
-
-                        fig.update_layout(
-                        # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
-                        plot_bgcolor            = tr,
-                        paper_bgcolor           = tr,
-                        legend                  = dict(orientation="v",itemwidth=30,yanchor="top", y=0.7,xanchor="left",x=1),
-                        showlegend              = True,
-                        font_family             = font,
-                        title_font_family       = font,
-                        title_font_color        = "white",
-                        legend_title_font_color = "white",
-                        height                  = 220,
-                        margin                  = dict(t=0, l=0, r=200, b=0),
-                        #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
-                        )
-
-                        st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
-                with col3:
-                    with st.container():
-                        st.markdown('**Вовлеченность студента в проекты по курсам**')
-                        projects_by_year_df = projects_with_student_df
-                        projects_by_year_df['Курс'] = projects_by_year_df[['Курс в моменте','Программа в моменте']].agg(' '.join,axis=1).map(lambda x:x[:5]+'.')
-                        projects_by_year_df = projects_by_year_df[['Курс']].copy().sort_values('Курс').value_counts(sort=True).reset_index(name='Количество')
-                        df = pd.DataFrame(data=['1 Бак.','2 Бак.','3 Бак.','4 Бак.','1 Маг.','2 Маг.'],columns=['Курс'])
-                        df = df.merge(projects_by_year_df,how='left',on='Курс')
-                        df['Количество'] = df['Количество'].fillna(0).map(lambda x:int(x))
-                        fig = go.Figure()
-
-                        fig.add_trace(go.Bar(
-                                x                   = df['Курс'],
-                                y                   = df['Количество'],
-                                width               = 0.7,
-                                name                = 'Проектов',
-                                marker_color        = marker,
-                                opacity             = 1,
-                                marker_line_width   = 0,
-                                text                = list(df['Количество']),
-                                ))
-                            
-                        fig.update_layout(
-                            font_family    = font,
-                            font_size      = 13,
-                            paper_bgcolor  = tr,
-                            plot_bgcolor   = tr,
-                            margin         = dict(t=0, l=0, r=0, b=0),
-                            yaxis_title    = "",
-                            xaxis_title    = "",
-                            width          = 10,
-                            height         = 220,
-                            xaxis_visible  = True,
-                            yaxis_visible  = True,
-                            xaxis          = dict(showgrid=False), 
-                            yaxis          = dict(showgrid=True),
-                            showlegend     = False
-                            )
-                        fig.update_traces(
-                            textfont_size   = 14,
-                            textangle      = 0,
-                            textposition   = "auto",
-                            cliponaxis     = False,
-                            )
+                    fig.update_traces(
+                        textposition  = 'inside',
+                        textinfo      = 'value',
+                        hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+                        textfont_size = 20,
+                        insidetextorientation = 'auto',
                         
-                        st.plotly_chart(fig,use_container_width=True,config={'staticPlot': True,'displayModeBar': False})  
+                        )
 
+                    fig.update_layout(
+                    # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
+                    plot_bgcolor            = tr,
+                    paper_bgcolor           = tr,
+                    legend                  = dict(orientation="v",itemwidth=30,yanchor="top", y=0.7,xanchor="left",x=1),
+                    showlegend              = True,
+                    font_family             = font,
+                    title_font_family       = font,
+                    title_font_color        = "white",
+                    legend_title_font_color = "white",
+                    height                  = 220,
+                    margin                  = dict(t=0, l=0, r=200, b=0),
+                    #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
+                    )
+
+                    st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+                with col3:
+                    st.markdown('**Вовлеченность студента в проекты по курсам**')
+                    projects_by_year_df = projects_with_student_df
+                    projects_by_year_df['Курс'] = projects_by_year_df[['Курс в моменте','Программа в моменте']].agg(' '.join,axis=1).map(lambda x:x[:5]+'.')
+                    projects_by_year_df = projects_by_year_df[['Курс']].copy().sort_values('Курс').value_counts(sort=True).reset_index(name='Количество')
+                    df = pd.DataFrame(data=['1 Бак.','2 Бак.','3 Бак.','4 Бак.','1 Маг.','2 Маг.'],columns=['Курс'])
+                    df = df.merge(projects_by_year_df,how='left',on='Курс')
+                    df['Количество'] = df['Количество'].fillna(0).map(lambda x:int(x))
+                    fig = go.Figure()
+
+                    fig.add_trace(go.Bar(
+                            x                   = df['Курс'],
+                            y                   = df['Количество'],
+                            width               = 0.7,
+                            name                = 'Проектов',
+                            marker_color        = marker,
+                            opacity             = 1,
+                            marker_line_width   = 0,
+                            text                = list(df['Количество']),
+                            ))
+                        
+                    fig.update_layout(
+                        font_family    = font,
+                        font_size      = 13,
+                        paper_bgcolor  = tr,
+                        plot_bgcolor   = tr,
+                        margin         = dict(t=0, l=0, r=0, b=0),
+                        yaxis_title    = "",
+                        xaxis_title    = "",
+                        width          = 10,
+                        height         = 220,
+                        xaxis_visible  = True,
+                        yaxis_visible  = True,
+                        xaxis          = dict(showgrid=False), 
+                        yaxis          = dict(showgrid=True),
+                        showlegend     = False
+                        )
+                    fig.update_traces(
+                        textfont_size   = 14,
+                        textangle      = 0,
+                        textposition   = "auto",
+                        cliponaxis     = False,
+                        )
+                    
+                    st.plotly_chart(fig,use_container_width=True,config={'staticPlot': True,'displayModeBar': False})
+            # Display regular projects 
+            with tab2:
+                regular_projects = projects_with_student_df.loc[(projects_with_student_df['Куратор'] == 0) & (projects_with_student_df['Модератор'] == 0)]
+                regular_projects_idx = regular_projects['ID проекта']
+                if regular_projects_idx.shape[0] > 0:
+                    regular_projects_df = projects_df.loc[projects_df['ID проекта'].isin(regular_projects_idx)]
+                    st.dataframe(regular_projects_df)
+                else:
+                    st.warning('Студент пока не участвовал в проектах.')
+            # Display curated projects
+            with tab3:
+                curated_projects = projects_with_student_df.loc[projects_with_student_df['Куратор'] == 1]
+                curated_projects_idx = curated_projects['ID проекта']
+                if curated_projects_idx.shape[0] > 0:
+                    curated_projects_df = projects_df.loc[projects_df['ID проекта'].isin(curated_projects_idx)]
+                    st.dataframe(curated_projects_df)
+                else:
+                    st.warning('Студент пока не выступал в роли куратора.')
+            # Display moderated projects
+            with tab4:
+                moderated_projects = projects_with_student_df.loc[projects_with_student_df['Модератор'] == 1]
+                moderated_projects_idx = moderated_projects['ID проекта']
+                if moderated_projects_idx.shape[0] > 0:
+                    moderated_projects_df = projects_df.loc[projects_df['ID проекта'].isin(moderated_projects_idx)]
+                    st.dataframe(moderated_projects_df)
+                else:
+                    st.warning('Студент пока не выступал в роли модератора.')
+            # Radar chart
+            
         else:
             st.warning('Проекты не найдены')
     else:
@@ -298,6 +330,7 @@ def run():
     
 if __name__ == "__main__":
     utils.page_config(layout='wide', title='Портфолио компании')
+    utils.load_local_css('css/student.css')
     utils.remove_footer()
     utils.set_logo()
     run()
