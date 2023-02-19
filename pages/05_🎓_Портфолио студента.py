@@ -156,7 +156,7 @@ def run():
     with st.spinner('Масштабируем Agile...'):
         projects_df             = utils.load_projects()
     with st.spinner('Принимаем сигналы из космоса...'):
-        students_in_projects_df = utils.load_students_in_projects().dropna(subset=['Курс в моменте'])
+        students_in_projects_df = utils.load_students_in_projects()
     with st.spinner('Еще чуть-чуть и прямо в рай...'):
         students_df             = utils.load_students()
     with st.spinner('Звоним в деканат...'):

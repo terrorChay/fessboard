@@ -96,7 +96,7 @@ def load_students_in_projects():
     df.dropna(axis=0, subset=['Команда', 'ID студента'], inplace=True)
     df['ID студента'] = df['ID студента'].astype(int)
     df['ID проекта'] = df['ID проекта'].astype(int)
-    return df
+    return df.dropna(subset=['Курс в моменте'])
 
 # @st.cache_data(show_spinner=False)
 # def load_students_in_project(project_id):
