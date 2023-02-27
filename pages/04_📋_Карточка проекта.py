@@ -173,7 +173,7 @@ def run():
     if not selected_project:
         st.markdown(f"<h4 style='text-align: center;'>Выберите проект 😎</h4>", unsafe_allow_html=True)
     else:
-        project_id = int(selected_project[:5].split(' - ')[0])
+        project_id = int(selected_project.split(' - ')[0])
         output = projects_df.loc[projects_df['ID проекта'] == project_id].to_dict('records')[0]
         # Convert dates to day.month.Year or ... if error (nan or null or else)
         try:
