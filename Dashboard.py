@@ -415,7 +415,7 @@ def main():
                 textposition  = 'inside',
                 textinfo      = 'percent',
                 hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
-                textfont_size = 14
+                textfont_size = 12
                 
                 )
 
