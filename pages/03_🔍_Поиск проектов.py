@@ -87,7 +87,7 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
                     user_date_input = tuple(map(pd.to_datetime, user_date_input))
                     start_date, end_date = user_date_input
                     df = df.loc[df[column].between(start_date, end_date)]
-            elif is_categorical_dtype(df[column]) and ('Название' not in df[column].name):
+            elif is_categorical_dtype(df[column]) or any(map(df[column].name.__contains__, ['Название компании', 'направление', 'отрасль', 'Тип', 'Статус', 'Грейд', 'год', 'Отрасль'])):
                 options = df[column].unique()
                 user_cat_input = right.multiselect(
                     f"{column}",
