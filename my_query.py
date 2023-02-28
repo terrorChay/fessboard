@@ -3,8 +3,8 @@ query_dict =    {
                                             SELECT
                                                 projects.project_id AS `ID проекта`,
                                                 projects.project_name AS `Название проекта`,
-                                                projects.project_description AS Описание,
-                                                projects.project_result AS Результат,
+                                                projects.project_description AS `Описание`,
+                                                projects.project_result AS `Результат`,
                                                 projects.project_start_date AS `Дата начала`,
                                                 projects.project_end_date AS `Дата окончания`,
                                                 CASE
@@ -17,8 +17,8 @@ query_dict =    {
                                                 projects.project_company_id AS `ID компании`,
                                                 companies.company_name AS `Название компании`,
                                                 company_types.company_type AS `Тип компании`,
-                                                company_spheres.company_sphere AS Отрасль,
-                                                project_grades.grade AS Грейд,
+                                                company_spheres.company_sphere AS `Отрасль`,
+                                                project_grades.grade AS `Грейд`,
                                                 project_fields.field AS `Микро-направление`,
                                                 field_spheres.sphere AS `Макро-направление`,
                                                 CASE
@@ -28,17 +28,17 @@ query_dict =    {
                                                     THEN 'Активен' ELSE 'Завершен'
                                                 END AS Статус
                                             FROM projects
-                                            INNER JOIN project_grades
+                                            LEFT JOIN project_grades
                                                 ON projects.project_grade_id = project_grades.grade_id
-                                            INNER JOIN project_fields
+                                            LEFT JOIN project_fields
                                                 ON projects.project_field_id = project_fields.field_id
-                                            INNER JOIN field_spheres
+                                            LEFT JOIN field_spheres
                                                 ON project_fields.sphere_id = field_spheres.sphere_id
-                                            INNER JOIN companies
+                                            LEFT JOIN companies
                                                 ON projects.project_company_id = companies.company_id
-                                            INNER JOIN company_spheres
+                                            LEFT JOIN company_spheres
                                                 ON companies.company_sphere_id = company_spheres.company_sphere_id
-                                            INNER JOIN company_types
+                                            LEFT JOIN company_types
                                                 ON companies.company_type_id = company_types.company_type_id;
                                             """,
                 "events"                :   """
