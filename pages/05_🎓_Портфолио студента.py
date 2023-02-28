@@ -209,7 +209,7 @@ def run():
                         font_size = 10,
                         paper_bgcolor = tr,
                         plot_bgcolor  = tr,
-                        height = 320,
+                        height = 300,
                         yaxis_visible   = False,)
                     fig.update_layout(polar = dict(radialaxis = dict(showticklabels = False,tick0=0,dtick=1)))
                     st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
@@ -237,14 +237,14 @@ def run():
                     # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
                     plot_bgcolor            = tr,
                     paper_bgcolor           = tr,
-                    legend                  = dict(orientation="v",itemwidth=30,yanchor="top", y=0.7,xanchor="left",x=1),
+                    legend                  = dict(orientation="h",itemwidth=50,yanchor="top", y=-0,xanchor="left",x=0),
                     showlegend              = True,
                     font_family             = font,
                     title_font_family       = font,
                     title_font_color        = "white",
                     legend_title_font_color = "white",
-                    height                  = 220,
-                    margin                  = dict(t=0, l=0, r=200, b=0),
+                    height                  = 300,
+                    margin                  = dict(t=40, l=0, r=0, b=0),
                     #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
                     )
 
@@ -275,11 +275,11 @@ def run():
                         font_size      = 13,
                         paper_bgcolor  = tr,
                         plot_bgcolor   = tr,
-                        margin         = dict(t=0, l=0, r=0, b=0),
+                        margin         = dict(t=50, l=0, r=0, b=0),
                         yaxis_title    = "",
                         xaxis_title    = "",
                         width          = 10,
-                        height         = 220,
+                        height         = 290,
                         xaxis_visible  = True,
                         yaxis_visible  = True,
                         xaxis          = dict(showgrid=False), 
