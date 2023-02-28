@@ -55,7 +55,7 @@ def main():
         col1.metric(
             label       = 'Проектов в работе',
             value       = projects_df[projects_df['Статус'] == 'Активен'].shape[0],
-            delta       = '{} за все время'.format(projects_df[projects_df['Статус'] == 'Завершен'].shape[0]),
+            delta       = '{} выполнено'.format(projects_df[projects_df['Статус'] == 'Завершен'].shape[0]),
             delta_color = 'normal')
         # Уникальных студентов ( активно vs. побывало )
         col2.metric(
