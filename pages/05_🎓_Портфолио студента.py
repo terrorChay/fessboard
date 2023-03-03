@@ -188,7 +188,7 @@ def run():
                             """)
                 col01, col02, col03, col04 = st.columns(4)
                 with col01:
-                    st.metric('Выполнено проектов', projects_with_student_df.loc[projects_with_student_df['Статус'] == 'Завершен'].shape[0])
+                    st.metric('Выполнено проектов', projects_with_student_df.loc[(projects_with_student_df['Статус'] == 'Завершен')|(projects_with_student_df['Статус'] == 'Заморожен')].shape[0])
                 with col02:
                     st.metric('Проектов в работе', projects_with_student_df.loc[projects_with_student_df['Статус'] == 'Активен'].shape[0])
                 with col03:

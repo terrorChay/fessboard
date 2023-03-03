@@ -321,7 +321,9 @@ def main():
     with col1:
         with st.container():
             st.markdown('**Топ заказчиков**')
-            top_companies_df = projects_df['Название компании'].value_counts().head(5)
+            top_companies_df = projects_df[['Название компании','Тип компании']]
+            top_companies_df = top_companies_df[top_companies_df['Тип компании']!='Частное лицо']
+            top_companies_df = top_companies_df['Название компании'].value_counts().head(5)
             fig = px.pie(top_companies_df.values,
             values                  = top_companies_df.values,
             names                   = top_companies_df.index,
@@ -470,42 +472,45 @@ def main():
     col1, col2,col3,col4 = st.columns([1, 2,2,1])
     with col1:
         with st.container():
-            st.markdown('**Разделение по курсам**')
-            courses_df = students_in_projects_df[['Статус','ID студента','Курс в моменте','Программа в моменте']].loc[(students_in_projects_df['Статус'] == 'Активен')]
-            courses_df['Курс'] = courses_df[['Курс в моменте','Программа в моменте']].agg(' '.join,axis=1).map(lambda x:x[:5]+'.')
-            courses_df = courses_df[['ID студента','Курс']].drop_duplicates(subset = ['ID студента','Курс'], keep=False)
-            # courses_df
-            fig = px.pie(courses_df,
-            values                  = courses_df['Курс'].value_counts(),
-            names                   = courses_df['Курс'].value_counts().index,
-            color_discrete_sequence = colors,
-            hole                    = .6
-            )
-
-            fig.update_traces(
-                textposition  = 'inside',
-                textinfo      = 'label',
-                hovertemplate = "<b>%{label}.</b> Участников: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
-                textfont_size = 14
-                
+            try:
+                st.markdown('**Разделение по курсам**')
+                courses_df = students_in_projects_df[['Статус','ID студента','Курс в моменте','Программа в моменте']].loc[(students_in_projects_df['Статус'] == 'Активен')&(students_df['ВУЗ'] == 'ФЭСН РАНХиГС')]
+                courses_df['Курс'] = courses_df[['Курс в моменте','Программа в моменте']].agg(' '.join,axis=1).apply(lambda x:x[:5]+'.')
+                courses_df = courses_df[['ID студента','Курс']].drop_duplicates(subset = ['ID студента','Курс'], keep=False)
+                fig = px.pie(courses_df,
+                values                  = courses_df['Курс'].value_counts(),
+                names                   = courses_df['Курс'].value_counts().index,
+                color_discrete_sequence = colors,
+                hole                    = .6
                 )
 
-            fig.update_layout(
-                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
-                plot_bgcolor            = tr,
-                paper_bgcolor           = tr,
-                #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
-                showlegend              = False,
-                font_family             = font,
-                title_font_family       = font,
-                title_font_color        = "white",
-                legend_title_font_color = "white",
-                height                  = 220,
-                margin                  = dict(t=0, l=0, r=0, b=0),
-                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
-                )
+                fig.update_traces(
+                    textposition  = 'inside',
+                    textinfo      = 'label',
+                    hovertemplate = "<b>%{label}.</b> Участников: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+                    textfont_size = 14
+                    
+                    )
 
-            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})  
+                fig.update_layout(
+                    # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
+                    plot_bgcolor            = tr,
+                    paper_bgcolor           = tr,
+                    #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
+                    showlegend              = False,
+                    font_family             = font,
+                    title_font_family       = font,
+                    title_font_color        = "white",
+                    legend_title_font_color = "white",
+                    height                  = 220,
+                    margin                  = dict(t=0, l=0, r=0, b=0),
+                    #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
+                    )
+
+                st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})  
+            except:
+                st.warning('Сейчас нет активных проектов :)')
+                pass
     with col2:
         with st.container():
             st.markdown('**Участников в проектах**')
