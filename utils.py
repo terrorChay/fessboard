@@ -77,22 +77,22 @@ def set_MU_icon(icon_name):
 ####################################################################################################################################
 
 # Database Query
-@st.cache_data(ttl=600, show_spinner=False)
+@st.cache_data(ttl=10800, show_spinner=False)
 def query_data(query):
     with mysql_conn() as conn:
         df = pd.read_sql(query, conn)
     return df
 
-@st.cache_data(ttl=600, show_spinner=False)
+@st.cache_data(ttl=10800, show_spinner=False)
 def load_students():
     return query_data(query_dict['students']).sort_values(by=['ФИО студента'])
 
-@st.cache_data(ttl=600, show_spinner=False)
+@st.cache_data(ttl=10800, show_spinner=False)
 def load_companies():
     df = query_data(query_dict['companies'])
     return df
 
-@st.cache_data(ttl=600, show_spinner=False)
+@st.cache_data(ttl=10800, show_spinner=False)
 def load_students_in_projects():
     df = query_data(query_dict['students_in_projects'])
     df.dropna(axis=0, subset=['Команда', 'ID студента'], inplace=True)
@@ -107,28 +107,28 @@ def load_students_in_projects():
 #     df = df.loc[df['ID проекта'] == project_id]
 #     return df
 
-@st.cache_data(ttl=600, show_spinner=False)
+@st.cache_data(ttl=10800, show_spinner=False)
 def load_teachers_in_projects():
     return query_data(query_dict['teachers_in_projects'])
 
-@st.cache_data(ttl=600, show_spinner=False)
+@st.cache_data(ttl=10800, show_spinner=False)
 def load_students_in_events():
     return query_data(query_dict['students_in_events'])
 
-@st.cache_data(ttl=600, show_spinner=False)
+@st.cache_data(ttl=10800, show_spinner=False)
 def load_events():
     return query_data(query_dict['events'])
 
-@st.cache_data(ttl=600, show_spinner=False)
+@st.cache_data(ttl=10800, show_spinner=False)
 def load_universities():
     return query_data(query_dict['universities'])
 
-@st.cache_data(ttl=600, show_spinner=False)
+@st.cache_data(ttl=10800, show_spinner=False)
 def load_fields():
     return query_data(query_dict['project_fields'])
 
 # Load projects dataset
-@st.cache_data(ttl=600, show_spinner=False)
+@st.cache_data(ttl=10800, show_spinner=False)
 def load_projects():
     # Load projects
     projects_df = query_data(query_dict['projects'])
