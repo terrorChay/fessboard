@@ -594,7 +594,7 @@ def main():
                     # font_size        = 7,
                     height = 160,
                     margin           = dict(t=0, l=0, r=0, b=0),
-                    xaxis_visible   = False,
+                    xaxis_visible   = True,
                     )
                 
                 fig.update_traces(hovertemplate = "<b>На %{label} курсе - %{value}</b>",cliponaxis    = False)
