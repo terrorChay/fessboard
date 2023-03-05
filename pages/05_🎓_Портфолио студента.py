@@ -177,25 +177,29 @@ def run():
         student_info = students_df.loc[students_df['ID студента'] == student_id]
         projects_with_student_df = students_in_projects_df.loc[students_in_projects_df['ID студента'] == student_id]
         if projects_with_student_df.shape[0] > 0:  
-            tab1, tab2, tab3, tab4 = st.tabs(['Аналитика', 'Проекты', 'Куратор', 'Модератор'])
-            # Display charts
+            tab1, tab2, tab3, tab4 = st.tabs(['Аналитика', 'Участник', 'Куратор', 'Модератор'])
+            # Analytics tab
             with tab1:
-                st.subheader(student_info['ФИО студента'].values[0])
+                student_fullname = student_info['ФИО студента'].values[0]
+                st.subheader(student_fullname)
                 st.markdown(f"""
-                            **Университет:** {student_info['ВУЗ'].values[0]}, {student_info['Программа'].values[0]}  
-                            **Курс:** {student_info['Курс'].values[0]}  
+                            **Университет:** {student_info['ВУЗ'].values[0]}  
+                            **Курс:** {student_info['Курс'].values[0]}, {student_info['Программа'].values[0]}  
                             **Поток:** {student_info['Поток'].values[0]}
                             """)
-                col01, col02, col03, col04 = st.columns(4)
-                with col01:
-                    st.metric('Выполнено проектов', projects_with_student_df.loc[(projects_with_student_df['Статус'] == 'Завершен')|(projects_with_student_df['Статус'] == 'Заморожен')].shape[0])
-                with col02:
-                    st.metric('Проектов в работе', projects_with_student_df.loc[projects_with_student_df['Статус'] == 'Активен'].shape[0])
-                with col03:
-                    st.metric('Любимая компания', projects_df.loc[projects_df['ID проекта'].isin(projects_with_student_df['ID проекта'])]['Название компании'].mode()[0])
-                with col04:
-                    st.metric('Активен с', f"{projects_with_student_df['Курс в моменте'].min()} курса")
-
+                projects_summary = {
+                    'Выполнено проектов'    : projects_with_student_df.loc[(projects_with_student_df['Статус'] == 'Завершен')|(projects_with_student_df['Статус'] == 'Заморожен')].shape[0],
+                    'Проектов в работе'     : projects_with_student_df.loc[projects_with_student_df['Статус'] == 'Активен'].shape[0],
+                    'Любимая компания'      : projects_df.loc[projects_df['ID проекта'].isin(projects_with_student_df['ID проекта'])]['Название компании'].mode()[0],
+                    'В проектах'          : f"c {projects_with_student_df['Курс в моменте'].min()} курса",
+                }
+                projects_summary_df = projects_with_student_df[['ID проекта', 'Куратор', 'Модератор']].merge(projects_df[['ID проекта', 'Название компании', 'Название проекта', 'Микро-направление', 'Грейд']], "left", "ID проекта", )
+                st.download_button(label='💾 Скачать портфолио', data=utils.student_to_pdf(student_info, projects_summary, projects_summary_df), file_name=f"{student_fullname}.pdf", mime="application/pdf",)
+                # Project summary metrics
+                cols = st.columns(4)
+                for idx, key in enumerate(list(projects_summary)):
+                    cols[idx].metric(key, projects_summary[key])
+                # Project summary visualization
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     st.markdown('**Распределение проектов студента по макронаправлениям**')
