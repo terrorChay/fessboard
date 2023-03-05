@@ -237,7 +237,8 @@ def student_to_pdf(student_info, projects_summary, projects_summary_df):
     pdf.set_font("DejaVu", "", 12)
     for idx, row in projects_summary_df.loc[(projects_summary_df['Куратор'] == 0) & (projects_summary_df['Модератор'] == 0)].iterrows():
         pdf.cell(pdf.epw*0.05, 8, txt=f"{idx})")
-        pdf.cell(pdf.epw*0.45, 8, txt=row['Название проекта'])
+        project_name = f"{row['Название проекта'][:30]}..." if len(row['Название проекта']) >= 30 else row['Название проекта']
+        pdf.cell(pdf.epw*0.45, 8, txt=project_name)
         pdf.cell(pdf.epw*0.4, 8, txt=row['Микро-направление'])
         pdf.cell(pdf.epw*0.1, 8, txt=row['Грейд'], new_x="LMARGIN", new_y="NEXT")
 
@@ -252,7 +253,8 @@ def student_to_pdf(student_info, projects_summary, projects_summary_df):
         pdf.set_font("DejaVu", "", 12)
         for idx, row in k.iterrows():
             pdf.cell(pdf.epw*0.05, 8, txt=f"{idx})")
-            pdf.cell(pdf.epw*0.45, 8, txt=row['Название проекта'])
+            project_name = f"{row['Название проекта'][:30]}..." if len(row['Название проекта']) >= 30 else row['Название проекта']
+            pdf.cell(pdf.epw*0.45, 8, txt=project_name)
             pdf.cell(pdf.epw*0.4, 8, txt=row['Микро-направление'])
             pdf.cell(pdf.epw*0.1, 8, txt=row['Грейд'], new_x="LMARGIN", new_y="NEXT")
 
@@ -267,7 +269,8 @@ def student_to_pdf(student_info, projects_summary, projects_summary_df):
         pdf.set_font("DejaVu", "", 12)
         for idx, row in j.iterrows():
             pdf.cell(pdf.epw*0.05, 8, txt=f"{idx})")
-            pdf.cell(pdf.epw*0.45, 8, txt=row['Название проекта'])
+            project_name = f"{row['Название проекта'][:30]}..." if len(row['Название проекта']) >= 30 else row['Название проекта']
+            pdf.cell(pdf.epw*0.45, 8, txt=project_name)
             pdf.cell(pdf.epw*0.4, 8, txt=row['Микро-направление'])
             pdf.cell(pdf.epw*0.1, 8, txt=row['Грейд'], new_x="LMARGIN", new_y="NEXT")
     return bytes(pdf.output())
