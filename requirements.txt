@@ -2,6 +2,7 @@
 streamlit
 pyxlsb
 xlsxwriter
+fpdf2
 
 # Extra visualization
 plotly
