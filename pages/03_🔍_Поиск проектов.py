@@ -30,7 +30,7 @@ def search_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
 # Apply filters and return filtered dataset
 def filter_dataframe(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
-    st.sidebar.write('Вывести столбцы')
+    st.sidebar.write('Выводить столбцы')
     cols_in_df      = df.columns.values
     cols_dict       = {}
     for col_name in cols_in_df:
@@ -55,7 +55,7 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
         for column in to_filter_columns:
             left, right = st.columns((1, 20))
             left.write("└")
-            if 'Модераторы' in df[column].name or 'Кураторы' in df[column].name or 'Преподаватели' in df[column].name:
+            if any(map(df[column].name.__contains__, ['Модераторы', 'Преподаватели', 'Кураторы', 'Университеты'])):
                 options = pd.Series([x for _list in df[column][df[column].notna()] for x in _list]).unique()
                 user_cat_input = right.multiselect(
                     f"{column}",

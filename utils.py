@@ -133,21 +133,24 @@ def load_projects():
     # Load projects
     projects_df = query_data(query_dict['projects'])
 
-    # Load people
-    students_df = load_students_in_projects()
-    moderators_df = students_df.loc[students_df['Модератор'] == 1]
-    curators_df = students_df.loc[students_df['Куратор'] == 1]
-    teachers_df = load_teachers_in_projects()
+    # Load people & universiies
+    students_df         = load_students_in_projects()
+    moderators_df       = students_df.loc[students_df['Модератор'] == 1]
+    curators_df         = students_df.loc[students_df['Куратор'] == 1]
+    teachers_df         = load_teachers_in_projects()
+    universities_df     = query_data(query_dict['universities_in_projects'])
 
     # Join multiple managers and teachers into list values
-    moderators_df = moderators_df.groupby(['ID проекта'])['ФИО студента'].apply(list).reset_index().rename(columns={'ФИО студента':'Модераторы'})
-    curators_df = curators_df.groupby(['ID проекта'])['ФИО студента'].apply(list).reset_index().rename(columns={'ФИО студента':'Кураторы'})
-    teachers_df = teachers_df.groupby(['ID проекта'])['ФИО преподавателя'].apply(list).reset_index().rename(columns={'ФИО преподавателя':'Преподаватели'})
+    moderators_df   = moderators_df.groupby(['ID проекта'])['ФИО студента'].apply(list).reset_index().rename(columns={'ФИО студента':'Модераторы'})
+    curators_df     = curators_df.groupby(['ID проекта'])['ФИО студента'].apply(list).reset_index().rename(columns={'ФИО студента':'Кураторы'})
+    teachers_df     = teachers_df.groupby(['ID проекта'])['ФИО преподавателя'].apply(list).reset_index().rename(columns={'ФИО преподавателя':'Преподаватели'})
+    universities_df = universities_df.groupby(['ID проекта'])['Университет'].apply(list).reset_index().rename(columns={'Университет':'Университеты'})
 
     # Left join dataframes to create consolidated one
     projects_df = projects_df.merge(moderators_df, on='ID проекта', how='left')
     projects_df = projects_df.merge(curators_df, on='ID проекта', how='left')
     projects_df = projects_df.merge(teachers_df, on='ID проекта', how='left')
+    projects_df = projects_df.merge(universities_df, on= 'ID проекта', how='left')
 
     return projects_df
 ####################################################################################################################################

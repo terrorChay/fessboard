@@ -276,5 +276,16 @@ query_dict =    {
                                                     ON universities.university_region_id = regions.region_id) Магистры
                                                 ON students.student_id = Магистры.student_id;
                                             """,
+                "universities_in_projects": """
+                                            SELECT DISTINCT
+                                            students_in_projects.project_id  AS `ID проекта`,
+                                            universities.university_id  AS `ID университета`,
+                                            universities.university_name  AS `Университет`
+                                            FROM students_in_projects
+                                            INNER JOIN students
+                                                ON students_in_projects.student_id = students.student_id
+                                            INNER JOIN universities
+                                                ON students.bachelors_university_id = universities.university_id;
+                                            """
                 
 }
