@@ -103,7 +103,7 @@ def agg_students(students_df: pd.DataFrame, students_in_projects_df: pd.DataFram
     students = students_df.copy()
     participations = students_in_projects_df[['ID студента', 'Куратор', 'Модератор', 'Академический год']].copy()
     # date limitation on projects
-    options = participations['Академический год'].unique()
+    options = sorted(participations['Академический год'].unique())
     user_cat_input = st.multiselect(
         f"Учитывать проекты за периоды",
         options,
