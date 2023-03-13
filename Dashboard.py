@@ -90,7 +90,7 @@ def main():
             delta       = '{} участников(-а)'.format(students_in_events_df.shape[0]),
             delta_color = 'normal')
     # Ряд графиков о проектах
-    col1, col2,col3,col5 = st.columns([1, 2,2,1])
+    col1, col2,col3,col4 = st.columns([1, 2,2,1])
     with col1:
         ## Распределение грейдов
         with st.container():
@@ -191,7 +191,49 @@ def main():
             )
 
             st.plotly_chart(fig,use_container_width=True,config=config)
+
     with col3:
+        ## Регионы мероприятий
+        with st.container():
+            st.markdown('**Регионы ивентов**')
+            events_regions_df = events_df['Регион']
+            data    = {'Регион': ['Москва', 'Нижний Новгород', 'Казань','Калининград','Сарапул'],'Количество': [10, 3, 1,3,1]}
+
+
+            fig = px.pie(events_regions_df,
+            values                  = events_regions_df.value_counts(),
+            names                   = events_regions_df.value_counts().index,
+            color_discrete_sequence = colors,
+            hole                    = .6
+            )
+            
+
+            fig.update_traces(
+                textposition  = 'inside',
+                textinfo      = 'percent',
+                hovertemplate = "<b>%{label}.</b> Мероприятий: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+                textfont_size = 12
+                
+                )
+
+
+            fig.update_layout(
+                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
+                plot_bgcolor            = tr,
+                paper_bgcolor           = tr,
+                legend                  = dict(orientation="v",itemwidth=30,yanchor="top", y=0.7,xanchor="left",x=1),
+                showlegend              = True,
+                font_family             = font,
+                title_font_family       = font,
+                title_font_color        = "white",
+                legend_title_font_color = "white",
+                height                  = 220,
+                margin                  = dict(t=0, l=0, r=200, b=0),
+                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
+                )
+            st.plotly_chart(fig,use_container_width=True,config=config)
+
+    with col4:
         ## Число проектных групп в год
         with st.container():
             st.markdown('**Число проектных групп в год**')  
@@ -238,44 +280,7 @@ def main():
 # add first scatter trace at row = 1, col = 1
             fig.add_trace(go.Scatter(x=test_df['Год'], y=test_df['Прирост'], line=dict(color='#07C607'), name='Прирост'),
               row = 1, col = 1)
-            st.plotly_chart(fig,use_container_width=True,config=config)
-    with col5:
-        ## Регионы мероприятий
-        with st.container():
-            st.markdown('**Регионы ивентов**')
-            events_regions_df = events_df['Регион']
-            data    = {'Регион': ['Москва', 'Нижний Новгород', 'Казань','Калининград','Сарапул'],'Количество': [10, 3, 1,3,1]}
 
-
-            fig = px.pie(events_regions_df,
-            values                  = events_regions_df.value_counts(),
-            names                   = events_regions_df.value_counts().index,
-            color_discrete_sequence = colors,
-            hole                    = .6
-            )
-
-            fig.update_traces(
-                textposition  = 'inside',
-                textinfo      = 'label',
-                hovertemplate = "<b>%{label}.</b> Мероприятий: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
-                textfont_size = 14
-                
-                )
-
-            fig.update_layout(
-                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
-                plot_bgcolor            = tr,
-                paper_bgcolor           = tr,
-                #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
-                showlegend              = False,
-                font_family             = font,
-                title_font_family       = font,
-                title_font_color        = "white",
-                legend_title_font_color = "white",
-                height                  = 220,
-                margin                  = dict(t=0, l=0, r=0, b=0),
-                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
-                )
 
             st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
     # Ряд логотипов
@@ -477,6 +482,7 @@ def main():
                 
                 courses_df = students_in_projects_df[['Статус','ID студента','Курс в моменте','Программа в моменте','ВУЗ в моменте']]
                 courses_df = courses_df.loc[(courses_df['Статус'] == 'Активен')&(courses_df['ВУЗ в моменте'] == 'ФЭСН РАНХиГС')]
+
                 courses_df['Курс'] = courses_df[['Курс в моменте','Программа в моменте']].agg(' '.join,axis=1).apply(lambda x:x[:5]+'.')
                 courses_df = courses_df[['ID студента','Курс']].drop_duplicates(subset = ['ID студента','Курс'], keep=False)
                 fig = px.pie(courses_df,
