@@ -76,12 +76,16 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
                 )
                 df = df[df[column].between(*user_num_input)]
             elif is_datetime64_any_dtype(df[column]):
+                _min = df[column].min()
+                _max = df[column].max()
                 user_date_input = right.date_input(
                     f" {column}",
                     value=(
-                        df[column].min(),
-                        df[column].max(),
+                        _min,
+                        _max,
                     ),
+                    max_value=_max,
+                    min_value=_min,
                 )
                 if len(user_date_input) == 2:
                     user_date_input = tuple(map(pd.to_datetime, user_date_input))

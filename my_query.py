@@ -249,7 +249,14 @@ query_dict =    {
                                                 projects.project_start_date < STR_TO_DATE(CONCAT(students.masters_start_year, '-09-01'), '%Y-%m-%d') THEN 'Бакалавриат' ELSE 'Магистратура' END AS 'Программа в моменте',
                                             CASE WHEN students.masters_start_year = 0 OR
                                                 students.masters_start_year IS NULL OR
-                                                projects.project_start_date < STR_TO_DATE(CONCAT(students.masters_start_year, '-09-01'), '%Y-%m-%d') THEN Бакалавры.university_name ELSE Магистры.university_name END AS 'ВУЗ в моменте'
+                                                projects.project_start_date < STR_TO_DATE(CONCAT(students.masters_start_year, '-09-01'), '%Y-%m-%d') THEN Бакалавры.university_name ELSE Магистры.university_name END AS 'ВУЗ в моменте',
+                                            CASE
+                                                    WHEN YEAR(projects.project_start_date) = 0
+                                                        THEN NULL
+                                                    WHEN MONTH(projects.project_start_date) > 8
+                                                        THEN CONCAT_WS(' - ', YEAR(projects.project_start_date), YEAR(projects.project_start_date)+1)
+                                                    ELSE CONCAT_WS(' - ', YEAR(projects.project_start_date)-1, YEAR(projects.project_start_date))
+                                                END AS `Академический год`
                                             FROM students_in_projects
                                             LEFT OUTER JOIN projects
                                                 ON students_in_projects.project_id = projects.project_id

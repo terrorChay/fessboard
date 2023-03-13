@@ -63,12 +63,16 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
                 )
                 df = df[df[column].between(*user_num_input)]
             elif is_datetime64_any_dtype(df[column]):
+                _min = df[column].min()
+                _max = df[column].max()
                 user_date_input = right.date_input(
                     f" {column}",
                     value=(
-                        df[column].min(),
-                        df[column].max(),
+                        _min,
+                        _max,
                     ),
+                    max_value=_max,
+                    min_value=_min,
                 )
                 if len(user_date_input) == 2:
                     user_date_input = tuple(map(pd.to_datetime, user_date_input))
@@ -95,16 +99,25 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
             df[col] = df[col].dt.strftime('%d-%m-%Y')
     return df
 
-
-@st.cache_data()
-def students_pivot(students_df: pd.DataFrame, students_in_projects_df: pd.DataFrame):
+def agg_students(students_df: pd.DataFrame, students_in_projects_df: pd.DataFrame):
     students = students_df.copy()
-    participations = students_in_projects_df[['ID студента', 'Куратор', 'Модератор']].copy()
+    participations = students_in_projects_df[['ID студента', 'Куратор', 'Модератор', 'Академический год']].copy()
+    # date limitation on projects
+    options = participations['Академический год'].unique()
+    user_cat_input = st.multiselect(
+        f"Учитывать проекты за периоды",
+        options,
+        default=options,
+    )
+    if user_cat_input:
+        _cat_input = user_cat_input
+        participations = participations[participations['Академический год'].isin(_cat_input)]
+    #
     df_k = participations.groupby(['ID студента']).agg({'Куратор':'sum', 'Модератор':'sum'}).reset_index().rename(columns ={'Куратор':'Курировал (раз)', 'Модератор':'Модерировал (раз)'})
     df_j = participations.loc[(participations['Куратор'] == 0) & (participations['Модератор'] == 0)].value_counts('ID студента').reset_index().rename(columns ={0:'Участвовал (раз)'})
     agg_df = df_k.merge(df_j, how='inner', on='ID студента')
-    pivot_df = students.merge(agg_df, how='left', on='ID студента').fillna(0)
-    return pivot_df
+    agg_df = students.merge(agg_df, how='left', on='ID студента').fillna(0)
+    return agg_df
 
 # App launch
 def run():
@@ -120,7 +133,7 @@ def run():
             :floppy_disk: Вы также можете скачать составленную выборку в формате Microsoft Excel.
             ''')
     # draw criteria filters and return filtered df
-    students_pivot_df = students_pivot(students_df, students_in_projects_df)
+    students_pivot_df = agg_students(students_df, students_in_projects_df)
     df_filters_applied  = filter_dataframe(students_pivot_df)
     # if filters have results -> draw DF, download btn and analytics
     if 0 not in df_filters_applied.shape:
