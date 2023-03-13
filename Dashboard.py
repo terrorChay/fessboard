@@ -474,7 +474,9 @@ def main():
         with st.container():
             try:
                 st.markdown('**Разделение по курсам**')
-                courses_df = students_in_projects_df[['Статус','ID студента','Курс в моменте','Программа в моменте']].loc[(students_in_projects_df['Статус'] == 'Активен')&(students_df['ВУЗ'] == 'ФЭСН РАНХиГС')]
+                
+                courses_df = students_in_projects_df[['Статус','ID студента','Курс в моменте','Программа в моменте','ВУЗ в моменте']]
+                courses_df = courses_df.loc[(courses_df['Статус'] == 'Активен')&(courses_df['ВУЗ в моменте'] == 'ФЭСН РАНХиГС')]
                 courses_df['Курс'] = courses_df[['Курс в моменте','Программа в моменте']].agg(' '.join,axis=1).apply(lambda x:x[:5]+'.')
                 courses_df = courses_df[['ID студента','Курс']].drop_duplicates(subset = ['ID студента','Курс'], keep=False)
                 fig = px.pie(courses_df,
@@ -483,6 +485,7 @@ def main():
                 color_discrete_sequence = colors,
                 hole                    = .6
                 )
+                
 
                 fig.update_traces(
                     textposition  = 'inside',
