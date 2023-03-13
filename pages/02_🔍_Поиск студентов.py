@@ -14,20 +14,6 @@ from pandas.api.types import (
 )
 import plotly.express as px
 
-# Apply search filters and return filtered dataset
-def search_dataframe(df: pd.DataFrame) -> pd.DataFrame:
-
-    df = df.copy()
-
-    user_text_input = st.text_input(f"Поиск по проектам", placeholder='Введите текст', help='Укажите текст, который могут содержать интересующие Вас проекты')
-
-    if user_text_input:
-        _user_text_input = "".join([char for char in user_text_input if char.isalnum()])
-        mask = df.apply(lambda x: x.astype(str).str.contains(_user_text_input, na=False, flags=re.IGNORECASE))
-        df = df.loc[mask.any(axis=1)]
-
-    return df
-
 # Apply filters and return filtered dataset
 def filter_dataframe(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
     st.sidebar.write('Выводить столбцы')
@@ -55,18 +41,19 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
         for column in to_filter_columns:
             left, right = st.columns((1, 20))
             left.write("└")
-            if any(map(df[column].name.__contains__, ['Модераторы', 'Преподаватели', 'Кураторы', 'Университеты'])):
-                options = pd.Series([x for _list in df[column][df[column].notna()] for x in _list]).unique()
-                user_cat_input = right.multiselect(
-                    f"{column}",
-                    options,
-                )
-                if user_cat_input:
-                    df = df[df[column].astype(str).str.contains('|'.join(user_cat_input))]
-            elif is_numeric_dtype(df[column]):
+            # if any(map(df[column].name.__contains__, ['Модераторы', 'Преподаватели', 'Кураторы', 'Университеты'])):
+            #     options = pd.Series([x for _list in df[column][df[column].notna()] for x in _list]).unique()
+            #     user_cat_input = right.multiselect(
+            #         f"{column}",
+            #         options,
+            #     )
+            #     if user_cat_input:
+            #         df = df[df[column].astype(str).str.contains('|'.join(user_cat_input))]
+            # el
+            if is_numeric_dtype(df[column]):
                 _min = float(df[column].min())
                 _max = float(df[column].max())
-                step = (_max - _min) / 100
+                step = 1.00
                 user_num_input = right.slider(
                     f" {column}",
                     min_value=_min,
@@ -87,7 +74,7 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
                     user_date_input = tuple(map(pd.to_datetime, user_date_input))
                     start_date, end_date = user_date_input
                     df = df.loc[df[column].between(start_date, end_date)]
-            elif is_categorical_dtype(df[column]) or any(map(df[column].name.__contains__, ['Название компании', 'направление', 'отрасль', 'Тип', 'Статус', 'Грейд', 'год', 'Отрасль'])):
+            elif is_categorical_dtype(df[column]) or any(map(df[column].name.__contains__, ['Курс', 'Поток', 'ВУЗ', 'Регион', 'Программа'])):
                 options = df[column].unique()
                 user_cat_input = right.multiselect(
                     f"{column}",
@@ -108,39 +95,46 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
             df[col] = df[col].dt.strftime('%d-%m-%Y')
     return df
 
+
+@st.cache_data()
+def students_pivot(students_df: pd.DataFrame, students_in_projects_df: pd.DataFrame):
+    students = students_df.copy()
+    participations = students_in_projects_df[['ID студента', 'Куратор', 'Модератор']].copy()
+    df_k = participations.groupby(['ID студента']).agg({'Куратор':'sum', 'Модератор':'sum'}).reset_index().rename(columns ={'Куратор':'Курировал (раз)', 'Модератор':'Модерировал (раз)'})
+    df_j = participations.loc[(participations['Куратор'] == 0) & (participations['Модератор'] == 0)].value_counts('ID студента').reset_index().rename(columns ={0:'Участвовал (раз)'})
+    agg_df = df_k.merge(df_j, how='inner', on='ID студента')
+    pivot_df = students.merge(agg_df, how='left', on='ID студента').fillna(0)
+    return pivot_df
+
 # App launch
 def run():
     # Load dataframe
-    with st.spinner('Поднимаем тайные архивы...'):
-        projects_df = utils.load_projects()
-    st.title('Поиск проектов')
+    with st.spinner('Изучаем ведомости...'):
+        students_in_projects_df = utils.load_students_in_projects()
+    with st.spinner('Задействуем нетворкинг...'):
+        students_df             = utils.load_students()
+    st.title('Поиск студентов')
     st.write('''
-            #### На данной странице можно составить выборку проектов по заданным параметрам!
-            :mag: __Поиск по проектам__ выводит проекты, в которых фигурирует введенный текст.  
-            :art: __Параметры фильтрации__ выводят проекты, которые удовлетворяют заданным параметрам.\n
-            :sunglasses: Поиск и фильтры можно использовать вместе!  
+            #### На данной странице можно составить выборку студентов по заданным параметрам!
+            :art: __Параметры фильтрации__ выводят студентов, которые удовлетворяют заданным параметрам.\n
             :floppy_disk: Вы также можете скачать составленную выборку в формате Microsoft Excel.
             ''')
-    # Draw search filters and return filtered df
-    df_search_applied   = search_dataframe(projects_df)
-    # if search has results -> draw criteria filters and return filtered df
-    if df_search_applied.shape[0]:
-        df_filters_applied  = filter_dataframe(df_search_applied)
-        # if filters have results -> draw DF, download btn and analytics
-        if 0 not in df_filters_applied.shape:
-            tab1, tab2 = st.tabs(["Данные", "Аналитика"])
-            with tab1:
-                st.dataframe(df_filters_applied)
-                col1, col2, _col3, _col4, _col5, _col6 = st.columns(6)
-                col1.download_button('💾 CSV', data=utils.convert_df(df_search_applied), file_name="fessboard_projects_slice.csv", mime='text/csv', use_container_width=True)
-                col2.download_button('💾 Excel', data=utils.convert_df(df_search_applied, True), file_name="fessboard_projects_slice.xlsx", use_container_width=True)
-            with tab2:
-                st.write('какая-то аналитика')
-        else:
-            # Technically only possible with long string criteria filters cuz they allow for any string input
-            st.warning('Проекты не найдены')
+    # draw criteria filters and return filtered df
+    students_pivot_df = students_pivot(students_df, students_in_projects_df)
+    df_filters_applied  = filter_dataframe(students_pivot_df)
+    # if filters have results -> draw DF, download btn and analytics
+    if 0 not in df_filters_applied.shape:
+        tab1, tab2 = st.tabs(["Данные", "Аналитика"])
+        with tab1:
+            st.dataframe(df_filters_applied)
+            col1, col2, _col3, _col4, _col5, _col6 = st.columns(6)
+            col1.download_button('💾 CSV', data=utils.convert_df(students_pivot_df), file_name="fessboard_students_slice.csv", mime='text/csv', use_container_width=True)
+            col2.download_button('💾 Excel', data=utils.convert_df(students_pivot_df, True), file_name="fessboard_students_slice.xlsx", use_container_width=True)
+        with tab2:
+            st.write('какая-то аналитика')
     else:
-        st.warning('Проекты не найдены')
+        # Technically only possible with long string criteria filters cuz they allow for any string input
+        st.warning('Студенты не найдены')
 
 if __name__ == "__main__":
     utils.page_config(layout='wide', title='Поиск проектов')
