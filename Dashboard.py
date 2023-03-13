@@ -8,6 +8,7 @@ import plotly.express as px
 from datetime import datetime
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+import pickle
 
 #Наборы цветов
 
@@ -734,6 +735,45 @@ def main():
             # display the plot
             st.plotly_chart(fig, use_container_width=True, config={'staticPlot': True,'displayModeBar': False})
 
+    with st.container():
+        st.markdown('**я КААААРТА**')
+        with open('counties.pkl', 'rb') as f:
+            counties = pickle.load(f)
+        # names = []
+        # for reg in counties['features']:
+        #     name = reg['properties']['name']
+        #     names.append(name)
+        # names_df = pd.DataFrame(names)
+        region_id_list = []
+        regions_list = []
+        for k in range(len(counties['features'])):
+            region_id_list.append(counties['features'][k]['id'])
+            regions_list.append(counties['features'][k]['properties']['name'])
+        df_regions = pd.DataFrame()
+        df_regions['region_id'] = region_id_list
+        df_regions['region_name'] = regions_list
+        df = pd.DataFrame(data = [1,2,3,4,0,5,0,1,3], columns = ['cases'] )
+        df['region_id'] = df_regions['region_id']
+        df['region_name'] = df_regions['region_name']
+        df
+        fig = go.Figure(go.Choroplethmapbox(geojson=counties,
+                           locations=df['region_id'],
+                           z=df['cases'],
+                           text=df['region_name'],
+                           colorscale = ['#ED1C24','#670004','#C53A40','#FCB6B9','#941B1E','#F85B61','#FFD5D7','#F78F92'],
+                           colorbar_thickness=20,
+                           customdata=np.stack([df['cases'],df['region_name']], axis=-1),
+                           hovertemplate='<b>%{text}</b>'+ '<br>' +
+                                         'Ивентов: %{z}' + '<br>',
+                           hoverinfo='text, z',
+                           
+                          ))
+        fig.update_layout(mapbox_style="carto-positron",
+                  mapbox_zoom=1, mapbox_center = {"lat": 66, "lon": 94})
+        fig.update_traces(marker_line_width=1)
+        fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
+                  mapbox_zoom=3, mapbox_center = {"lat": 55.75222, "lon": 37.61556})
+        st.plotly_chart(fig, use_container_width=True, config={'staticPlot': True,'displayModeBar': False})
 if __name__ == "__main__":
     # page setup
     utils.page_config(layout='wide', title='FESSBoard')
