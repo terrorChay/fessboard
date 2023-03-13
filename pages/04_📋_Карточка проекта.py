@@ -234,7 +234,7 @@ def run():
                 if type(curators) != list:
                     st.warning('Данных нет, но вы держитесь...')
                 else:
-                    for i in managers:
+                    for i in curators:
                         st.text(f'🧑‍💼 {i}')
                 
                 # Teachers
@@ -246,7 +246,7 @@ def run():
                     for i in teachers:
                         st.text(f'🧑‍🏫 {i}')
             with right:
-                students_in_project = students_in_all_projects.loc[students_in_all_projects['ID проекта'] == project_id]
+                students_in_project = students_in_all_projects.loc[(students_in_all_projects['ID проекта'] == project_id)&(students_in_all_projects['Куратор'] == 0)&(students_in_all_projects['Модератор'] == 0)]
                 unique_groups_idx = students_in_project['Команда'].unique()
                 st.markdown('**Участники проекта**')
                 if len(unique_groups_idx) > 0:
