@@ -236,53 +236,8 @@ def main():
     with col4:
         ## Число проектных групп в год
         with st.container():
-            st.markdown('**Число проектных групп в год**')  
-            data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [17, 28, 42,50,70],'Прирост':
-            [17,11,14,8,20]}
-            test_df = pd.DataFrame(data)
-            fig = make_subplots(1,1)
+             st.warning('Илья я жду тебя :3')
 
-# add first bar trace at row = 1, col = 1
-            fig.add_trace(go.Bar(x=test_df['Год'], y=test_df['Количество'],
-                     name='Групп',
-                     marker_color = marker,
-                     opacity=1,
-                     marker_line_width=2,
-                     text=list(test_df['Количество']),
-                     hovertext= ''
-                     
-),
-              row = 1, col = 1)
-            fig.update_layout(
-                 font_family   = font,
-                 font_size     = 13,
-                 paper_bgcolor = tr,
-                 plot_bgcolor  = tr,
-                 margin        = dict(t=0, l=0, r=0, b=0),
-                 yaxis_title     = "",
-                 xaxis_title     = "",
-                 width = 10,
-                 height = 220,
-                 xaxis_visible   = True,
-                 yaxis_visible   = True,
-                 xaxis=dict(showgrid=False), 
-                 yaxis=dict(showgrid=False),
-                 showlegend       = False,
-                 
-                 )
-            fig.update_traces(
-                textfont_size = 14,
-                 textangle     = 0,
-                 textposition  = "inside",
-                 cliponaxis    = False,
-                 )
-            fig['data'][0].width=0.7
-# add first scatter trace at row = 1, col = 1
-            fig.add_trace(go.Scatter(x=test_df['Год'], y=test_df['Прирост'], line=dict(color='#07C607'), name='Прирост'),
-              row = 1, col = 1)
-
-
-            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
     # Ряд логотипов
     col1, col2,col3,col4,col5,col6 = st.columns([1,1,1,1,1,1])
     with col1:
