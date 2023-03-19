@@ -220,8 +220,8 @@ def run():
             left, right = st.columns(2)
             with left:
                 # Managers
-                st.markdown('**Модераторы проекта**')
                 managers = output['Модераторы']
+                st.markdown(f'**Модераторы проекта** ({len(managers) if type(managers) != float else 0} чел.)')
                 if type(managers) != list:
                     st.warning('Данных нет, но вы держитесь...')
                 else:
@@ -229,8 +229,8 @@ def run():
                         st.text(f'🧑‍💼 {i}')
                 
                 # Curators
-                st.markdown('**Кураторы проекта**')
                 curators = output['Кураторы']
+                st.markdown(f'**Кураторы проекта** ({len(curators) if type(curators) != float else 0} чел.)')
                 if type(curators) != list:
                     st.warning('Данных нет, но вы держитесь...')
                 else:
@@ -238,8 +238,8 @@ def run():
                         st.text(f'🧑‍💼 {i}')
                 
                 # Teachers
-                st.markdown('**Курирующие преподаватели**')
                 teachers = output['Преподаватели']
+                st.markdown(f'**Курирующие преподаватели** ({len(teachers) if type(teachers) != float else 0} чел.)')
                 if type(teachers) != list:
                     st.warning('Данных нет, но вы держитесь...')
                 else:
@@ -248,12 +248,12 @@ def run():
             with right:
                 students_in_project = students_in_all_projects.loc[(students_in_all_projects['ID проекта'] == project_id)&(students_in_all_projects['Куратор'] == 0)&(students_in_all_projects['Модератор'] == 0)]
                 unique_groups_idx = students_in_project['Команда'].unique()
-                st.markdown('**Участники проекта**')
+                st.markdown(f'**Участники проекта** ({students_in_project.shape[0]} чел.)')
                 if len(unique_groups_idx) > 0:
                     group_counter = 0
                     for group_idx in unique_groups_idx:
-                        st.caption(f'Проектная команда {group_counter+1}')
                         students_in_the_group   = students_in_project[students_in_project['Команда'] == group_idx]
+                        st.caption(f'Проектная команда {group_counter+1} ({students_in_the_group.shape[0]} чел.)')
                         for i in students_in_the_group[['ФИО студента']].values:
                             st.text(f'🧑‍🎓 {i[0]}') 
                         group_counter += 1

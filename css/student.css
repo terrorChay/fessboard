@@ -4,10 +4,10 @@
 }  */
 
 /* Лейбл метрики */
-[data-testid="stMetricLabel"] [data-testid="stMarkdownContainer"] {
+[data-testid="metric-container"] label {
     text-transform: uppercase;
-    justify-content: center;
-    display: flex;
+    width: fit-content;
+    margin: auto;
     font-weight: 500;
 }
 

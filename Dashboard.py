@@ -21,24 +21,22 @@ config = {'staticPlot': False,'displayModeBar': False}
 
 def main():
     # load data
-    with st.spinner('(1/8) Читаем PMI и PMBOK...'):
+    with st.spinner('Читаем PMI и PMBOK...'):
         projects_df             = utils.load_projects()
-    with st.spinner('(2/8) Происходит аджайл...'):
+    with st.spinner('Внедряем аджайл...'):
         students_in_projects_df     = utils.load_students_in_projects()
         moderators_in_projects_df   = students_in_projects_df.loc[students_in_projects_df['Модератор'] == 1]
         curators_in_projects_df     = students_in_projects_df.loc[students_in_projects_df['Куратор'] == 1]
         students_in_projects_df     = students_in_projects_df.loc[(students_in_projects_df['Куратор'] == 0) & (students_in_projects_df['Модератор'] == 0)]
-    with st.spinner('(3/8) Изучаем требования стейкхолдеров...'):
         teachers_in_projects_df = utils.load_teachers_in_projects()
-    with st.spinner('(4/8) Еще чуть-чуть и прямо в рай...'):
+    with st.spinner('Изучаем требования стейкхолдеров...'):
         students_df             = utils.load_students()
-    with st.spinner('(5/8) Нежно обращаемся к базе данных...'):
+    with st.spinner('Нежно обращаемся к базе данных...'):
         universities_df         = utils.load_universities()
-    with st.spinner('(6/8) Собираем встречу выпускников...'):
+    with st.spinner('Советуемся с ChatGPT...'):
         events_df               = utils.load_events()
-    with st.spinner('(7/8) Советуемся с ChatGPT...'):
         students_in_events_df   = utils.load_students_in_events()
-    with st.spinner('(8/8) Звоним представителям компаний...'):
+    with st.spinner('Звоним представителям компаний...'):
         companies_df   = utils.load_companies()
     
     selection = st.sidebar.selectbox(options =color_themes.keys(),label='Выберите тему')

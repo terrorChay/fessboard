@@ -180,39 +180,43 @@ def run():
     if company:
         company_id = int(company[:5].split(' - ')[0])
         tab1, tab2, tab3 = st.tabs(['О компании', 'Проекты', 'Студенты'])
-        # load info about company as a dictionary
         with st.spinner('Делаем однотумбовые столы...'):
             company_data_df            = utils.load_companies()
-        company_data_df            = company_data_df.loc[company_data_df['ID компании'] == company_id].to_dict()
-        # load only projects with selected company
-        projects_with_company   = projects_df.loc[projects_df['ID компании'] == company_id]
-        # load only students who had projects with selected company
+            company_data_df            = company_data_df.loc[company_data_df['ID компании'] == company_id].to_dict()
+            projects_with_company   = projects_df.loc[projects_df['ID компании'] == company_id]
         with st.spinner('Захватываем мир...'):
             students_with_company   = utils.load_students_in_projects().merge(projects_with_company[['ID проекта']], on='ID проекта', how='right')
 
         # О компании
         with tab1:
-            try:
-                col1, col2 = st.columns([3, 1])
-                for key, value in company_data_df.items():
-                    key = key.casefold()
-                    value = list(value.values())[0]
-                    if 'сайт' in key:
-                        col1.markdown(f'[{value}]({value})')
-                    elif 'логотип' in key:
-                        try:
-                            col2.image(value, use_column_width=True)
-                        except:
-                            col2.caption('Логотип уехал в отпуск')
-                    elif 'название компании' in key:
-                        col1.subheader(value)
-                    elif 'id компании' in key:
-                        pass
-                    else:
-                        # col1.text_input(label=key, value=value, disabled=True)
-                        col1.caption(value)
-            except:
-                st.error('Ошибка 1')
+            #INFO
+            col1, col2 = st.columns([3, 1])
+            for key, value in company_data_df.items():
+                key = key.casefold()
+                value = list(value.values())[0]
+                if 'сайт' in key:
+                    col1.markdown(f'[{value}]({value})')
+                elif 'логотип' in key:
+                    try:
+                        col2.image(value, use_column_width=True)
+                    except:
+                        col2.caption('Логотип уехал в отпуск')
+                elif 'название компании' in key:
+                    col1.subheader(value)
+                elif 'id компании' in key:
+                    pass
+                else: 
+                    col1.caption(value)
+            #METRICS
+            projects_summary = {
+                'Выполнено проектов'    : projects_with_company.loc[(projects_with_company['Статус'] == 'Завершен')|(projects_with_company['Статус'] == 'Заморожен')].shape[0],
+                'Проектов в работе'     : projects_with_company.loc[projects_with_company['Статус'] == 'Активен'].shape[0],
+                'Частый грейд'          : projects_with_company['Грейд'].mode()[0],
+                'Партнеры'              : f"c {projects_with_company['Дата начала'].min().year} года",
+            }
+            cols = st.columns(4)
+            for idx, key in enumerate(list(projects_summary)):
+                cols[idx].metric(key, projects_summary[key])
         # Проекты        
         with tab2:
             ## Draw search filters and return filtered df
@@ -225,25 +229,6 @@ def run():
                 col2.download_button('💾 Excel', data=utils.convert_df(df_search_applied, True), file_name=f"{company}_slice.xlsx", use_container_width=True)
             else:
                 st.warning('Проекты не найдены')
-            # Project groups
-            # st.markdown('#### Просмотр проектных команд')
-            # unique_projects_idx = students_with_company.index.unique()
-            # if len(unique_projects_idx) >= 1:
-            #     for project_idx in unique_projects_idx:
-            #         project_name = projects_with_company['Название проекта'].loc[project_idx]
-            #         with st.expander(f'Проект "{project_name}"'):
-
-            #             students_in_project     = students_with_company[['Команда', 'ФИО студента', 'Бакалавриат', 'Магистратура']].loc[[project_idx]]
-            #             unique_groups_idx       = students_in_project['Команда'].unique()
-            #             group_counter = 0
-            #             for group_idx in unique_groups_idx:
-            #                 st.caption(f'Группа {group_counter+1}')
-            #                 students_in_group   = students_in_project[students_in_project['Команда'] == group_idx].reset_index()
-            #                 st.dataframe(students_in_group[['ФИО студента', 'Бакалавриат', 'Магистратура']], use_container_width=True)    
-                            
-            #                 group_counter += 1
-            # else:
-            #     st.warning('Проектные команды не найдены')
 
         # Студенты
         with tab3:
@@ -267,5 +252,6 @@ def run():
 if __name__ == "__main__":
     utils.page_config(layout='wide', title='Портфолио компании')
     utils.remove_footer()
+    utils.load_local_css('css/company.css')
     utils.set_logo()
     run()
