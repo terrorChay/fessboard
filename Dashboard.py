@@ -526,7 +526,7 @@ def main():
             options = sorted(students_fesn['Поток'].unique(), reverse=True)
             # options = sorted(students_df.loc[(students_df['Бакалавриат'] == 'ФЭСН РАНХиГС')]['Бак. год'].unique(), reverse=True)
             # options = list(map(lambda x: f'{x} - {x+4}', options))
-            year = st.selectbox(label='Выберите поток', options=options, index=0,label_visibility="collapsed")
+            year = st.selectbox(label='Выберите поток', options=options, index=3,label_visibility="collapsed")
             # year = int(year[:4])
             if year:
                 # Айди студентов выбранного потока
