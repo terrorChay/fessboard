@@ -91,7 +91,7 @@ def main():
             delta       = '{} участников(-а)'.format(students_in_events_df.shape[0]),
             delta_color = 'normal')
     # Ряд графиков о проектах
-    col1, col2,col3,col4 = st.columns([1, 2,2,1])
+    col1, col2,col3 = st.columns([1, 2,3])
     with col1:
         ## Распределение грейдов
         with st.container():
@@ -197,93 +197,138 @@ def main():
         ## Регионы мероприятий
         with st.container():
             st.markdown('**Регионы ивентов**')
-            events_regions_df = events_df['Регион']
-            data    = {'Регион': ['Москва', 'Нижний Новгород', 'Казань','Калининград','Сарапул'],'Количество': [10, 3, 1,3,1]}
+            # events_regions_df = events_df['Регион']
+            # data    = {'Регион': ['Москва', 'Нижний Новгород', 'Казань','Калининград','Сарапул'],'Количество': [10, 3, 1,3,1]}
 
 
-            fig = px.pie(events_regions_df,
-            values                  = events_regions_df.value_counts(),
-            names                   = events_regions_df.value_counts().index,
-            color_discrete_sequence = colors,
-            hole                    = .6
-            )
+            # fig = px.pie(events_regions_df,
+            # values                  = events_regions_df.value_counts(),
+            # names                   = events_regions_df.value_counts().index,
+            # color_discrete_sequence = colors,
+            # hole                    = .6
+            # )
             
 
-            fig.update_traces(
-                textposition  = 'inside',
-                textinfo      = 'percent',
-                hovertemplate = "<b>%{label}.</b> Мероприятий: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
-                textfont_size = 12
+            # fig.update_traces(
+            #     textposition  = 'inside',
+            #     textinfo      = 'percent',
+            #     hovertemplate = "<b>%{label}.</b> Мероприятий: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+            #     textfont_size = 12
                 
+            #     )
+
+
+            # fig.update_layout(
+            #     # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
+            #     plot_bgcolor            = tr,
+            #     paper_bgcolor           = tr,
+            #     legend                  = dict(orientation="v",itemwidth=30,yanchor="top", y=0.7,xanchor="left",x=1),
+            #     showlegend              = True,
+            #     font_family             = font,
+            #     title_font_family       = font,
+            #     title_font_color        = "white",
+            #     legend_title_font_color = "white",
+            #     height                  = 220,
+            #     margin                  = dict(t=0, l=0, r=200, b=0),
+            #     #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
+            #     )
+            # st.plotly_chart(fig,use_container_width=True,config=config)
+            events_regions_df = events_df['Регион'].value_counts()
+            events_regions_df.name = 'cases'
+
+            with open('counties.pkl', 'rb') as f:
+                counties = pickle.load(f)
+            
+            region_id_list = []
+            regions_list = []
+            for k in range(len(counties['features'])):
+                region_id_list.append(counties['features'][k]['id'])
+                regions_list.append(counties['features'][k]['properties']['name'])
+            df_regions = pd.DataFrame()
+            df_regions['region_id'] = region_id_list
+            df_regions['region_name'] = regions_list
+            df_regions.set_index('region_name',inplace=True)
+            df_regions = df_regions.merge(events_regions_df.to_frame(),left_index=True, right_index=True)
+
+            colors_map = colors.copy()
+            colors_map.reverse()
+            fig = go.Figure(go.Choroplethmapbox(geojson=counties,
+                            locations=df_regions['region_id'],
+                            z=df_regions['cases'],
+                            text=df_regions.index.values,
+                            colorscale = colors_map,
+                            colorbar_thickness=5,
+                            customdata=np.stack([df_regions['cases'],df_regions.index.values], axis=-1),
+                            hovertemplate='<b>%{text}</b>'+ '<br>' +
+                                            'Ивентов: %{z}' + '<br>',
+                            hoverinfo='text, z',
+                            
+                            ))
+            fig.update_layout(mapbox_style="carto-positron",
+                    mapbox_zoom=1, mapbox_center = {"lat": 66, "lon": 94},
+                    height = 220
+                    )
+            fig.update_traces(marker_line_width=1)
+            fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
+                    mapbox_zoom=3.5, mapbox_center = {"lat": 55.75222, "lon": 37.61556},
+                    mapbox_pitch=0,
+                    mapbox_bearing=0
                 )
+            st.plotly_chart(fig, use_container_width=True, config={'staticPlot': False,'displayModeBar': False})
 
 
-            fig.update_layout(
-                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
-                plot_bgcolor            = tr,
-                paper_bgcolor           = tr,
-                legend                  = dict(orientation="v",itemwidth=30,yanchor="top", y=0.7,xanchor="left",x=1),
-                showlegend              = True,
-                font_family             = font,
-                title_font_family       = font,
-                title_font_color        = "white",
-                legend_title_font_color = "white",
-                height                  = 220,
-                margin                  = dict(t=0, l=0, r=200, b=0),
-                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
-                )
-            st.plotly_chart(fig,use_container_width=True,config=config)
 
-    with col4:
-        ## Число проектных групп в год
-        with st.container():
-            st.markdown('**Число проектных групп в год**')  
-            data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [17, 28, 42,50,70],'Прирост':
-            [17,11,14,8,20]}
-            test_df = pd.DataFrame(data)
-            fig = make_subplots(1,1)
 
-# add first bar trace at row = 1, col = 1
-            fig.add_trace(go.Bar(x=test_df['Год'], y=test_df['Количество'],
-                     name='Групп',
-                     marker_color = marker,
-                     opacity=1,
-                     marker_line_width=2,
-                     text=list(test_df['Количество']),
-                     hovertext= ''
+#     with col4:
+#         ## Число проектных групп в год
+#         with st.container():
+#             st.markdown('**Число проектных групп в год**')  
+#             data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [17, 28, 42,50,70],'Прирост':
+#             [17,11,14,8,20]}
+#             test_df = pd.DataFrame(data)
+#             fig = make_subplots(1,1)
+
+# # add first bar trace at row = 1, col = 1
+#             fig.add_trace(go.Bar(x=test_df['Год'], y=test_df['Количество'],
+#                      name='Групп',
+#                      marker_color = marker,
+#                      opacity=1,
+#                      marker_line_width=2,
+#                      text=list(test_df['Количество']),
+#                      hovertext= ''
                      
-),
-              row = 1, col = 1)
-            fig.update_layout(
-                 font_family   = font,
-                 font_size     = 13,
-                 paper_bgcolor = tr,
-                 plot_bgcolor  = tr,
-                 margin        = dict(t=0, l=0, r=0, b=0),
-                 yaxis_title     = "",
-                 xaxis_title     = "",
-                 width = 10,
-                 height = 220,
-                 xaxis_visible   = True,
-                 yaxis_visible   = True,
-                 xaxis=dict(showgrid=False), 
-                 yaxis=dict(showgrid=False),
-                 showlegend       = False,
+# ),
+#               row = 1, col = 1)
+#             fig.update_layout(
+#                  font_family   = font,
+#                  font_size     = 13,
+#                  paper_bgcolor = tr,
+#                  plot_bgcolor  = tr,
+#                  margin        = dict(t=0, l=0, r=0, b=0),
+#                  yaxis_title     = "",
+#                  xaxis_title     = "",
+#                  width = 10,
+#                  height = 220,
+#                  xaxis_visible   = True,
+#                  yaxis_visible   = True,
+#                  xaxis=dict(showgrid=False), 
+#                  yaxis=dict(showgrid=False),
+#                  showlegend       = False,
                  
-                 )
-            fig.update_traces(
-                textfont_size = 14,
-                 textangle     = 0,
-                 textposition  = "inside",
-                 cliponaxis    = False,
-                 )
-            fig['data'][0].width=0.7
-# add first scatter trace at row = 1, col = 1
-            fig.add_trace(go.Scatter(x=test_df['Год'], y=test_df['Прирост'], line=dict(color='#07C607'), name='Прирост'),
-              row = 1, col = 1)
+#                  )
+#             fig.update_traces(
+#                 textfont_size = 14,
+#                  textangle     = 0,
+#                  textposition  = "inside",
+#                  cliponaxis    = False,
+#                  )
+#             fig['data'][0].width=0.7
+# # add first scatter trace at row = 1, col = 1
+#             fig.add_trace(go.Scatter(x=test_df['Год'], y=test_df['Прирост'], line=dict(color='#07C607'), name='Прирост'),
+#               row = 1, col = 1)
 
 
-            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+#             st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
     # Ряд логотипов
     col1, col2,col3,col4,col5,col6 = st.columns([1,1,1,1,1,1])
     with col1:
@@ -578,7 +623,7 @@ def main():
             options = sorted(students_fesn['Поток'].unique(), reverse=True)
             # options = sorted(students_df.loc[(students_df['Бакалавриат'] == 'ФЭСН РАНХиГС')]['Бак. год'].unique(), reverse=True)
             # options = list(map(lambda x: f'{x} - {x+4}', options))
-            year = st.selectbox(label='Выберите поток', options=options, index=0,label_visibility="collapsed")
+            year = st.selectbox(label='Выберите поток', options=options, index=3,label_visibility="collapsed")
             # year = int(year[:4])
             if year:
                 # Айди студентов выбранного потока
@@ -735,46 +780,46 @@ def main():
             # display the plot
             st.plotly_chart(fig, use_container_width=True, config={'staticPlot': True,'displayModeBar': False})
 
-    with st.container():
-        st.markdown('**я КААААРТА**')
-        events_regions_df = events_df['Регион'].value_counts()
-        events_regions_df.name = 'cases'
+    # with st.container():
+    #     st.markdown('**я КААААРТА**')
+    #     events_regions_df = events_df['Регион'].value_counts()
+    #     events_regions_df.name = 'cases'
 
-        with open('counties.pkl', 'rb') as f:
-            counties = pickle.load(f)
+    #     with open('counties.pkl', 'rb') as f:
+    #         counties = pickle.load(f)
         
-        region_id_list = []
-        regions_list = []
-        for k in range(len(counties['features'])):
-            region_id_list.append(counties['features'][k]['id'])
-            regions_list.append(counties['features'][k]['properties']['name'])
-        df_regions = pd.DataFrame()
-        df_regions['region_id'] = region_id_list
-        df_regions['region_name'] = regions_list
-        df_regions.set_index('region_name',inplace=True)
-        df_regions = df_regions.merge(events_regions_df.to_frame(),left_index=True, right_index=True)
+    #     region_id_list = []
+    #     regions_list = []
+    #     for k in range(len(counties['features'])):
+    #         region_id_list.append(counties['features'][k]['id'])
+    #         regions_list.append(counties['features'][k]['properties']['name'])
+    #     df_regions = pd.DataFrame()
+    #     df_regions['region_id'] = region_id_list
+    #     df_regions['region_name'] = regions_list
+    #     df_regions.set_index('region_name',inplace=True)
+    #     df_regions = df_regions.merge(events_regions_df.to_frame(),left_index=True, right_index=True)
 
-        colors_map = colors.copy()
-        colors_map.reverse()
-        fig = go.Figure(go.Choroplethmapbox(geojson=counties,
-                           locations=df_regions['region_id'],
-                           z=df_regions['cases'],
-                           text=df_regions.index.values,
-                           colorscale = colors_map,
-                           colorbar_thickness=20,
-                           customdata=np.stack([df_regions['cases'],df_regions.index.values], axis=-1),
-                           hovertemplate='<b>%{text}</b>'+ '<br>' +
-                                         'Ивентов: %{z}' + '<br>',
-                           hoverinfo='text, z',
+    #     colors_map = colors.copy()
+    #     colors_map.reverse()
+    #     fig = go.Figure(go.Choroplethmapbox(geojson=counties,
+    #                        locations=df_regions['region_id'],
+    #                        z=df_regions['cases'],
+    #                        text=df_regions.index.values,
+    #                        colorscale = colors_map,
+    #                        colorbar_thickness=20,
+    #                        customdata=np.stack([df_regions['cases'],df_regions.index.values], axis=-1),
+    #                        hovertemplate='<b>%{text}</b>'+ '<br>' +
+    #                                      'Ивентов: %{z}' + '<br>',
+    #                        hoverinfo='text, z',
                            
-                          ))
-        fig.update_layout(mapbox_style="carto-positron",
-                  mapbox_zoom=1, mapbox_center = {"lat": 66, "lon": 94},
-                  )
-        fig.update_traces(marker_line_width=1)
-        fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
-                  mapbox_zoom=4, mapbox_center = {"lat": 55.75222, "lon": 37.61556})
-        st.plotly_chart(fig, use_container_width=True, config={'staticPlot': False,'displayModeBar': False})
+    #                       ))
+    #     fig.update_layout(mapbox_style="carto-positron",
+    #               mapbox_zoom=1, mapbox_center = {"lat": 66, "lon": 94},
+    #               )
+    #     fig.update_traces(marker_line_width=1)
+    #     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
+    #               mapbox_zoom=4, mapbox_center = {"lat": 55.75222, "lon": 37.61556})
+    #     st.plotly_chart(fig, use_container_width=True, config={'staticPlot': False,'displayModeBar': False})
 
 if __name__ == "__main__":
     # page setup
