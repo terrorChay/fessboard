@@ -26,7 +26,8 @@ query_dict =    {
                                                     THEN 'Заморожен'
                                                     WHEN projects.is_frozen <> 1 AND (DAYNAME(projects.project_end_date) IS NULL OR DATE(projects.project_end_date) >= CURDATE())
                                                     THEN 'Активен' ELSE 'Завершен'
-                                                END AS Статус
+                                                END AS Статус,
+                                                IFNULL(T0.Участников, 0) AS `Кол-во участников`
                                             FROM projects
                                             LEFT JOIN project_grades
                                                 ON projects.project_grade_id = project_grades.grade_id
@@ -39,15 +40,32 @@ query_dict =    {
                                             LEFT JOIN company_spheres
                                                 ON companies.company_sphere_id = company_spheres.company_sphere_id
                                             LEFT JOIN company_types
-                                                ON companies.company_type_id = company_types.company_type_id;
+                                                ON companies.company_type_id = company_types.company_type_id
+                                            LEFT JOIN (
+                                                (SELECT students_in_projects.project_id, COUNT(students_in_projects.project_id) AS Участников FROM students_in_projects GROUP BY students_in_projects.project_id)) AS T0
+                                                ON projects.project_id = T0.project_id;
                                             """,
                 "events"                :   """
                                             SELECT
                                                 events.event_id AS `ID мероприятия`,
-                                                regions.region AS Регион
+                                                events.event_name AS Название,
+                                                events.event_start_date AS `Дата начала`,
+                                                events.event_end_date AS `Дата окончания`,
+                                                events.event_description AS Описание,
+                                                regions.region AS Регион,
+                                                CASE
+                                                    WHEN events.is_frozen = 1
+                                                    THEN 'Заморожен'
+                                                    WHEN events.is_frozen <> 1 AND (DAYNAME(events.event_end_date) IS NULL OR DATE(events.event_end_date) >= CURDATE())
+                                                    THEN 'Активен' ELSE 'Завершен'
+                                                END AS Статус,
+                                                IFNULL(T0.Участников, 0) AS `Кол-во участников`
                                             FROM events
                                             INNER JOIN regions
-                                                ON events.event_region_id = regions.region_id;
+                                                ON events.event_region_id = regions.region_id
+                                            LEFT JOIN (
+                                                (SELECT participants_in_events.event_id, COUNT(participants_in_events.event_id) AS Участников FROM participants_in_events GROUP BY participants_in_events.event_id)) AS T0
+                                                ON events.event_id = T0.event_id;
                                             """,
 
                 "students"              :   """
@@ -165,6 +183,20 @@ query_dict =    {
                                             LEFT JOIN
                                                 teachers ON teachers_in_projects.teacher_id = teachers.teacher_id;
                                             """,
+
+                "teachers_in_events"    :   """
+                                            SELECT
+                                                teachers_in_events.event_id AS 'ID мероприятия',
+                                                CONCAT_WS(
+                                                    ' ',
+                                                    teachers.teacher_surname,
+                                                    teachers.teacher_name,
+                                                    teachers.teacher_midname) AS 'ФИО преподавателя',
+                                                teachers_in_events.teacher_id AS 'ID преподавателя'
+                                            FROM teachers_in_events
+                                            LEFT JOIN
+                                                teachers ON teachers_in_events.teacher_id = teachers.teacher_id;
+                                            """,
                 
                 "companies"             :   """
                                             SELECT
@@ -196,25 +228,68 @@ query_dict =    {
 
                 "students_in_events"    :   """
                                             SELECT
-                                                students.student_surname AS `Фамилия студента`,
-                                                students.student_name AS `Имя студента`,
-                                                students.student_midname AS `Отчество студента`,
-                                                events.event_name AS `Название мероприятия`,
+
                                                 students.student_id AS `ID студента`,
                                                 events.event_id AS `ID мероприятия`,
                                                 regions.region AS Регион,
                                                 events.event_start_date AS `Дата начала мероприятия`,
                                                 events.event_end_date AS `Дата окончания мероприятия`,
-                                                events.event_description AS `Описание мероприятия`,
-                                                events.is_frozen AS Заморожен,
-                                                events.event_region_id AS `ID региона`
+                                                CONCAT_WS(
+                                                    ' ',
+                                                    students.student_surname,
+                                                    students.student_name,
+                                                    students.student_midname)
+                                                AS 'ФИО студента',
+                                                participants_in_events.is_manager AS Модератор,
+                                                CASE WHEN students.masters_start_year = 0 OR
+                                                    students.masters_start_year IS NULL OR
+                                                    events.event_start_date < STR_TO_DATE(CONCAT(students.masters_start_year, '-09-01'), '%Y-%m-%d') THEN CASE WHEN STR_TO_DATE(CONCAT(students.bachelors_start_year, '-09-01'), '%Y-%m-%d') <= events.event_start_date AND
+                                                            events.event_start_date < STR_TO_DATE(CONCAT(students.bachelors_start_year + 1, '-09-01'), '%Y-%m-%d') THEN '1' WHEN STR_TO_DATE(CONCAT(students.bachelors_start_year + 1, '-09-01'), '%Y-%m-%d') <= events.event_start_date AND
+                                                            events.event_start_date < STR_TO_DATE(CONCAT(students.bachelors_start_year + 2, '-09-01'), '%Y-%m-%d') THEN '2' WHEN STR_TO_DATE(CONCAT(students.bachelors_start_year + 2, '-09-01'), '%Y-%m-%d') <= events.event_start_date AND
+                                                            events.event_start_date < STR_TO_DATE(CONCAT(students.bachelors_start_year + 3, '-09-01'), '%Y-%m-%d') THEN '3' WHEN STR_TO_DATE(CONCAT(students.bachelors_start_year + 3, '-09-01'), '%Y-%m-%d') <= events.event_start_date AND
+                                                            events.event_start_date < STR_TO_DATE(CONCAT(students.bachelors_start_year + 4, '-09-01'), '%Y-%m-%d') THEN '4' ELSE NULL END ELSE CASE WHEN STR_TO_DATE(CONCAT(students.masters_start_year, '-09-01'), '%Y-%m-%d') <= events.event_start_date AND
+                                                        events.event_start_date < STR_TO_DATE(CONCAT(students.masters_start_year + 1, '-09-01'), '%Y-%m-%d') THEN '1' WHEN STR_TO_DATE(CONCAT(students.masters_start_year + 1, '-09-01'), '%Y-%m-%d') <= events.event_start_date AND
+                                                        events.event_start_date < STR_TO_DATE(CONCAT(students.masters_start_year + 2, '-09-01'), '%Y-%m-%d') THEN '2' ELSE NULL END END AS 'Курс в моменте',
+                                                CASE WHEN students.masters_start_year = 0 OR
+                                                    students.masters_start_year IS NULL OR
+                                                    events.event_start_date < STR_TO_DATE(CONCAT(students.masters_start_year, '-09-01'), '%Y-%m-%d') THEN 'Бакалавриат' ELSE 'Магистратура' END AS 'Программа в моменте',
+                                                CASE WHEN students.masters_start_year = 0 OR
+                                                    students.masters_start_year IS NULL OR
+                                                    events.event_start_date < STR_TO_DATE(CONCAT(students.masters_start_year, '-09-01'), '%Y-%m-%d') THEN Бакалавры.university_name ELSE Магистры.university_name END AS 'ВУЗ в моменте',
+                                                CASE
+                                                        WHEN YEAR(events.event_start_date) = 0
+                                                            THEN NULL
+                                                        WHEN MONTH(events.event_start_date) > 8
+                                                            THEN CONCAT_WS(' - ', YEAR(events.event_start_date), YEAR(events.event_start_date)+1)
+                                                        ELSE CONCAT_WS(' - ', YEAR(events.event_start_date)-1, YEAR(events.event_start_date))
+                                                    END AS `Академический год`
                                             FROM participants_in_events
-                                            INNER JOIN events
+                                            LEFT OUTER JOIN events
                                                 ON participants_in_events.event_id = events.event_id
-                                            INNER JOIN students
+                                            LEFT OUTER JOIN students
                                                 ON participants_in_events.student_id = students.student_id
-                                            INNER JOIN regions
-                                                ON events.event_region_id = regions.region_id;
+                                            LEFT OUTER JOIN regions
+                                                ON events.event_region_id = regions.region_id
+                                            LEFT OUTER JOIN (SELECT
+                                                students.student_id,
+                                                universities.university_name,
+                                                regions.region
+                                                FROM students
+                                                INNER JOIN universities
+                                                    ON students.bachelors_university_id = universities.university_id
+                                                INNER JOIN regions
+                                                    ON universities.university_region_id = regions.region_id) Бакалавры
+                                                ON students.student_id = Бакалавры.student_id
+                                            LEFT OUTER JOIN (SELECT
+                                                students.student_id,
+                                                universities.university_name,
+                                                regions.region
+                                                FROM students
+                                                INNER JOIN universities
+                                                    ON students.masters_university_id = universities.university_id
+                                                INNER JOIN regions
+                                                    ON universities.university_region_id = regions.region_id) Магистры
+                                                ON students.student_id = Магистры.student_id;
                                             """,
                 "students_in_projects"  :   """
                                             SELECT
@@ -283,6 +358,7 @@ query_dict =    {
                                                     ON universities.university_region_id = regions.region_id) Магистры
                                                 ON students.student_id = Магистры.student_id;
                                             """,
+
                 "universities_in_projects": """
                                             SELECT DISTINCT
                                             students_in_projects.project_id  AS `ID проекта`,
@@ -291,6 +367,18 @@ query_dict =    {
                                             FROM students_in_projects
                                             INNER JOIN students
                                                 ON students_in_projects.student_id = students.student_id
+                                            INNER JOIN universities
+                                                ON students.bachelors_university_id = universities.university_id;
+                                            """,
+
+                "universities_in_events":   """
+                                            SELECT DISTINCT
+                                            participants_in_events.event_id  AS `ID мероприятия`,
+                                            universities.university_id  AS `ID университета`,
+                                            universities.university_name  AS `Университет`
+                                            FROM participants_in_events
+                                            INNER JOIN students
+                                                ON participants_in_events.student_id = students.student_id
                                             INNER JOIN universities
                                                 ON students.bachelors_university_id = universities.university_id;
                                             """

@@ -112,12 +112,35 @@ def load_teachers_in_projects():
     return query_data(query_dict['teachers_in_projects'])
 
 @st.cache_data(ttl=10800, show_spinner=False)
+def load_teachers_in_events():
+    return query_data(query_dict['teachers_in_events'])
+
+@st.cache_data(ttl=10800, show_spinner=False)
 def load_students_in_events():
     return query_data(query_dict['students_in_events'])
 
 @st.cache_data(ttl=10800, show_spinner=False)
 def load_events():
-    return query_data(query_dict['events'])
+    # Load events
+    events_df = query_data(query_dict['events'])
+
+    # Load people
+    students_df     = load_students_in_events()
+    moderators_df   = students_df.loc[students_df['Модератор'] == 1]
+    teachers_df     = load_teachers_in_events()
+    universities_df = query_data(query_dict['universities_in_events'])
+
+    # Join multiple managers and teachers into list values
+    moderators_df   = moderators_df.groupby(['ID мероприятия'])['ФИО студента'].apply(list).reset_index().rename(columns={'ФИО студента':'Модераторы'})
+    teachers_df     = teachers_df.groupby(['ID мероприятия'])['ФИО преподавателя'].apply(list).reset_index().rename(columns={'ФИО преподавателя':'Преподаватели'})
+    universities_df = universities_df.groupby(['ID мероприятия'])['Университет'].apply(list).reset_index().rename(columns={'Университет':'Университеты'})
+
+    # Left join dataframes to create consolidated one
+    events_df = events_df.merge(moderators_df, on='ID мероприятия', how='left')
+    events_df = events_df.merge(teachers_df, on='ID мероприятия', how='left')
+    events_df = events_df.merge(universities_df, on= 'ID мероприятия', how='left')
+
+    return events_df
 
 @st.cache_data(ttl=10800, show_spinner=False)
 def load_universities():

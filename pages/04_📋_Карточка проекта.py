@@ -30,78 +30,9 @@ def search_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
-# Apply filters and return filtered dataset
-def filter_dataframe(df: pd.DataFrame, cols_to_ignore: list) -> pd.DataFrame:
-
-    df = df.copy()
-
-    # Try to convert datetimes into a standard format (datetime, no timezone)
-    for col in df.columns:
-        if is_object_dtype(df[col]):
-            try:
-                df[col] = pd.to_datetime(df[col])
-            except Exception:
-                pass
-
-        if is_datetime64_any_dtype(df[col]):
-            df[col] = df[col].dt.tz_localize(None)
-
-    modification_container = st.container()
-
-    with modification_container:
-        cols = [col for col in df.columns if col not in cols_to_ignore]
-        to_filter_columns = st.multiselect("Параметры фильтрации", cols)
-        for column in to_filter_columns:
-            left, right = st.columns((1, 20))
-            left.write("└")
-            if is_numeric_dtype(df[column]):
-                _min = float(df[column].min())
-                _max = float(df[column].max())
-                step = (_max - _min) / 100
-                user_num_input = right.slider(
-                    f" {column}",
-                    min_value=_min,
-                    max_value=_max,
-                    value=(_min, _max),
-                    step=step,
-                )
-                df = df[df[column].between(*user_num_input)]
-            elif is_datetime64_any_dtype(df[column]):
-                user_date_input = right.date_input(
-                    f" {column}",
-                    value=(
-                        df[column].min(),
-                        df[column].max(),
-                    ),
-                )
-                if len(user_date_input) == 2:
-                    user_date_input = tuple(map(pd.to_datetime, user_date_input))
-                    start_date, end_date = user_date_input
-                    df = df.loc[df[column].between(start_date, end_date)]
-            # use selectbox for instances where there are < 10 unique vals or where max len option is < 255
-            elif is_categorical_dtype(df[column]) or df[column].nunique() < 10 or df[column].map(len).max() < 255:
-                options = df[column].unique()
-                user_cat_input = right.multiselect(
-                    f"{column}",
-                    options
-                )
-                if user_cat_input == []:
-                    _cat_input = df[column].unique()
-                else:
-                    _cat_input = user_cat_input
-                df = df[df[column].isin(_cat_input)]
-            else:
-                user_text_input = right.text_input(
-                    f"{column}",
-                )
-                if user_text_input:
-                    df = df[df[column].astype(str).str.contains(user_text_input)]
-
-    return df
-
-# Apply filters and return company name
+# Apply filters and return project name
 def project_selection(df: pd.DataFrame):
-    df = df[['ID проекта', 'Название проекта', 'Название компании', 'Грейд', 'Статус', 'Макро-направление', 'Микро-направление']].sort_values(by='ID проекта', ascending=False).copy()
+    df = df[['ID проекта', 'Название проекта', 'Название компании', 'Грейд', 'Статус', 'Макро-направление', 'Микро-направление', 'Академический год']].sort_values(by='ID проекта', ascending=False).copy()
     df.insert(0, 'Составной ключ', df['ID проекта'].astype('str') + ' - ' + df['Название проекта'])
     selected_project = False
 
@@ -111,7 +42,7 @@ def project_selection(df: pd.DataFrame):
         cols_list = [col01, col02, col03]
         # Filters for project selection
         ## df.columns[3:] so that the composite key, project id and project name are ignored
-        for idx, column in enumerate(df.columns[3:]):
+        for idx, column in enumerate(['Академический год', 'Название компании',  'Макро-направление', 'Грейд', 'Статус', 'Микро-направление']):
             options = df[column].unique()
             ### preselection tweak to preserve selected filter values in case related filters get adjusted
             cached_value_key = column+'-input'
@@ -135,7 +66,7 @@ def project_selection(df: pd.DataFrame):
                 df = df[df[column].isin(user_cat_input)]
         options = np.insert(df['Составной ключ'].unique(), 0, 'Не выбрано', axis=0)
 
-        # Household name selection
+        # Project name selection
         ## preselection tweak once again to preserve selected company in case related filters get adjusted
         preselection = 0
         if 'project_selectbox' in session:
@@ -165,7 +96,8 @@ def run():
 
     st.title('Карточка проекта')
     st.write('''
-            #### На данной странице можно ознакомиться со всей информацией по выбранному проекту!
+            #### На данной странице можно ознакомиться с карточкой выбранного проекта!
+            :art: Используйте фильтры, чтобы быстрее найти нужный проект.  
             ''')
     # user input
     selected_project = project_selection(projects_df)
@@ -226,7 +158,7 @@ def run():
                     st.warning('Данных нет, но вы держитесь...')
                 else:
                     for i in managers:
-                        st.text(f'🧑‍💼 {i}')
+                        st.text(i)
                 
                 # Curators
                 curators = output['Кураторы']
@@ -235,7 +167,7 @@ def run():
                     st.warning('Данных нет, но вы держитесь...')
                 else:
                     for i in curators:
-                        st.text(f'🧑‍💼 {i}')
+                        st.text(i)
                 
                 # Teachers
                 teachers = output['Преподаватели']
@@ -244,7 +176,7 @@ def run():
                     st.warning('Данных нет, но вы держитесь...')
                 else:
                     for i in teachers:
-                        st.text(f'🧑‍🏫 {i}')
+                        st.text(i)
             with right:
                 students_in_project = students_in_all_projects.loc[(students_in_all_projects['ID проекта'] == project_id)&(students_in_all_projects['Куратор'] == 0)&(students_in_all_projects['Модератор'] == 0)]
                 unique_groups_idx = students_in_project['Команда'].unique()
@@ -253,9 +185,9 @@ def run():
                     group_counter = 0
                     for group_idx in unique_groups_idx:
                         students_in_the_group   = students_in_project[students_in_project['Команда'] == group_idx]
-                        st.caption(f'Проектная команда {group_counter+1} ({students_in_the_group.shape[0]} чел.)')
+                        st.caption(f'🧑‍🎓 Проектная команда {group_counter+1} ({students_in_the_group.shape[0]} чел.)')
                         for i in students_in_the_group[['ФИО студента']].values:
-                            st.text(f'🧑‍🎓 {i[0]}') 
+                            st.text(i[0]) 
                         group_counter += 1
                 else:
                     st.warning('Данных нет, но вы держитесь...')

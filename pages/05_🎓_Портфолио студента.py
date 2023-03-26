@@ -164,11 +164,11 @@ def run():
     st.title('Портфолио студента')
     st.write('''
             #### На данной странице можно ознакомиться с портфелем проектов выбранного студента!
-            :mag: У коровы нет других забот  
-            :art: Ест траву  
-            :male-student: И молоко дает\n
+            :sparkles: Раздел **Сводная** содержит общую информацию о выбранном студенте.  
+            :performing_arts: Разделы **Проектерство**, **Кураторство** и **Модераторство** содержат информацию о проектах, в которых студент выступал в соответствующей роли.  
+            :world_map: Раздел **Мероприятия** содержит перечень выездных и местных мероприятий, в которых участвовал студент.\n
 
-            :floppy_disk: ыы
+            :floppy_disk: Вы также можете скачать портфолио студента в формате PDF.
             ''')
 
     student_id = select_student(students_df)
@@ -200,6 +200,7 @@ def run():
                     cols[idx].metric(key, projects_summary[key])
                 # Project summary visualization
                 col1, col2, col3,col4 = st.columns(4)
+                # График распределения проектов студента по макронаправлениям
                 with col1:
                     st.markdown('**Распределение проектов студента по макронаправлениям**')
                     data = projects_df.loc[projects_df['ID проекта'].isin(projects_with_student_df['ID проекта'])]['Макро-направление'].value_counts().reset_index(name='Количество')
@@ -217,7 +218,7 @@ def run():
                         margin                  = dict(t=35, l=0, r=0, b=35))
                     fig.update_layout(polar = dict(radialaxis = dict(showticklabels = False,tick0=0,dtick=1)))
                     st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
-
+                # График распределения проектов студента по грейдам
                 with col3:
                     st.markdown('**Распределение проектов студента по<br>грейдам**',unsafe_allow_html=True)
                     data = projects_df.loc[projects_df['ID проекта'].isin(projects_with_student_df['ID проекта'])]['Грейд'].value_counts().reset_index(name='Количество')
@@ -253,12 +254,11 @@ def run():
                         #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
                         )   
                     st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})       
-
-               
+                # График вовлеченности студента в проекты по курсам
                 with col4:
                     st.markdown('**Вовлеченность студента в проекты<br>по курсам**',unsafe_allow_html=True)
                     projects_by_year_df = projects_with_student_df
-                    projects_by_year_df['Курс'] = projects_by_year_df[['Курс в моменте','Программа в моменте']].agg(' '.join,axis=1).map(lambda x:x[:5]+'.')
+                    projects_by_year_df['Курс'] = projects_with_student_df[['Курс в моменте','Программа в моменте']].agg(' '.join,axis=1).map(lambda x:x[:5]+'.')
                     projects_by_year_df = projects_by_year_df[['Курс']].copy().sort_values('Курс').value_counts(sort=True).reset_index(name='Количество')
                     df = pd.DataFrame(data=['1 Бак.','2 Бак.','3 Бак.','4 Бак.','1 Маг.','2 Маг.'],columns=['Курс'])
                     df = df.merge(projects_by_year_df,how='left',on='Курс')
@@ -300,7 +300,7 @@ def run():
                         )
                     
                     st.plotly_chart(fig,use_container_width=True,config={'staticPlot': True,'displayModeBar': False})
-                
+                # Распределение проектов студента по микронаправлениям
                 with col2:
                     data = projects_df.loc[projects_df['ID проекта'].isin(projects_with_student_df['ID проекта'])]['Микро-направление'].value_counts().reset_index(name='Количество')
                     data = data.rename(columns={'index':'Микро'})

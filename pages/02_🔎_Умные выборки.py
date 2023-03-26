@@ -113,6 +113,90 @@ def filter_projects(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
             df[col] = df[col].dt.strftime('%d-%m-%Y')
     return df
 
+# Apply filters and return filtered dataset of events
+def filter_events(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
+    cols_in_df      = df.columns.values
+    with st.sidebar.expander(label='Столбцы мероприятий'):
+        cols_dict       = {}
+        for col_name in cols_in_df:
+            cols_dict[col_name] = st.checkbox(col_name, True, key=f"events_display_{col_name}")
+    cols_to_display = [k for k, v in cols_dict.items() if v]
+    df = df[cols_to_display].copy()
+    # Try to convert datetimes into a standard format (datetime, no timezone)
+    for col in df.columns:
+        if is_object_dtype(df[col]):
+            try:
+                df[col] = pd.to_datetime(df[col])
+            except Exception:
+                pass
+
+        if is_datetime64_any_dtype(df[col]):
+            df[col] = df[col].dt.tz_localize(None)
+
+    modification_container = st.container()
+    with modification_container:
+        cols = [col for col in df.columns if col not in cols_to_ignore]
+        to_filter_columns = st.multiselect("Параметры фильтрации", cols, key='events_select_filters')
+        for column in to_filter_columns:
+            left, right = st.columns((1, 20))
+            left.write("└")
+            if any(map(df[column].name.__contains__, ['Модераторы', 'Преподаватели', 'Университеты'])):
+                options = pd.Series([x for _list in df[column][df[column].notna()] for x in _list]).unique()
+                user_cat_input = right.multiselect(
+                    f"{column}",
+                    options,
+                )
+                if user_cat_input:
+                    df = df[df[column].astype(str).str.contains('|'.join(user_cat_input))]
+            elif is_numeric_dtype(df[column]):
+                _min = float(df[column].min())
+                _max = float(df[column].max())
+                step = (_max - _min) / 100
+                user_num_input = right.slider(
+                    f" {column}",
+                    min_value=_min,
+                    max_value=_max,
+                    value=(_min, _max),
+                    step=step,
+                )
+                df = df[df[column].between(*user_num_input)]
+            elif is_datetime64_any_dtype(df[column]):
+                _min = df[column].min()
+                _max = df[column].max()
+                user_date_input = right.date_input(
+                    f" {column}",
+                    value=(
+                        _min,
+                        _max,
+                    ),
+                    max_value=_max,
+                    min_value=_min,
+                )
+                if len(user_date_input) == 2:
+                    user_date_input = tuple(map(pd.to_datetime, user_date_input))
+                    start_date, end_date = user_date_input
+                    df = df.loc[df[column].between(start_date, end_date)]
+            elif is_categorical_dtype(df[column]) or any(map(df[column].name.__contains__, ['год', 'Регион'])):
+                options = df[column].unique()
+                user_cat_input = right.multiselect(
+                    f"{column}",
+                    options,
+                )
+                if user_cat_input:
+                    _cat_input = user_cat_input
+                    df = df[df[column].isin(_cat_input)]
+            else:
+                user_text_input = right.text_input(
+                    f"{column} содержит",
+                )
+                if user_text_input:
+                    df = df[df[column].astype(str).str.contains(user_text_input, na=False, flags=re.IGNORECASE)]
+    # Try to convert datetimes into displayable date formats
+    for col in df.columns:
+        if is_datetime64_any_dtype(df[col]):
+            df[col] = df[col].dt.strftime('%d-%m-%Y')
+    return df
+
 # Apply filters and return filtered dataset of students
 def filter_students(df: pd.DataFrame, cols_to_ignore=[]) -> pd.DataFrame:
     cols_in_df      = df.columns.values
@@ -229,6 +313,8 @@ def run():
     # Load dataframe
     with st.spinner('Поднимаем тайные архивы...'):
         projects_df = utils.load_projects()
+    with st.spinner('Посылаем сигналы в космос...'):
+        events_df = utils.load_events()
     with st.spinner('Изучаем ведомости...'):
         students_in_projects_df = utils.load_students_in_projects()
     with st.spinner('Задействуем нетворкинг...'):
@@ -263,7 +349,22 @@ def run():
             st.warning('Проекты не найдены')
     #EVENTS
     with tab2:
-        st.warning("Check back soon...")
+        # Draw search filters and return filtered df
+        df_search_applied   = search_dataframe(events_df, key='events')
+        # if search has results -> draw criteria filters and return filtered df
+        if df_search_applied.shape[0]:
+            df_filters_applied  = filter_events(df_search_applied)
+            # if filters have results -> draw DF, download btn and analytics
+            if 0 not in df_filters_applied.shape:
+                st.dataframe(df_filters_applied)
+                col1, col2, _col3, _col4, _col5, _col6 = st.columns(6)
+                col1.download_button('💾 CSV', data=utils.convert_df(df_search_applied), file_name="fessboard_events_slice.csv", mime='text/csv', use_container_width=True)
+                col2.download_button('💾 Excel', data=utils.convert_df(df_search_applied, True), file_name="fessboard_events_slice.xlsx", use_container_width=True)
+            else:
+                # Technically only possible with long string criteria filters cuz they allow for any string input
+                st.warning('Мероприятия не найдены')
+        else:
+            st.warning('Мероприятия не найдены')
     #STUDENTS
     with tab3:
         # Choose which projects (by year) to use in calculated columns
