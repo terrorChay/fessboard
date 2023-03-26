@@ -62,7 +62,7 @@ def filter_dataframe(df: pd.DataFrame, cols_to_ignore: list) -> pd.DataFrame:
             elif is_numeric_dtype(df[column]):
                 _min = float(df[column].min())
                 _max = float(df[column].max())
-                step = (_max - _min) / 100
+                step = 1.00
                 user_num_input = right.slider(
                     f" {column}",
                     min_value=_min,
