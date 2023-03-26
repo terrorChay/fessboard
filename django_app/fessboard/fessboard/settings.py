@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -53,7 +53,7 @@ ROOT_URLCONF = 'fessboard.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -74,9 +74,9 @@ WSGI_APPLICATION = 'fessboard.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'u1815885_django_test',
-        'USER': 'u1815885_djanger',
-        'PASSWORD': 'wI5qE9iE8vcI7lF6',
+        'NAME': 'u1815885_djangodb',
+        'USER': 'u1815885_fessboa',
+        'PASSWORD': '9XRF8rs62S6xzHd',
         'HOST': '31.31.196.139',
     }
 }
@@ -120,3 +120,5 @@ STATIC_ROOT = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = '/'

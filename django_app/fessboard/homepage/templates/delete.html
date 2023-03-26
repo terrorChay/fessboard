@@ -8,7 +8,7 @@
 
             <form action='{% url 'delete-company-form' item.company_id %}' method="POST">
                 {% csrf_token %}
-                <a href="{% url 'company-hub' %}">Cancel</a>
+                <a href="{{request.META.HTTP_REFERER}}">Go Back</a>
                 <button type="submit" class="btn btn-danger" href="{% url 'company-hub' %}">Delete</button>
             </form>
         </div>

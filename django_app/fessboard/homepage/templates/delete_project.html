@@ -5,10 +5,9 @@
     <div class="col-md-6">
         <div class="card card-body align-content-center">
             <p>Are you sure you want to delete "{{item.project_name}}"?</p>
-
             <form action='{% url 'delete-project-form' item.project_id %}' method="POST">
                 {% csrf_token %}
-                <a href="{% url 'project-hub' %}">Cancel</a>
+                <a href="{{request.META.HTTP_REFERER}}">Go Back</a>
                 <button type="submit" class="btn btn-danger" href="{% url 'project-hub' %}">Delete</button>
             </form>
         </div>

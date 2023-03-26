@@ -14,18 +14,6 @@
     </head>
     <body>
         <div class="d-flex" id="wrapper">
-            <!-- Sidebar-->
-            <div class="border-end bg-white" id="sidebar-wrapper">
-                <div class="sidebar-heading border-bottom bg-light">FESSBoard Moderation Panel</div>
-                <div class="list-group list-group-flush">
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{% url 'company-hub' %}">Add a company</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{% url 'student-form' %}">Add a student</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{% url 'events-form' %}">Add an event</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{% url 'teachers-form' %}">Add a counselor</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{% url 'universities-form' %}">Add a partnering university</a>
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{% url 'projects-form' %}">Add a project</a>
-                </div>
-            </div>
             <!-- Page content wrapper-->
             <div id="page-content-wrapper">
                 <!-- Top navigation-->
@@ -84,7 +72,7 @@
                                                 <div class="card-body text-center p-4 p-lg-5 pt-0 pt-lg-0">
                                                     <div class="feature bg-primary bg-gradient text-white rounded-3 mb-4 mt-n4"><i class="bi bi-collection"></i></div>
                                                     <h2 class="fs-4 fw-bold">Something here</h2>
-                                                    <a class="fs-4 fw-bold" href="{% url 'project-hub' %}">Add a project</a>
+                                                    <a class="fs-4 fw-bold" href="{% url 'project-hub' %}">Project hub</a>
                                                     <p class="mb-0">Button or anything really</p>
                                                 </div>
                                             </div>
@@ -94,6 +82,7 @@
                                                 <div class="card-body text-center p-4 p-lg-5 pt-0 pt-lg-0">
                                                     <div class="feature bg-primary bg-gradient text-white rounded-3 mb-4 mt-n4"><i class="bi bi-collection"></i></div>
                                                     <h2 class="fs-4 fw-bold">Something here</h2>
+                                                    <a class="fs-4 fw-bold" href="{% url 'event-hub' %}">Event hub</a>
                                                     <p class="mb-0">Button or anything really</p>
                                                 </div>
                                             </div>

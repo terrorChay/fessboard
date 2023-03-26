@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load extras %}
 <html lang="en">
     <head>
         <title> Table Example </title>
@@ -24,6 +25,11 @@
         <div class="row">
             <div class="col-sm"> <h2> Students in project </h2> </div>
         </div>
+        <div class="col-sm">
+                <form method="post" class="card p-2 mt-1" style="width: 100%; font-size: 14px">
+                <a href="{% url 'update-student-form' project %}" class="btn btn-primary btn-sm btn-block">Add new students</a>
+            </form>
+        </div>
         <table class="table table-bordered" id="sortTable">
             <thead>
             <tr>
@@ -33,23 +39,17 @@
                 <th>is_Куратор</th>
                 <th>is_Модератор</th>
                 <th></th>
-                <th></th>
-                <th></th>
             </tr>
             </thead>
             <tbody>
-            {% for item in Projects %}
+            {% for item in students %}
                 <tr>
-                    <td>{{ item.project_id }}</td>
-                    <td>{{ item.project_name }}</td>
-                    <td>{{ item.project_start_date }}</td>
-                    <td>{{ item.project_end_date }}</td>
-                    <td>{{ item.project_company }}</td>
-                    <td>{{ item.project_field }}</td>
-                    <td>{{ item.project_grade }}</td>
-                    <td><a href="{% url 'update-project-form' item.project_id %}" class="btn btn-sm btn-info">Edit</a></td>
-                    <td><a href="{% url 'update-project-form' item.project_id %}" class="btn btn-sm btn-info">Students</a></td>
-                    <td><a href="{% url 'delete-project-form' item.project_id %}" class="btn btn-sm btn-danger">Delete </a></td>
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.student_id|get_student_name}}</td>
+                    <td>{{ item.team }}</td>
+                    <td>{{ item.is_curator }}</td>
+                    <td>{{ item.is_moderator }}</td>
+                    <td><a href="{% url 'delete-student-form' item.id %}" class="btn btn-sm btn-danger">Delete</a></td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -58,6 +58,6 @@
     <script>
         $('#sortTable').DataTable();
     </script>
-    <a class="btn btn-close btn-lg" href="/">Cancel</a>
+    <a class="btn btn-close btn-lg" href="/project-hub/">Cancel</a>
     </body>
 </html>
