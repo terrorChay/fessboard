@@ -198,7 +198,7 @@ def run():
                     col1.markdown(f'[{value}]({value})')
                 elif 'логотип' in key:
                     try:
-                        col2.image(value, use_column_width=True)
+                        col2.image(value, width=300)
                     except:
                         col2.caption('Логотип уехал в отпуск')
                 elif 'название компании' in key:
