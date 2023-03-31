@@ -4,6 +4,8 @@ import pandas as pd
 import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+import pickle
+import numpy as np
 
 #Наборы цветов
 
@@ -189,44 +191,84 @@ def main():
     with col3:
         ## Регионы мероприятий
         with st.container():
-            st.markdown('**Регионы ивентов**')
-            events_regions_df = events_df['Регион']
-            data    = {'Регион': ['Москва', 'Нижний Новгород', 'Казань','Калининград','Сарапул'],'Количество': [10, 3, 1,3,1]}
+            # st.markdown('**Регионы ивентов**')
+            # events_regions_df = events_df['Регион']
+            # data    = {'Регион': ['Москва', 'Нижний Новгород', 'Казань','Калининград','Сарапул'],'Количество': [10, 3, 1,3,1]}
 
 
-            fig = px.pie(events_regions_df,
-            values                  = events_regions_df.value_counts(),
-            names                   = events_regions_df.value_counts().index,
-            color_discrete_sequence = colors,
-            hole                    = .6
-            )
+            # fig = px.pie(events_regions_df,
+            # values                  = events_regions_df.value_counts(),
+            # names                   = events_regions_df.value_counts().index,
+            # color_discrete_sequence = colors,
+            # hole                    = .6
+            # )
             
 
-            fig.update_traces(
-                textposition  = 'inside',
-                textinfo      = 'percent',
-                hovertemplate = "<b>%{label}.</b> Мероприятий: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
-                textfont_size = 12
+            # fig.update_traces(
+            #     textposition  = 'inside',
+            #     textinfo      = 'percent',
+            #     hovertemplate = "<b>%{label}.</b> Мероприятий: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+            #     textfont_size = 12
                 
+            #     )
+
+
+            # fig.update_layout(
+            #     # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
+            #     plot_bgcolor            = tr,
+            #     paper_bgcolor           = tr,
+            #     legend                  = dict(orientation="v",itemwidth=30,yanchor="top", y=0.7,xanchor="left",x=1),
+            #     showlegend              = True,
+            #     font_family             = font,
+            #     title_font_family       = font,
+            #     title_font_color        = "white",
+            #     legend_title_font_color = "white",
+            #     height                  = 220,
+            #     margin                  = dict(t=0, l=0, r=200, b=0),
+            #     #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
+            #     )
+            # st.plotly_chart(fig,use_container_width=True,config=config)
+            events_regions_df = events_df['Регион'].value_counts()
+            events_regions_df.name = 'cases'
+
+            with open('counties.pkl', 'rb') as f:
+                counties = pickle.load(f)
+            
+            region_id_list = []
+            regions_list = []
+            for k in range(len(counties['features'])):
+                region_id_list.append(counties['features'][k]['id'])
+                regions_list.append(counties['features'][k]['properties']['name'])
+            df_regions = pd.DataFrame()
+            df_regions['region_id'] = region_id_list
+            df_regions['region_name'] = regions_list
+            df_regions.set_index('region_name',inplace=True)
+            df_regions = df_regions.merge(events_regions_df.to_frame(),left_index=True, right_index=True)
+
+            colors_map = colors.copy()
+            colors_map.reverse()
+            fig = go.Figure(go.Choroplethmapbox(geojson=counties,
+                            locations=df_regions['region_id'],
+                            z=df_regions['cases'],
+                            text=df_regions.index.values,
+                            colorscale = colors_map,
+                            colorbar_thickness=5,
+                            customdata=np.stack([df_regions['cases'],df_regions.index.values], axis=-1),
+                            hovertemplate='<b>%{text}</b>'+ '<br>' +
+                                            'Ивентов: %{z}' + '<br>',
+                            hoverinfo='text, z',
+                            
+                            ))
+            fig.update_traces(marker_line_width=1)
+            fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0},
+                    mapbox_zoom=3.5, mapbox_center = {"lat": 55.75222, "lon": 37.61556},
+                    mapbox_pitch=0,
+                    mapbox_bearing=0,
+                    height = 220,
+                    mapbox_style="carto-positron",
                 )
-
-
-            fig.update_layout(
-                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
-                plot_bgcolor            = tr,
-                paper_bgcolor           = tr,
-                legend                  = dict(orientation="v",itemwidth=30,yanchor="top", y=0.7,xanchor="left",x=1),
-                showlegend              = True,
-                font_family             = font,
-                title_font_family       = font,
-                title_font_color        = "white",
-                legend_title_font_color = "white",
-                height                  = 220,
-                margin                  = dict(t=0, l=0, r=200, b=0),
-                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
-                )
-            st.plotly_chart(fig,use_container_width=True,config=config)
-
+            st.plotly_chart(fig, use_container_width=True, config={'staticPlot': False,'displayModeBar': False})
+    
     with col4:
         ## Число проектных групп в год
         with st.container():
