@@ -12,7 +12,19 @@ from pandas.api.types import (
     is_float_dtype,
 )
 import plotly.express as px
- 
+import plotly.graph_objects as go
+#Наборы цветов
+color_themes = {
+                'FESS'  : ['#ED1C24','#670004','#C53A40','#FCB6B9','#941B1E','#F85B61','#FFD5D7','#F78F92'],
+                'ЦПР'    :['#3A42FF','#00046F','#2227A7','#88B1FF','#D3E2FF','#C0C0C0','#969696','#5B5B5B','#222222','#FFFFFF','#FB832A']
+                }
+tr='rgba(0,0,0,0)'
+
+
+
+
+font="Source Sans Pro"
+config = {'staticPlot': False,'displayModeBar': False}
 # Apply search filters and return filtered dataset
 def search_dataframe(df: pd.DataFrame, label='Поиск') -> pd.DataFrame:
 
@@ -166,6 +178,8 @@ def run():
     # Load dataframe
     with st.spinner('Изучаем SCRUM...'):
         projects_df = utils.load_projects()
+    with st.spinner('Звоним в деканат...'):
+        fields_df               = utils.load_fields()
     st.title('Портфолио компании')
     st.write('''
             #### На данной странице можно ознакомиться с портфелем проектов выбранной компании!
@@ -175,6 +189,9 @@ def run():
 
             :floppy_disk: Все таблицы можно скачать в формате Microsoft Excel.
             ''')
+    selection = st.sidebar.selectbox(options =color_themes.keys(),label='Выберите тему')
+    colors = color_themes[selection]
+    marker = colors[0]
     # Draw company search filters and return chosen company
     company = company_selection(projects_df)
     if company:
@@ -217,6 +234,146 @@ def run():
             cols = st.columns(4)
             for idx, key in enumerate(list(projects_summary)):
                 cols[idx].metric(key, projects_summary[key])
+            col1, col2, col3,col4 = st.columns(4)
+                # График распределения проектов студента по макронаправлениям
+            with col1:
+                    with st.container():
+                        st.markdown('**Распределение проектов с компанией по макронаправлениям**')
+                        data = projects_df.loc[projects_df['ID проекта'].isin(projects_with_company['ID проекта'])]['Макро-направление'].value_counts().reset_index(name='Количество')
+                        data = data.rename(columns={'index':'Макро'})
+                        data = data.drop_duplicates().merge(fields_df['Макро'].drop_duplicates(), on='Макро', how='right').fillna(0).sort_values(by='Количество')
+                        fig = px.line_polar(data,r='Количество',theta='Макро',line_close=True,color_discrete_sequence=colors)
+                        fig.update_traces(fill='toself',mode='lines+markers',cliponaxis=False)
+                        fig.update_layout(
+                            font_family=font,
+                            font_size = 10,
+                            paper_bgcolor = tr,
+                            plot_bgcolor  = tr,
+                            height = 220,
+                            yaxis_visible   = False,
+                            margin                  = dict(t=35, l=0, r=0, b=35))
+                        fig.update_layout(polar = dict(radialaxis = dict(showticklabels = False,tick0=0,dtick=1)))
+                        st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+                
+                    # График распределения проектов студента по грейдам
+            with col2:
+                    with st.container():                    
+                        data = projects_df.loc[projects_df['ID проекта'].isin(projects_with_company['ID проекта'])]['Микро-направление'].value_counts().reset_index(name='Количество')
+                        data = data.rename(columns={'index':'Микро'})
+                        st.markdown('**Распределение проектов  с компанией по микронаправлениям**')
+                        fig = px.pie(data,
+                        values                  = data['Количество'],
+                        names                   = data['Микро'],
+                        color_discrete_sequence = colors,
+                        )
+
+                        fig.update_traces(
+                            textposition  = 'inside',
+                            textinfo      = 'value',
+                            hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+                            textfont_size = 20,
+                            insidetextorientation = 'auto',
+                            hole = .6
+                            
+                            )
+
+                        fig.update_layout(
+                        # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
+                        plot_bgcolor            = tr,
+                        paper_bgcolor           = tr,
+                        legend                  = dict(orientation="h",itemwidth=50,yanchor="top", y=-0,xanchor="left",x=0),
+                        showlegend              = False,
+                        font_family             = font,
+                        title_font_family       = font,
+                        title_font_color        = "white",
+                        legend_title_font_color = "white",
+                        height                  = 220,
+                        margin                  = dict(t=10, l=0, r=0, b=10),
+                        #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
+                        )
+
+                        st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+                # Display regular projects             
+            with col3:
+                    with st.container():
+                        st.markdown('**Распределение проектов  с компанией по<br>грейдам**',unsafe_allow_html=True)
+                        data = projects_df.loc[projects_df['ID проекта'].isin(projects_with_company['ID проекта'])]['Грейд'].value_counts().reset_index(name='Количество')
+                        data = data.rename(columns={'index':'Грейд'})
+
+                        fig = px.pie(data,
+                        values                  = data['Количество'],
+                        names                   = data['Грейд'],
+                        color_discrete_sequence = colors,
+                        hole                    = .6
+                        )
+
+                        fig.update_traces(
+                            textposition  = 'inside',
+                            textinfo      = 'label',
+                            hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+                            textfont_size = 14
+                            
+                            )
+
+                        fig.update_layout(
+                            # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
+                            plot_bgcolor            = tr,
+                            paper_bgcolor           = tr,
+                            #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
+                            showlegend              = False,
+                            font_family             = font,
+                            title_font_family       = font,
+                            title_font_color        = "white",
+                            legend_title_font_color = "white",
+                            height                  = 220,
+                            margin                  = dict(t=10, l=0, r=0, b=10),
+                            #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
+                            )   
+                        st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})       
+                    # График вовлеченности студента в проекты по курсам
+            with col4:
+                    with st.container():
+                        st.markdown('**Проекты с компанией по<br> академическим годам**',unsafe_allow_html=True)
+                        a = projects_with_company['Академический год'].value_counts()
+                        a = a.sort_index()
+                        fig = go.Figure()
+                        fig.add_trace(go.Bar(
+                                x                   = a.index,
+                                y                   = a.values,
+                                width               = 0.7,
+                                name                = 'Проектов',
+                                marker_color        = marker,
+                                opacity             = 1,
+                                marker_line_width   = 0,
+                                
+                                ))
+                            
+                        fig.update_layout(
+                            font_family    = font,
+                            font_size      = 13,
+                            paper_bgcolor  = tr,
+                            plot_bgcolor   = tr,
+                            margin         = dict(t=0, l=0, r=0, b=0),
+                            yaxis_title    = "",
+                            xaxis_title    = "",
+                            width          = 10,
+                            height         = 230,
+                            xaxis_visible  = True,
+                            yaxis_visible  = True,
+                            xaxis          = dict(showgrid=False), 
+                            yaxis          = dict(showgrid=True),
+                            showlegend     = False
+                            )
+                        fig.update_traces(
+                            textfont_size   = 14,
+                            textangle      = 0,
+                            textposition   = "auto",
+                            cliponaxis     = False,
+                            )
+                        
+                        st.plotly_chart(fig,use_container_width=True,config={'staticPlot': True,'displayModeBar': False})
+                    # Распределение проектов студента по микронаправлениям
+
         # Проекты        
         with tab2:
             ## Draw search filters and return filtered df
