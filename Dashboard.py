@@ -86,7 +86,7 @@ def main():
             delta       = '{} участников(-а)'.format(students_in_events_df.shape[0]),
             delta_color = 'normal')
     # Ряд графиков о проектах
-    col1, col2,col3,col4 = st.columns([1, 2,2,1])
+    col1, col2,col3 = st.columns([1, 2,3])
     with col1:
         ## Распределение грейдов
         with st.container():
@@ -191,43 +191,7 @@ def main():
     with col3:
         ## Регионы мероприятий
         with st.container():
-            # st.markdown('**Регионы ивентов**')
-            # events_regions_df = events_df['Регион']
-            # data    = {'Регион': ['Москва', 'Нижний Новгород', 'Казань','Калининград','Сарапул'],'Количество': [10, 3, 1,3,1]}
-
-
-            # fig = px.pie(events_regions_df,
-            # values                  = events_regions_df.value_counts(),
-            # names                   = events_regions_df.value_counts().index,
-            # color_discrete_sequence = colors,
-            # hole                    = .6
-            # )
-            
-
-            # fig.update_traces(
-            #     textposition  = 'inside',
-            #     textinfo      = 'percent',
-            #     hovertemplate = "<b>%{label}.</b> Мероприятий: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
-            #     textfont_size = 12
-                
-            #     )
-
-
-            # fig.update_layout(
-            #     # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
-            #     plot_bgcolor            = tr,
-            #     paper_bgcolor           = tr,
-            #     legend                  = dict(orientation="v",itemwidth=30,yanchor="top", y=0.7,xanchor="left",x=1),
-            #     showlegend              = True,
-            #     font_family             = font,
-            #     title_font_family       = font,
-            #     title_font_color        = "white",
-            #     legend_title_font_color = "white",
-            #     height                  = 220,
-            #     margin                  = dict(t=0, l=0, r=200, b=0),
-            #     #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
-            #     )
-            # st.plotly_chart(fig,use_container_width=True,config=config)
+            st.markdown('**Распределение мероприятий по регионам**')
             events_regions_df = events_df['Регион'].value_counts()
             events_regions_df.name = 'cases'
 
@@ -245,8 +209,12 @@ def main():
             df_regions.set_index('region_name',inplace=True)
             df_regions = df_regions.merge(events_regions_df.to_frame(),left_index=True, right_index=True)
 
-            colors_map = colors.copy()
-            colors_map.reverse()
+            if selection =='FESS':
+                colors_map = ['#FFD5D7','#ED1C24']
+            else:
+                colors_map = ['#D6E4FF','#3A42FF']
+
+
             fig = go.Figure(go.Choroplethmapbox(geojson=counties,
                             locations=df_regions['region_id'],
                             z=df_regions['cases'],
@@ -269,11 +237,6 @@ def main():
                 )
             st.plotly_chart(fig, use_container_width=True, config={'staticPlot': False,'displayModeBar': False})
     
-    with col4:
-        ## Число проектных групп в год
-        with st.container():
-             st.warning('В разработке...')
-
     # Ряд логотипов
     col1, col2,col3,col4,col5,col6 = st.columns([1,1,1,1,1,1])
     with col1:
@@ -724,7 +687,7 @@ def main():
             # display the plot
             st.plotly_chart(fig, use_container_width=True, config={'staticPlot': True,'displayModeBar': False})
 
-
+ 
 if __name__ == "__main__":
     # page setup
     utils.page_config(layout='wide', title='FESSBoard')
