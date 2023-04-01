@@ -8,18 +8,69 @@ import pickle
 import numpy as np
 
 #Наборы цветов
-
 color_themes = {
                 'FESS'  : ['#ED1C24','#670004','#C53A40','#FCB6B9','#941B1E','#F85B61','#FFD5D7','#F78F92'],
                 'ЦПР'    :['#3A42FF','#00046F','#2227A7','#88B1FF','#D3E2FF','#C0C0C0','#969696','#5B5B5B','#222222','#FFFFFF','#FB832A']
                 }
 tr='rgba(0,0,0,0)'
-
-
-
-
 font="Source Sans Pro"
 config = {'staticPlot': False,'displayModeBar': False}
+
+##################
+##  Plot utils  ##
+##################
+def two_axis_barchart(data: pd.DataFrame, marker, value_label='шт.', group_col='Академический год', primary_col='Количество', secondary_col='Темп прироста'):
+    # figure with 2 axes
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    # bar plot (secondary_y = False)
+    fig.add_trace(go.Bar(
+            x                   = data[group_col],
+            y                   = data[primary_col],
+            width               = 0.7,
+            name                = value_label,
+            marker_color        = marker,
+            opacity             = 1,
+            marker_line_width   = 0,
+            text                = list(data[primary_col]),
+            ),
+        secondary_y = False)
+    fig.update_layout(
+            font_family    = font,
+            font_size      = 13,
+            paper_bgcolor  = tr,
+            plot_bgcolor   = tr,
+            margin         = dict(t=0, l=0, r=0, b=0),
+            yaxis_title    = "",
+            xaxis_title    = "",
+            width          = 10,
+            height         = 220,
+            xaxis_visible  = True,
+            yaxis_visible  = True,
+            xaxis          = dict(showgrid=False), 
+            yaxis          = dict(showgrid=False),
+            showlegend     = False
+            )
+    fig.update_traces(
+        textfont_size   = 14,
+            textangle      = 0,
+            textposition   = "auto",
+            cliponaxis     = False,
+            )
+    # fig['data'][0].width=0.7
+    # scatter plot (secondary_y = True)
+    fig.add_trace(go.Scatter(
+            x       = data[group_col],
+            y       = data[secondary_col],
+            line    = dict(color='#07C607'),
+            name    = secondary_col,
+            ),
+        secondary_y = True)
+    fig.update_yaxes(
+        hoverformat = ',.0%',
+        tickformat  = ',.0%',
+        secondary_y = True
+    )
+    st.plotly_chart(fig,use_container_width=True,config=config)
 
 def main():
     # load data
@@ -128,65 +179,9 @@ def main():
         ## Число и темп прироста проектов
         with st.container():
             st.markdown('**Число и темп прироста проектов**')
-            df = projects_df[['Академический год']].copy()
-            df.dropna(inplace=True)
-            df = df.sort_values('Академический год').value_counts(sort=False).reset_index(name='Количество')
-            df['Темп прироста'] = df['Количество'].pct_change().fillna(0)
-            test_df = df.iloc[-5:]
-
-            # Figure with two Y axes
-            fig = make_subplots(specs=[[{"secondary_y": True}]])
-
-            # bar plot (secondary_y = False)
-            fig.add_trace(go.Bar(
-                    x                   = test_df['Академический год'],
-                    y                   = test_df['Количество'],
-                    width               = 0.7,
-                    name                = 'Проектов',
-                    marker_color        = marker,
-                    opacity             = 1,
-                    marker_line_width   = 0,
-                    text                = list(test_df['Количество']),
-                    ),
-                secondary_y = False)
-            fig.update_layout(
-                 font_family    = font,
-                 font_size      = 13,
-                 paper_bgcolor  = tr,
-                 plot_bgcolor   = tr,
-                 margin         = dict(t=0, l=0, r=0, b=0),
-                 yaxis_title    = "",
-                 xaxis_title    = "",
-                 width          = 10,
-                 height         = 220,
-                 xaxis_visible  = True,
-                 yaxis_visible  = True,
-                 xaxis          = dict(showgrid=False), 
-                 yaxis          = dict(showgrid=False),
-                 showlegend     = False
-                 )
-            fig.update_traces(
-                textfont_size   = 14,
-                 textangle      = 0,
-                 textposition   = "auto",
-                 cliponaxis     = False,
-                 )
-            # fig['data'][0].width=0.7
-            # scatter plot (secondary_y = True)
-            fig.add_trace(go.Scatter(
-                    x       = test_df['Академический год'],
-                    y       = test_df['Темп прироста'],
-                    line    = dict(color='#07C607'),
-                    name    = 'Темп прироста',
-                    ),
-                secondary_y = True)
-            fig.update_yaxes(
-                hoverformat = ',.0%',
-                tickformat  = ',.0%',
-                secondary_y = True
-            )
-
-            st.plotly_chart(fig,use_container_width=True,config=config)
+            data                    = projects_df.groupby('Академический год')['ID проекта'].nunique().reset_index()
+            data['Темп прироста']   = data['ID проекта'].pct_change().fillna(0)
+            two_axis_barchart(data.tail(5), marker, value_label='проектов', primary_col='ID проекта')
 
     with col3:
         ## Регионы мероприятий
@@ -315,50 +310,10 @@ def main():
             st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})  
     with col2:
         with st.container():
-            st.markdown('**Рост количества компаний-партнёров**')
-            st.warning('В разработке..')
-#             data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [17, 28, 42,50,70],'Прирост':
-#             [17,11,14,8,20]}
-#             test_df = pd.DataFrame(data)
-#             fig = make_subplots(1,1)
-
-# # add first bar trace at row = 1, col = 1
-#             fig.add_trace(go.Bar(x=test_df['Год'], y=test_df['Количество'],
-#                      name='Партнёров',
-#                      marker_color = marker,
-#                      opacity=1,
-#                      marker_line_width=2,
-#                      text=list(test_df['Количество']),
-#                      hovertext= ''),
-#               row = 1, col = 1)
-#             fig.update_layout(
-#                  font_family   = font,
-#                  font_size     = 13,
-#                  paper_bgcolor = tr,
-#                  plot_bgcolor  = tr,
-#                  margin        = dict(t=0, l=0, r=0, b=0),
-#                  yaxis_title     = "",
-#                  xaxis_title     = "",
-#                  width = 10,
-#                  height = 220,
-#                  xaxis_visible   = True,
-#                  yaxis_visible   = True,
-#                  xaxis=dict(showgrid=False), 
-#                  yaxis=dict(showgrid=False),
-#                  showlegend       = False,
-                 
-#                  )
-#             fig.update_traces(
-#                 textfont_size = 14,
-#                  textangle     = 0,
-#                  textposition  = "inside",
-#                  cliponaxis    = False,
-#                  )
-#             fig['data'][0].width=0.7
-# # add first scatter trace at row = 1, col = 1
-#             fig.add_trace(go.Scatter(x=test_df['Год'], y=test_df['Прирост'], line=dict(color='#07C607'), name='Прирост'),
-#               row = 1, col = 1)
-#             st.plotly_chart(fig,use_container_width=True,config=config) 
+            st.markdown('**Динамика вовлеченности компаний**')
+            data                    = projects_df.groupby('Академический год')['ID компании'].nunique().reset_index()
+            data['Темп прироста']   = data['ID компании'].pct_change().fillna(0)
+            two_axis_barchart(data.tail(5), marker, value_label='заказчиков', primary_col='ID компании')
             
     with col3:
         with st.container():
@@ -416,17 +371,7 @@ def main():
             
             )
     
-#     with col5:
-#         with st.container():
-#             st.markdown('**Наши партнёры**')  
-#             st.image(
-#                 image = r'img\sber_logo.png',
-#                 use_column_width = 'auto',
-#             )
-#             st.write('СБЕР Агентство Инноваций Москвы (Московский инновационный кластер) BMW (?)\nBOSCH\
-# Segezha Xiaomi Schneider Студия имени горького')
-    
-    # Ряд студентовтоп
+    # Ряд студентов топ
     col1, col2,col3,col4 = st.columns([1, 2,2,1])
     with col1:
         with st.container():
@@ -475,52 +420,10 @@ def main():
                 pass
     with col2:
         with st.container():
-            st.markdown('**Участников в проектах**')
-            st.warning('В разработке...')
-#             data    = {'Год': ['2018-2019', '2019-2020', '2020-2021','2021-2022','2022-2023'],'Количество': [17, 28, 42,50,70],'Прирост':
-#             [17,11,14,8,20]}
-#             test_df = pd.DataFrame(data)
-#             fig = make_subplots(1,1)
-
-# # add first bar trace at row = 1, col = 1
-#             fig.add_trace(go.Bar(x=test_df['Год'], y=test_df['Количество'],
-#                      name='Участников',
-#                      marker_color = marker,
-#                      opacity=1,
-#                      marker_line_width=2,
-#                      text=list(test_df['Количество']),
-#                      hovertext= ''
-                     
-# ),
-#               row = 1, col = 1)
-#             fig.update_layout(
-#                  font_family   = font,
-#                  font_size     = 13,
-#                  paper_bgcolor = tr,
-#                  plot_bgcolor  = tr,
-#                  margin        = dict(t=0, l=0, r=0, b=0),
-#                  yaxis_title     = "",
-#                  xaxis_title     = "",
-#                  width = 10,
-#                  height = 220,
-#                  xaxis_visible   = True,
-#                  yaxis_visible   = True,
-#                  xaxis=dict(showgrid=False), 
-#                  yaxis=dict(showgrid=False),
-#                  showlegend       = False,
-                 
-#                  )
-#             fig.update_traces(
-#                 textfont_size = 14,
-#                  textangle     = 0,
-#                  textposition  = "inside",
-#                  cliponaxis    = False,
-#                  )
-#             fig['data'][0].width=0.7
-# # add first scatter trace at row = 1, col = 1
-#             fig.add_trace(go.Scatter(x=test_df['Год'], y=test_df['Прирост'], line=dict(color='#07C607'), name='Прирост'),
-#               row = 1, col = 1)
-#             st.plotly_chart(fig,use_container_width=True,config=config)
+            st.markdown('**Динамика вовлеченности студентов**')
+            data                    = students_in_projects_df.groupby('Академический год')['ID студента'].nunique().reset_index()
+            data['Темп прироста']   = data['ID студента'].pct_change().fillna(0)
+            two_axis_barchart(data.tail(5), marker, value_label='студентов', primary_col='ID студента')
 
         
     with col3:
@@ -528,10 +431,7 @@ def main():
             st.markdown('**Вовлечённость потока**')
             students_fesn = students_df.loc[(students_df['Программа'] == 'Бакалавриат') & (students_df['ВУЗ'] == 'ФЭСН РАНХиГС')]
             options = sorted(students_fesn['Поток'].unique(), reverse=True)
-            # options = sorted(students_df.loc[(students_df['Бакалавриат'] == 'ФЭСН РАНХиГС')]['Бак. год'].unique(), reverse=True)
-            # options = list(map(lambda x: f'{x} - {x+4}', options))
             year = st.selectbox(label='Выберите поток', options=options, index=3,label_visibility="collapsed")
-            # year = int(year[:4])
             if year:
                 # Айди студентов выбранного потока
                 selected_students = students_fesn.loc[students_fesn['Поток'] == year]['ID студента']
@@ -541,10 +441,9 @@ def main():
                 data = selected_students_in_projects.groupby('Курс в моменте')['ID студента'].nunique().reset_index(name='Количество')
                 data['Вовлечённость'] = (data['Количество']/selected_students.nunique()) # Вовлеченность
                 data = pd.DataFrame(index=['1','2','3','4']).merge(data.drop('Количество', axis=1).set_index('Курс в моменте'), how='left', left_index=True, right_index=True).fillna(0)
-                
+                # Отрисовка чарта
                 fig = px.bar(data, color_discrete_sequence=colors,)
                 fig.update_yaxes(range = [0,1])
-                
                 fig.update_layout(
                     yaxis_tickformat = ".0%",
                     showlegend       = False,
@@ -558,9 +457,7 @@ def main():
                     margin           = dict(t=0, l=0, r=0, b=0),
                     xaxis_visible   = True,
                     )
-                
                 fig.update_traces(hovertemplate = "<b>На %{label} курсе - %{value}</b>",cliponaxis    = False)
-        
                 st.plotly_chart(fig, use_container_width=True,config=config)
     
     with col4:
