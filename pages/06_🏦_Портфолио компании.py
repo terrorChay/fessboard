@@ -234,7 +234,7 @@ def run():
             cols = st.columns(4)
             for idx, key in enumerate(list(projects_summary)):
                 cols[idx].metric(key, projects_summary[key])
-            col1, col2, col3,col4 = st.columns(4)
+            col1, col2, col3,col4 = st.columns([1,1,1,1])
                 # График распределения проектов студента по макронаправлениям
             with col1:
                     with st.container():
@@ -345,6 +345,7 @@ def run():
                                 marker_color        = marker,
                                 opacity             = 1,
                                 marker_line_width   = 0,
+                                text = a.values
                                 
                                 ))
                             
