@@ -313,8 +313,7 @@ def main():
             st.markdown('**Динамика вовлеченности компаний**')
             data                    = projects_df.groupby('Академический год')['ID компании'].nunique().reset_index()
             data['Темп прироста']   = data['ID компании'].pct_change().fillna(0)
-            two_axis_barchart(data.tail(5), marker, value_label='заказчиков', primary_col='ID компании')
-            
+            two_axis_barchart(data.tail(5), marker, value_label='заказчиков', primary_col='ID компании')           
     with col3:
         with st.container():
             st.markdown('**Проекты по типу компании-заказчика**')
@@ -353,24 +352,9 @@ def main():
     with col4:
         with st.container():
             a = companies_df['Тип компании'].value_counts()
-            rus = a['Крупный российский бизнес'] + a['Малый и средний российский бизнес'] + a['Государственная структура']
-            foreign = a['Малый и средний международный бизнес'] + a['Крупный международный бизнес']
-            
-            # st.markdown('**Российских компаний**')
-            st.metric(
-            label       = 'Российских компаний',
-            value       = rus,
-            # label_visibility = 'collapsed' ХЗ ПОЧЕМУ НО МНЕ ВЫДАЁТ ОШИБКУ
-            )            
-            # st.markdown('**Международных компаний**')
-            st.metric(
-            label       = 'Международных компаний',
-            value       = foreign,
-            
-            # label_visibility = 'collapsed'
-            
-            )
-    
+            st.metric('Российские', a['Крупный российский бизнес'] + a['Малый и средний российский бизнес'] + a['Государственная структура'])
+            st.metric('Международные', a['Малый и средний международный бизнес'] + a['Крупный международный бизнес'])
+            st.metric('Активные партнеры', projects_df[['Академический год', 'ID компании']].groupby('Академический год').nunique().iloc[-1])
     # Ряд студентов топ
     col1, col2,col3,col4 = st.columns([1, 2,2,1])
     with col1:

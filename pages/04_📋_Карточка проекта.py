@@ -147,7 +147,7 @@ def run():
                     st.caption(res)
                 else:
                     st.warning('Данных нет, но вы держитесь...')
-        st.markdown(f"<hr style='height:0.1rem; opacity: 0'/>", unsafe_allow_html=True)
+        # Project team and affiliated ppl
         with st.container():
             left, right = st.columns(2)
             with left:
@@ -191,7 +191,7 @@ def run():
                         group_counter += 1
                 else:
                     st.warning('Данных нет, но вы держитесь...')
-
+        # st.download_button('💾 PDF', data=utils.project_to_pdf(output), file_name=f"{output['Название проекта']}.pdf", mime="application/pdf",)
 
 if __name__ == "__main__":
     utils.page_config(layout='wide', title='Поиск проектов')
