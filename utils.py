@@ -100,13 +100,6 @@ def load_students_in_projects():
     df['ID проекта'] = df['ID проекта'].astype(int)
     return df.dropna(subset=['Курс в моменте'])
 
-# @st.cache_data(show_spinner=False)
-# def load_students_in_project(project_id):
-#     df = query_data(query_dict['students_in_projects']).merge(query_data(query_dict['students']), on='ID студента', how='left')
-#     df.dropna(axis=0, subset=['Команда', 'ID студента'], inplace=True)
-#     df = df.loc[df['ID проекта'] == project_id]
-#     return df
-
 @st.cache_data(ttl=10800, show_spinner=False)
 def load_teachers_in_projects():
     return query_data(query_dict['teachers_in_projects'])
@@ -341,7 +334,19 @@ def project_to_pdf(project_info):
     pdf.multi_cell(w=0, txt=project_info['Результат'], new_x="LMARGIN", new_y="NEXT")
     # Padding
     pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
-    # Managers
+    # Administrative
+    for i in ['Модераторы', 'Кураторы', 'Преподаватели']:
+        names = project_info[i]
+        pdf.set_font("DejaVu", "B", 12)
+        header = f'{i} проекта ({len(names) if type(names) != float else 0} чел.)'
+        pdf.cell(w=0, h=8, txt=header, new_x="LMARGIN", new_y="NEXT")
+        pdf.set_font("DejaVu", "", 10)
+        if type(names) != list:
+            pdf.cell(None, 8, txt='Не найдено', new_x="LMARGIN", new_y="NEXT")
+        else:
+            for j in names:
+                pdf.cell(None, 8, txt=j, new_x="LMARGIN", new_y="NEXT")
+    # Participants
     for i in ['Модераторы', 'Кураторы', 'Преподаватели']:
         names = project_info[i]
         pdf.set_font("DejaVu", "B", 12)
