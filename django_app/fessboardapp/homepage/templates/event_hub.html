@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title> Table Example </title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+                body {
+                    padding-top: 20px;
+                    padding-bottom: 20px;
+                }
+            </style>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css">
+        <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.22/js/dataTables.bootstrap4.min.js"></script>
+    </head>
+    <body>
+
+    <div class="container" style="width:100%">
+        <div class="row">
+            <div class="col-sm"> <h2> Events </h2> </div>
+            <div class="col-sm">
+                <form method="post" class="card p-2 mt-1" style="width: 100%; font-size: 14px">
+                <a href="{% url 'events-form' %}" class="btn btn-primary btn-sm btn-block">Add event</a>
+            </form>
+            </div>
+        </div>
+        <table class="table table-bordered" id="sortTable">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Регион</th>
+                <th>Дата начала</th>
+                <th>Дата окончания</th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in Events %}
+                <tr>
+                    <td>{{ item.event_id }}</td>
+                    <td>{{ item.event_name }}</td>
+                    <td>{{ item.event_region }}</td>
+                    <td>{{ item.event_start_date }}</td>
+                    <td>{{ item.event_end_date }}</td>
+                    <td><a href="{% url 'update-event-form' item.event_id %}" class="btn btn-sm btn-info">Edit</a></td>
+                    <td><a href="{% url 'update-student-hub-event' item.event_id %}" class="btn btn-sm btn-info">Students</a></td>
+                    <td><a href="{% url 'update-teacher-hub-event' item.event_id %}" class="btn btn-sm btn-info">Teachers</a></td>
+                    <td><a href="{% url 'delete-event-form' item.event_id %}" class="btn btn-sm btn-danger">Delete</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        $('#sortTable').DataTable();
+    </script>
+    <a class="btn btn-close btn-lg" href="/">Go back</a>
+    </body>
+</html>
