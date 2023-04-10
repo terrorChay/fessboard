@@ -11,9 +11,9 @@ from io import BytesIO
 ####################################################################################################################################
 
 # set page layout
-def page_config(title, layout='wide'):
+def page_config(title, layout='wide', page_icon=None):
     try:
-        st.set_page_config(layout=layout, page_title=title)
+        st.set_page_config(layout=layout, page_title=title, page_icon=page_icon)
     except st.errors.StreamlitAPIException as e:
         if "can only be called once per app" in e.__str__():
             return
@@ -67,10 +67,6 @@ def set_logo():
 # load css with external source
 def load_remote_css(url):
     st.markdown(f'<link href="{url}" rel="stylesheet">', unsafe_allow_html=True)
-
-# set material ui icon
-def set_MU_icon(icon_name):
-    st.markdown(f'<i class="material-icons">{icon_name}</i>', unsafe_allow_html=True)
 
 ####################################################################################################################################
 #                                                            DATABASE QUERIES
