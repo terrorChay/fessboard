@@ -14,7 +14,7 @@ def run():
     st.subheader('Обратная связь')
     text_col, qr_col    = st.columns([3,1])
     with qr_col:
-        st.image('img/feedback.png')
+        st.image('https://raw.githubusercontent.com/terrorChay/FESSBoard-images/main/feedback.png')
     with text_col:
         st.write("""
         Нам очень важна Ваша обратная связь. Если Вы нашли баг, хотите предложить улучшение или оставить отзыв - заполните анкету **[по ссылке](https://forms.gle/yHKSg8oNko9MnQtB6)**.

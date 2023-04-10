@@ -49,7 +49,7 @@ def remove_table_indice():
 
 # set logo
 def set_logo():
-    logo_url = 'https://github.com/terrorChay/FESSBoard/blob/master/img/logo_dark.png?raw=true'
+    logo_url = 'https://raw.githubusercontent.com/terrorChay/FESSBoard-images/main/logo/fessboard/logo_dark.png'
     st.markdown(
         f"""
         <style>

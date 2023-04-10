@@ -237,37 +237,37 @@ def main():
     with col1:
         with st.container():
             st.image(
-                image = 'https://github.com/terrorChay/FESSBoard/blob/master/img/sber_logo.png?raw=true',
+                image = 'https://raw.githubusercontent.com/terrorChay/FESSBoard-images/main/logo/companies/sber_logo.png',
                 use_column_width = 'auto',
             )
     with col2:
         with st.container():
             st.image(
-                image = 'https://github.com/terrorChay/FESSBoard/blob/master/img/mik_logo.png?raw=true',
+                image = 'https://raw.githubusercontent.com/terrorChay/FESSBoard-images/main/logo/companies/mik_logo.png',
                 use_column_width = 'auto',
             )
     with col3:
         with st.container():
             st.image(
-                image = 'https://github.com/terrorChay/FESSBoard/blob/master/img/segezha_logo.png?raw=true',
+                image = 'https://raw.githubusercontent.com/terrorChay/FESSBoard-images/main/logo/companies/segezha_logo.png',
                 use_column_width = 'auto',
             )
     with col4:
         with st.container():
             st.image(
-                image = 'https://github.com/terrorChay/FESSBoard/blob/master/img/schneider_logo.png?raw=true',
+                image = 'https://raw.githubusercontent.com/terrorChay/FESSBoard-images/main/logo/companies/schneider_logo.png',
                 use_column_width = 'auto',
             )
     with col5:
         with st.container():
             st.image(
-                image = 'https://github.com/terrorChay/FESSBoard/blob/master/img/xiaomi_logo.png?raw=true',
+                image = 'https://raw.githubusercontent.com/terrorChay/FESSBoard-images/main/logo/companies/xiaomi_logo.png',
                 use_column_width = 'auto',
             )
     with col6:
         with st.container():
             st.image(
-                image = 'https://github.com/terrorChay/FESSBoard/blob/master/img/bosch_logo.png?raw=true',
+                image = 'https://raw.githubusercontent.com/terrorChay/FESSBoard-images/main/logo/companies/bosch_logo.png',
                 use_column_width = 'auto',
             )
     # # Ряд Компаний-парнёров      
