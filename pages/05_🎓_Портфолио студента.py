@@ -380,7 +380,7 @@ def run():
         st.markdown(f"<h4 style='text-align: center;'>Выберите студента 😎</h4>", unsafe_allow_html=True)
     
 if __name__ == "__main__":
-    utils.page_config(layout='wide', title='Портфолио компании')
+    utils.page_config(layout='wide', title='Портфолио компании', page_icon=':bar_chart:')
     utils.load_local_css('css/student.css')
     utils.remove_footer()
     utils.set_logo()

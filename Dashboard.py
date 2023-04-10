@@ -571,7 +571,7 @@ def main():
  
 if __name__ == "__main__":
     # page setup
-    utils.page_config(layout='wide', title='FESSBoard')
+    utils.page_config(layout='wide', title='FESSBoard', page_icon=':bar_chart:')
     # styles
     utils.remove_footer()
     utils.load_local_css('css/main.css')

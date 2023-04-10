@@ -194,7 +194,7 @@ def run():
         # st.download_button('💾 PDF', data=utils.project_to_pdf(output), file_name=f"{output['Название проекта']}.pdf", mime="application/pdf",)
 
 if __name__ == "__main__":
-    utils.page_config(layout='wide', title='Поиск проектов')
+    utils.page_config(layout='wide', title='Поиск проектов', page_icon=':bar_chart:')
     utils.load_local_css('css/project.css')
     utils.remove_footer()
     utils.set_logo()

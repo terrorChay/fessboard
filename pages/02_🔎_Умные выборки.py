@@ -240,7 +240,7 @@ def run():
             st.warning('Студенты не найдены')
 
 if __name__ == "__main__":
-    utils.page_config(layout='wide', title='Поиск проектов')
+    utils.page_config(layout='wide', title='Поиск проектов', page_icon=':bar_chart:')
     utils.remove_footer()
     utils.set_logo()
     run()
