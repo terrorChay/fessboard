@@ -196,7 +196,7 @@ class FESSBoard_PDF(FPDF):
         self.add_font("DejaVu", "B", "fonts/DejaVuSans-Bold.ttf", uni=True)
         self.set_font("DejaVu", "", 12)
         # Rendering logo:
-        self.image("https://github.com/terrorChay/FESSBoard/blob/master/img/logo_dark.png?raw=true", 10, 8, w=self.epw/3)
+        self.image("https://raw.githubusercontent.com/terrorChay/FESSBoard-images/main/logo/fessboard/logo_dark.png", 10, 8, w=self.epw/3)
         # Printing date
         self.cell(0, align="R", txt=date.today().strftime("%d/%m/%Y"), ln=1)
         # Performing a line break
