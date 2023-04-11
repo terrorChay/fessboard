@@ -59,15 +59,28 @@ def filter_df(df: pd.DataFrame, key="default", force_multiselect=[]) -> pd.DataF
             left.write("└")
             # Multiselect for lists
             if is_object_dtype(df[column]):
+                select_col, operator_col = right.columns([8,2])
                 options = pd.Series([x for _list in df[column][df[column].notna()] for x in _list]).unique()
                 # input
-                user_cat_input = right.multiselect(
+                user_cat_input = select_col.multiselect(
                     f"{column}",
                     options,
                     key=f'{key}_{column}_input',
                 )
+                operator_to_use = operator_col.selectbox(
+                    "Оператор",
+                    ['или', 'и'],
+                    key=f'{key}_{column}_operator',
+                    label_visibility="hidden",
+                )
                 if user_cat_input:
-                    df = df[df[column].astype(str).str.contains('|'.join([re.escape(m) for m in user_cat_input]))]
+                    if operator_to_use == 'или':
+                        expr_str    = '|'.join([re.escape(m) for m in user_cat_input])
+                    else:
+                        base        = r'^{}'
+                        expr        = '(?=.*{})'
+                        expr_str    = base.format(''.join(expr.format(w) for w in [re.escape(m) for m in user_cat_input]))
+                    df = df[df[column].astype(str).str.contains(expr_str)]
             # Multiselect Box
             elif any(map(df[column].name.__contains__, force_multiselect)):
                 options = sorted(df[column].unique())
@@ -197,9 +210,9 @@ def run():
                 col2.download_button('💾 Excel', data=utils.convert_df(df_filters_applied, True), file_name="fessboard_projects_slice.xlsx", use_container_width=True)
             else:
                 # Technically only possible with long string criteria filters cuz they allow for any string input
-                st.warning('Проекты не найдены 1')
+                st.warning('Таких проектов пока нет')
         else:
-            st.warning('Проекты не найдены 2')
+            st.warning('Таких проектов пока нет')
     #EVENTS
     with tab2:
         # Draw search filters and return filtered df
