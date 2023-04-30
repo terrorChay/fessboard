@@ -144,7 +144,6 @@ def select_student(df: pd.DataFrame):
 
     return student_id
 
-
 # App launch
 def run():
     # Load data
@@ -175,7 +174,20 @@ def run():
     if student_id:
         student_info = students_df.loc[students_df['ID студента'] == student_id]
         projects_with_student_df = students_in_projects_df.loc[students_in_projects_df['ID студента'] == student_id]
-        if projects_with_student_df.shape[0] > 0:  
+        if projects_with_student_df.shape[0] > 0:
+            # Calculate activity
+            regular_projects_idx = projects_with_student_df.loc[(projects_with_student_df['Куратор'] == 0) & (projects_with_student_df['Модератор'] == 0)]['ID проекта']
+            regular_projects_df = projects_df.loc[projects_df['ID проекта'].isin(regular_projects_idx)]
+            #
+            curated_projects_idx = projects_with_student_df.loc[projects_with_student_df['Куратор'] == 1]['ID проекта']
+            curated_projects_df = projects_df.loc[projects_df['ID проекта'].isin(curated_projects_idx)]
+            #
+            moderated_projects_idx = projects_with_student_df.loc[projects_with_student_df['Модератор'] == 1]['ID проекта']
+            moderated_projects_df = projects_df.loc[projects_df['ID проекта'].isin(moderated_projects_idx)]
+            #
+            events_participated_idx = students_in_events_df.loc[students_in_events_df['ID студента'] == student_id]['ID мероприятия']
+            events_participated_df = events_df.loc[events_df['ID мероприятия'].isin(events_participated_idx)]
+            #
             tab1, tab2, tab3, tab4, tab5 = st.tabs(['Сводная', 'Проектерство', 'Кураторство', 'Модераторство', 'Мероприятия'])
             # Analytics tab
             with tab1:
@@ -186,14 +198,20 @@ def run():
                             **Курс:** {student_info['Курс'].values[0]}, {student_info['Программа'].values[0]}  
                             **Поток:** {student_info['Поток'].values[0]}
                             """)
+                #
                 projects_summary = {
                     'Выполнено проектов'    : projects_with_student_df.loc[(projects_with_student_df['Статус'] == 'Завершен')|(projects_with_student_df['Статус'] == 'Заморожен')].shape[0],
                     'Проектов в работе'     : projects_with_student_df.loc[projects_with_student_df['Статус'] == 'Активен'].shape[0],
                     'Любимая компания'      : projects_df.loc[projects_df['ID проекта'].isin(projects_with_student_df['ID проекта'])]['Название компании'].mode()[0],
-                    'В проектах'          : f"c {projects_with_student_df['Курс в моменте'].min()} курса",
+                    'В проектах'            : f"c {projects_with_student_df.sort_values(by='Академический год').iloc[0]['Курс в моменте']} курса",
                 }
-                projects_summary_df = projects_with_student_df[['ID проекта', 'Куратор', 'Модератор']].merge(projects_df[['ID проекта', 'Название компании', 'Название проекта', 'Микро-направление', 'Грейд']], "left", "ID проекта", )
-                st.download_button(label='💾 Скачать портфолио', data=utils.student_to_pdf(student_info, projects_summary, projects_summary_df), file_name=f"{student_fullname}.pdf", mime="application/pdf",)
+                #
+                total_activity = {
+                    "Участник команды"      : regular_projects_df,
+                    "Куратор проекта"       : curated_projects_df,
+                    "Модератор проекта"     : moderated_projects_df
+                }
+                st.download_button(label='💾 Скачать портфолио', data=utils.student_to_pdf(student_info, projects_summary, total_activity, events_participated_df), file_name=f"{student_fullname}.pdf", mime="application/pdf",)
                 # Project summary metrics
                 cols = st.columns(4)
                 for idx, key in enumerate(list(projects_summary)):
@@ -339,36 +357,28 @@ def run():
                     st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
             # Display regular projects 
             with tab2:
-                regular_projects_idx = projects_with_student_df.loc[(projects_with_student_df['Куратор'] == 0) & (projects_with_student_df['Модератор'] == 0)]['ID проекта']
-                if regular_projects_idx.shape[0] > 0:
-                    regular_projects_df = projects_df.loc[projects_df['ID проекта'].isin(regular_projects_idx)]
+                if regular_projects_df.shape[0] > 0:
                     st.info("В данной выборке представлены только те проекты, в которых студент выступал(-а) в роли участника.", icon="ℹ️")
                     st.dataframe(regular_projects_df)
                 else:
                     st.warning('Студент пока не участвовал в проектах.')
             # Display curated projects
             with tab3:
-                curated_projects_idx = projects_with_student_df.loc[projects_with_student_df['Куратор'] == 1]['ID проекта']
-                if curated_projects_idx.shape[0] > 0:
-                    curated_projects_df = projects_df.loc[projects_df['ID проекта'].isin(curated_projects_idx)]
+                if curated_projects_df.shape[0] > 0:
                     st.info("В данной выборке представлены только те проекты, в которых студент выступал(-а) в роли куратора.", icon="ℹ️")
                     st.dataframe(curated_projects_df)
                 else:
                     st.warning('Студент пока не выступал в роли куратора.')
             # Display moderated projects
             with tab4:
-                moderated_projects_idx = projects_with_student_df.loc[projects_with_student_df['Модератор'] == 1]['ID проекта']
-                if moderated_projects_idx.shape[0] > 0:
-                    moderated_projects_df = projects_df.loc[projects_df['ID проекта'].isin(moderated_projects_idx)]
+                if moderated_projects_df.shape[0] > 0:
                     st.info("В данной выборке представлены только те проекты, в которых студент выступал(-а) в роли модератора.", icon="ℹ️")
                     st.dataframe(moderated_projects_df)
                 else:
                     st.warning('Студент пока не выступал в роли модератора.')
             # Display events participated
             with tab5:
-                events_participated_idx = students_in_events_df.loc[students_in_events_df['ID студента'] == student_id]['ID мероприятия']
-                if events_participated_idx.shape[0] > 0:
-                    events_participated_df = events_df.loc[events_df['ID мероприятия'].isin(events_participated_idx)]
+                if events_participated_df.shape[0] > 0:
                     st.info("В данной выборке представлены только эвенты, хакатоны и прочие мероприятия.", icon="ℹ️")
                     st.dataframe(events_participated_df)
                 else:

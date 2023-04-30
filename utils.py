@@ -208,7 +208,7 @@ class FESSBoard_PDF(FPDF):
         self.cell(w=self.epw, txt="Информационно-аналитическая система FESSBoard", align="C", new_x="LMARGIN", new_y="NEXT")
         self.cell(w=self.epw, txt="ФЭСН, РАНХиГС", align="C")
 
-def student_to_pdf(student_info, projects_summary, projects_summary_df):
+def student_to_pdf(student_info, projects_summary, total_activity, events_df):
     pdf = FESSBoard_PDF(orientation="P", unit="mm", format="Legal")
     pdf.add_page()
     # Student name
@@ -243,117 +243,104 @@ def student_to_pdf(student_info, projects_summary, projects_summary_df):
     pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
     # Projects data
     pdf.set_font("DejaVu", "B", 16)
-    pdf.cell(txt="Портфолио проектов", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(txt="Портфолио проектера", new_x="LMARGIN", new_y="NEXT")
     ## Padding
     pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
-    ## Projects as teammate
-    pdf.set_font("DejaVu", "B", 12)
-    pdf.cell(None, 8, txt="В роли участника", new_x="LMARGIN", new_y="NEXT")
-    pdf.set_font("DejaVu", "", 12)
-    for idx, row in projects_summary_df.loc[(projects_summary_df['Куратор'] == 0) & (projects_summary_df['Модератор'] == 0)].iterrows():
-        project_name = f"{row['Название проекта'][:30]}..." if len(row['Название проекта']) >= 30 else row['Название проекта']
-        pdf.cell(pdf.epw*0.45, 8, txt=project_name)
-        pdf.cell(pdf.epw*0.4, 8, txt=row['Микро-направление'])
-        pdf.cell(pdf.epw*0.1, 8, txt=row['Грейд'], new_x="LMARGIN", new_y="NEXT")
-
-    ## Curator
-    k = projects_summary_df.loc[projects_summary_df['Куратор'] == 1]
-    if k.shape[0] > 0:
-        ## Padding
-        pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
-        ## Projects as curator
+    # Write project activity
+    for key, df in total_activity.items():
+        if df.shape[0] > 0:
+            df.sort_values(by="Академический год", inplace=True)
+            pdf.set_font("DejaVu", "B", 12)
+            pdf.cell(None, 8, txt=key, new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font("DejaVu", "", 12)
+            for idx, row in df.iterrows():
+                project_name = row['Название проекта']
+                project_name = f"{project_name[:50]}..." if len(project_name) >= 50 else project_name
+                pdf.cell(pdf.epw*0.7, 8, txt=project_name)
+                pdf.cell(pdf.epw*0.2, 8, txt=row['Академический год'])
+                pdf.cell(pdf.epw*0.1, 8, txt=row['Грейд'], new_x="LMARGIN", new_y="NEXT")
+            pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
+    # Write event activity
+    if events_df.shape[0] > 0:
+        events_df.sort_values(by="Дата начала", inplace=True)
         pdf.set_font("DejaVu", "B", 12)
-        pdf.cell(None, 8, txt="В роли куратора", new_x="LMARGIN", new_y="NEXT")
+        pdf.cell(None, 8, txt="Участие в мероприятиях и хакатонах", new_x="LMARGIN", new_y="NEXT")
         pdf.set_font("DejaVu", "", 12)
-        for idx, row in k.iterrows():
-            project_name = f"{row['Название проекта'][:30]}..." if len(row['Название проекта']) >= 30 else row['Название проекта']
-            pdf.cell(pdf.epw*0.45, 8, txt=project_name)
-            pdf.cell(pdf.epw*0.4, 8, txt=row['Микро-направление'])
-            pdf.cell(pdf.epw*0.1, 8, txt=row['Грейд'], new_x="LMARGIN", new_y="NEXT")
+        for idx, row in events_df.iterrows():
+            event_name = row['Название']
+            event_name = f"{event_name[:50]}..." if len(event_name) >= 50 else event_name
+            pdf.cell(pdf.epw*0.7, 8, txt=event_name)
+            pdf.cell(pdf.epw*0.3, 8, txt=row['Регион'], new_x="LMARGIN", new_y="NEXT")
 
-    ## Moderator
-    j = projects_summary_df.loc[projects_summary_df['Модератор'] == 1]
-    if j.shape[0] > 0:
-        ## Padding
-        pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
-        ## Projects as curator
-        pdf.set_font("DejaVu", "B", 12)
-        pdf.cell(None, 8, txt="В роли модератора", new_x="LMARGIN", new_y="NEXT")
-        pdf.set_font("DejaVu", "", 12)
-        for idx, row in j.iterrows():
-            project_name = f"{row['Название проекта'][:30]}..." if len(row['Название проекта']) >= 30 else row['Название проекта']
-            pdf.cell(pdf.epw*0.45, 8, txt=project_name)
-            pdf.cell(pdf.epw*0.4, 8, txt=row['Микро-направление'])
-            pdf.cell(pdf.epw*0.1, 8, txt=row['Грейд'], new_x="LMARGIN", new_y="NEXT")
     return bytes(pdf.output())
 
-def project_to_pdf(project_info):
-    pdf = FESSBoard_PDF(orientation="P", unit="mm", format="Legal")
-    pdf.add_page()
-    # Project name
-    pdf.set_font("DejaVu", "B", 16)
-    pdf.multi_cell(w=0, h=8, txt=project_info['Название проекта'], new_x="LMARGIN", new_y="NEXT")
-    # Padding
-    pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
-    # Dates
-    try:
-        start_date = project_info['Дата начала'].strftime('%d.%m.%Y')
-    except:
-        start_date = "..."
-    try:
-        end_date = project_info['Дата окончания'].strftime('%d.%m.%Y')
-    except:
-        end_date = "..."
-    pdf.set_font("DejaVu", "B", 12)
-    pdf.cell(None, 8, txt=f'Сроки реализации: ')
-    pdf.set_font("DejaVu", "", 12)
-    pdf.cell(None, 8, txt=f'{start_date} - {end_date}', new_x="LMARGIN", new_y="NEXT")
-    # Basic info
-    for i in ['Название компании', 'Тип компании', 'Макро-направление', 'Микро-направление', 'Грейд', 'Статус']:
-        pdf.set_font("DejaVu", "B", 12)
-        pdf.cell(None, 8, txt=f'{i}:')
-        pdf.set_font("DejaVu", "", 12)
-        pdf.cell(None, 8, txt=project_info[i], new_x="LMARGIN", new_y="NEXT")
-    # Padding
-    pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
-    # Project description
-    pdf.set_font("DejaVu", "B", 12)
-    pdf.cell(w=0, h=8, txt="Описание проекта", new_x="LMARGIN", new_y="NEXT")
-    pdf.set_font("DejaVu", "", 10)
-    pdf.multi_cell(w=0, txt=project_info['Описание'], new_x="LMARGIN", new_y="NEXT")
-    # Padding
-    pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
-    # Project results
-    pdf.set_font("DejaVu", "B", 12)
-    pdf.cell(w=0, h=8, txt="Результат проекта", new_x="LMARGIN", new_y="NEXT")
-    pdf.set_font("DejaVu", "", 10)
-    pdf.multi_cell(w=0, txt=project_info['Результат'], new_x="LMARGIN", new_y="NEXT")
-    # Padding
-    pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
-    # Administrative
-    for i in ['Модераторы', 'Кураторы', 'Преподаватели']:
-        names = project_info[i]
-        pdf.set_font("DejaVu", "B", 12)
-        header = f'{i} проекта ({len(names) if type(names) != float else 0} чел.)'
-        pdf.cell(w=0, h=8, txt=header, new_x="LMARGIN", new_y="NEXT")
-        pdf.set_font("DejaVu", "", 10)
-        if type(names) != list:
-            pdf.cell(None, 8, txt='Не найдено', new_x="LMARGIN", new_y="NEXT")
-        else:
-            for j in names:
-                pdf.cell(None, 8, txt=j, new_x="LMARGIN", new_y="NEXT")
-    # Participants
-    for i in ['Модераторы', 'Кураторы', 'Преподаватели']:
-        names = project_info[i]
-        pdf.set_font("DejaVu", "B", 12)
-        header = f'{i} проекта ({len(names) if type(names) != float else 0} чел.)'
-        pdf.cell(w=0, h=8, txt=header, new_x="LMARGIN", new_y="NEXT")
-        pdf.set_font("DejaVu", "", 10)
-        if type(names) != list:
-            pdf.cell(None, 8, txt='Не найдено', new_x="LMARGIN", new_y="NEXT")
-        else:
-            for j in names:
-                pdf.cell(None, 8, txt=j, new_x="LMARGIN", new_y="NEXT")
+# def project_to_pdf(project_info):
+#     pdf = FESSBoard_PDF(orientation="P", unit="mm", format="Legal")
+#     pdf.add_page()
+#     # Project name
+#     pdf.set_font("DejaVu", "B", 16)
+#     pdf.multi_cell(w=0, h=8, txt=project_info['Название проекта'], new_x="LMARGIN", new_y="NEXT")
+#     # Padding
+#     pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
+#     # Dates
+#     try:
+#         start_date = project_info['Дата начала'].strftime('%d.%m.%Y')
+#     except:
+#         start_date = "..."
+#     try:
+#         end_date = project_info['Дата окончания'].strftime('%d.%m.%Y')
+#     except:
+#         end_date = "..."
+#     pdf.set_font("DejaVu", "B", 12)
+#     pdf.cell(None, 8, txt=f'Сроки реализации: ')
+#     pdf.set_font("DejaVu", "", 12)
+#     pdf.cell(None, 8, txt=f'{start_date} - {end_date}', new_x="LMARGIN", new_y="NEXT")
+#     # Basic info
+#     for i in ['Название компании', 'Тип компании', 'Макро-направление', 'Микро-направление', 'Грейд', 'Статус']:
+#         pdf.set_font("DejaVu", "B", 12)
+#         pdf.cell(None, 8, txt=f'{i}:')
+#         pdf.set_font("DejaVu", "", 12)
+#         pdf.cell(None, 8, txt=project_info[i], new_x="LMARGIN", new_y="NEXT")
+#     # Padding
+#     pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
+#     # Project description
+#     pdf.set_font("DejaVu", "B", 12)
+#     pdf.cell(w=0, h=8, txt="Описание проекта", new_x="LMARGIN", new_y="NEXT")
+#     pdf.set_font("DejaVu", "", 10)
+#     pdf.multi_cell(w=0, txt=project_info['Описание'], new_x="LMARGIN", new_y="NEXT")
+#     # Padding
+#     pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
+#     # Project results
+#     pdf.set_font("DejaVu", "B", 12)
+#     pdf.cell(w=0, h=8, txt="Результат проекта", new_x="LMARGIN", new_y="NEXT")
+#     pdf.set_font("DejaVu", "", 10)
+#     pdf.multi_cell(w=0, txt=project_info['Результат'], new_x="LMARGIN", new_y="NEXT")
+#     # Padding
+#     pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
+#     # Administrative
+#     for i in ['Модераторы', 'Кураторы', 'Преподаватели']:
+#         names = project_info[i]
+#         pdf.set_font("DejaVu", "B", 12)
+#         header = f'{i} проекта ({len(names) if type(names) != float else 0} чел.)'
+#         pdf.cell(w=0, h=8, txt=header, new_x="LMARGIN", new_y="NEXT")
+#         pdf.set_font("DejaVu", "", 10)
+#         if type(names) != list:
+#             pdf.cell(None, 8, txt='Не найдено', new_x="LMARGIN", new_y="NEXT")
+#         else:
+#             for j in names:
+#                 pdf.cell(None, 8, txt=j, new_x="LMARGIN", new_y="NEXT")
+#     # Participants
+#     for i in ['Модераторы', 'Кураторы', 'Преподаватели']:
+#         names = project_info[i]
+#         pdf.set_font("DejaVu", "B", 12)
+#         header = f'{i} проекта ({len(names) if type(names) != float else 0} чел.)'
+#         pdf.cell(w=0, h=8, txt=header, new_x="LMARGIN", new_y="NEXT")
+#         pdf.set_font("DejaVu", "", 10)
+#         if type(names) != list:
+#             pdf.cell(None, 8, txt='Не найдено', new_x="LMARGIN", new_y="NEXT")
+#         else:
+#             for j in names:
+#                 pdf.cell(None, 8, txt=j, new_x="LMARGIN", new_y="NEXT")
 
-    return bytes(pdf.output())
+#     return bytes(pdf.output())
 

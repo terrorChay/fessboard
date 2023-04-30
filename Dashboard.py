@@ -59,8 +59,8 @@ def two_axis_barchart(data: pd.DataFrame, marker, value_label='шт.', group_col
     # fig['data'][0].width=0.7
     # scatter plot (secondary_y = True)
     fig.add_trace(go.Scatter(
-            x       = data[group_col],
-            y       = data[secondary_col],
+            x       = data[group_col].iloc[1:],
+            y       = data[secondary_col].iloc[1:],
             line    = dict(color='#07C607'),
             name    = secondary_col,
             ),
@@ -540,13 +540,14 @@ def main():
                 display_limit = st.selectbox(label='Топ', options=[5,10,15],index=1)
             # data selection
             if rating_subject == 'Преподаватели':
-                data = teachers_in_projects_df.value_counts(subset='ФИО преподавателя', ascending=sort_asc).iloc[:display_limit]
+                data = teachers_in_projects_df.value_counts(subset='ФИО преподавателя', ascending=sort_asc)
             elif rating_subject == 'Участники':
-                data = students_in_projects_df.value_counts(subset='ФИО студента', ascending=sort_asc).iloc[:display_limit]
+                data = students_in_projects_df.value_counts(subset='ФИО студента', ascending=sort_asc)
             elif rating_subject == 'Кураторы':
-                data = curators_in_projects_df.value_counts(subset='ФИО студента', ascending=sort_asc).iloc[:display_limit]
+                data = curators_in_projects_df.value_counts(subset='ФИО студента', ascending=sort_asc)
             elif rating_subject == 'Модераторы':
-                data = moderators_in_projects_df.value_counts(subset='ФИО студента', ascending=sort_asc).iloc[:display_limit]
+                data = moderators_in_projects_df.value_counts(subset='ФИО студента', ascending=sort_asc)
+            data = data[data.index.str.contains("Типовой")==False ].iloc[:display_limit]
             # set up a plot
             fig = px.bar(data, orientation='h', color_discrete_sequence=colors,text_auto=True)
             fig.update_layout(
