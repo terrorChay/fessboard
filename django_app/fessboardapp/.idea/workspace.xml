@@ -5,15 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3ba4d248-df86-40b2-9b13-c9f9aee26e29" name="Changes" comment="Finished product">
-      <change beforePath="$PROJECT_DIR$/../fessboard/.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../streamlit_app/.streamlit/config.toml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../streamlit_app/.streamlit/desktop.ini" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../streamlit_app/index.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../streamlit_app/pages/01_Проекты.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../streamlit_app/pages/02_Участники.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../streamlit_app/pages/03_Партнеры.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../streamlit_app/pages/desktop.ini" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../streamlit_app/styles.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,7 +65,7 @@
       <workItem from="1680341837069" duration="3613000" />
       <workItem from="1681042402592" duration="2645000" />
       <workItem from="1681823654591" duration="152000" />
-      <workItem from="1682857137016" duration="1522000" />
+      <workItem from="1682857137016" duration="1767000" />
     </task>
     <task id="LOCAL-00001" summary="Finished product">
       <created>1681046800683</created>
