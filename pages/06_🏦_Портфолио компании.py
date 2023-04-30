@@ -146,75 +146,18 @@ def run():
                         data = projects_df.loc[projects_df['ID проекта'].isin(projects_with_company['ID проекта'])]['Микро-направление'].value_counts().reset_index(name='Количество')
                         data = data.rename(columns={'index':'Микро'})
                         st.markdown('**Распределение проектов  с компанией по микронаправлениям**')
-                        fig = px.pie(data,
-                        values                  = data['Количество'],
-                        names                   = data['Микро'],
-                        color_discrete_sequence = colors,
-                        )
-
-                        fig.update_traces(
-                            textposition  = 'inside',
-                            textinfo      = 'value',
-                            hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
-                            textfont_size = 20,
-                            insidetextorientation = 'auto',
-                            hole = .6
-                            
-                            )
-
-                        fig.update_layout(
-                        # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
-                        plot_bgcolor            = tr,
-                        paper_bgcolor           = tr,
-                        legend                  = dict(orientation="h",itemwidth=50,yanchor="top", y=-0,xanchor="left",x=0),
-                        showlegend              = False,
-                        font_family             = font,
-                        title_font_family       = font,
-                        title_font_color        = "white",
-                        legend_title_font_color = "white",
-                        height                  = 220,
-                        margin                  = dict(t=10, l=0, r=0, b=10),
-                        #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
-                        )
-
-                        st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+                        v = data['Количество']
+                        n = data['Микро']
+                        utils.donut_chart(v,n,colors, textinfo='value')
                 # Display regular projects             
             with col3:
                     with st.container():
                         st.markdown('**Распределение проектов  с компанией по<br>грейдам**',unsafe_allow_html=True)
                         data = projects_df.loc[projects_df['ID проекта'].isin(projects_with_company['ID проекта'])]['Грейд'].value_counts().reset_index(name='Количество')
                         data = data.rename(columns={'index':'Грейд'})
-
-                        fig = px.pie(data,
-                        values                  = data['Количество'],
-                        names                   = data['Грейд'],
-                        color_discrete_sequence = colors,
-                        hole                    = .6
-                        )
-
-                        fig.update_traces(
-                            textposition  = 'inside',
-                            textinfo      = 'label',
-                            hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
-                            textfont_size = 14
-                            
-                            )
-
-                        fig.update_layout(
-                            # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
-                            plot_bgcolor            = tr,
-                            paper_bgcolor           = tr,
-                            #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
-                            showlegend              = False,
-                            font_family             = font,
-                            title_font_family       = font,
-                            title_font_color        = "white",
-                            legend_title_font_color = "white",
-                            height                  = 220,
-                            margin                  = dict(t=10, l=0, r=0, b=10),
-                            #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
-                            )   
-                        st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})       
+                        v = data['Количество']
+                        n = data['Грейд']
+                        utils.donut_chart(v,n,colors)      
                     # График вовлеченности студента в проекты по курсам
             with col4:
                     with st.container():

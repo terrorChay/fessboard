@@ -16,91 +16,6 @@ tr='rgba(0,0,0,0)'
 font="Source Sans Pro"
 config = {'staticPlot': False,'displayModeBar': False}
 
-##################
-##  Plot utils  ##
-##################
-def two_axis_barchart(data: pd.DataFrame, marker, value_label='шт.', group_col='Академический год', primary_col='Количество', secondary_col='Темп прироста'):
-    # figure with 2 axes
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
-    # bar plot (secondary_y = False)
-    fig.add_trace(go.Bar(
-            x                   = data[group_col],
-            y                   = data[primary_col],
-            width               = 0.7,
-            name                = value_label,
-            marker_color        = marker,
-            opacity             = 1,
-            marker_line_width   = 0,
-            text                = list(data[primary_col]),
-            ),
-        secondary_y = False)
-    fig.update_layout(
-            font_family    = font,
-            font_size      = 13,
-            paper_bgcolor  = tr,
-            plot_bgcolor   = tr,
-            margin         = dict(t=0, l=0, r=0, b=0),
-            yaxis_title    = "",
-            xaxis_title    = "",
-            width          = 10,
-            height         = 220,
-            xaxis_visible  = True,
-            yaxis_visible  = True,
-            xaxis          = dict(showgrid=False), 
-            yaxis          = dict(showgrid=False),
-            showlegend     = False
-            )
-    fig.update_traces(
-        textfont_size   = 14,
-            textangle      = 0,
-            textposition   = "auto",
-            cliponaxis     = False,
-            )
-    # fig['data'][0].width=0.7
-    # scatter plot (secondary_y = True)
-    fig.add_trace(go.Scatter(
-            x       = data[group_col].iloc[1:],
-            y       = data[secondary_col].iloc[1:],
-            line    = dict(color='#07C607'),
-            name    = secondary_col,
-            ),
-        secondary_y = True)
-    fig.update_yaxes(
-        hoverformat = ',.0%',
-        tickformat  = ',.0%',
-        secondary_y = True
-    )
-    st.plotly_chart(fig,use_container_width=True,config=config)
-
-def donut_chart(values, names, colors, legend=False, textinfo='label'):
-    fig = px.pie(
-        values                  = values,
-        names                   = names,
-        color_discrete_sequence = colors,
-        hole                    = .6
-    )
-
-    fig.update_traces(
-        textposition  = 'inside',
-        textinfo      = textinfo,
-        hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
-        textfont_size = 14
-        
-        )
-
-    fig.update_layout(
-        plot_bgcolor            = tr,
-        paper_bgcolor           = tr,
-        showlegend              = False,
-        font_family             = font,
-        title_font_family       = font,
-        title_font_color        = "white",
-        legend_title_font_color = "white",
-        height                  = 220,
-        margin                  = dict(t=0, l=0, r=0, b=0),
-        )
-    st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
-
 def main():
     # load data
     with st.spinner('Читаем PMI и PMBOK...'):
@@ -172,14 +87,14 @@ def main():
         with st.container():
             st.markdown('<p class="tooltip"><strong>Грейды проектов</strong><span class="tooltiptext">Показывает чудеса грейдного членения</span></p>', unsafe_allow_html=True)
             k = projects_df['Грейд'].value_counts()
-            donut_chart(values=k.values, names=k.index, colors=colors)
+            utils.donut_chart(values=k.values, names=k.index, colors=colors)
     with col2:
         ## Число и темп прироста проектов
         with st.container():
             st.markdown('**Число и темп прироста проектов**')
             data                    = projects_df.groupby('Академический год')['ID проекта'].nunique().reset_index()
             data['Темп прироста']   = data['ID проекта'].pct_change().fillna(0)
-            two_axis_barchart(data.tail(5), marker, value_label='проектов', primary_col='ID проекта')
+            utils.two_axis_barchart(data.tail(5), marker, value_label='проектов', primary_col='ID проекта')
 
     with col3:
         ## Регионы мероприятий
@@ -276,48 +191,20 @@ def main():
             top_companies_df = projects_df[['Название компании','Тип компании']]
             top_companies_df = top_companies_df[top_companies_df['Тип компании']!='Частное лицо']
             top_companies_df = top_companies_df['Название компании'].value_counts().head(5)
-            donut_chart(values=top_companies_df.values, names=top_companies_df.index, colors=colors)
+            utils.donut_chart(values=top_companies_df.values, names=top_companies_df.index, colors=colors)
     with col2:
         with st.container():
             st.markdown('**Динамика вовлеченности компаний**')
             data                    = projects_df.groupby('Академический год')['ID компании'].nunique().reset_index()
             data['Темп прироста']   = data['ID компании'].pct_change().fillna(0)
-            two_axis_barchart(data.tail(5), marker, value_label='заказчиков', primary_col='ID компании')           
+            utils.two_axis_barchart(data.tail(5), marker, value_label='заказчиков', primary_col='ID компании')           
     with col3:
         with st.container():
             st.markdown('**Проекты по типу компании-заказчика**')
-            data = projects_df['Тип компании']
-            fig = px.pie(data,
-            values                  = data.value_counts(),
-            names                   = data.value_counts().index,
-            color_discrete_sequence = colors,
-            hole                    = .6
-            )
-
-            fig.update_traces(
-                textposition  = 'inside',
-                textinfo      = 'percent',
-                hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
-                textfont_size = 12
-                
-                )
-
-            fig.update_layout(
-                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
-                plot_bgcolor            = tr,
-                paper_bgcolor           = tr,
-                legend                  = dict(orientation="v",itemwidth=30,yanchor="top", y=0.7,xanchor="left",x=1),
-                showlegend              = True,
-                font_family             = font,
-                title_font_family       = font,
-                title_font_color        = "white",
-                legend_title_font_color = "white",
-                height                  = 220,
-                margin                  = dict(t=0, l=0, r=200, b=0),
-                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
-                )
-
-            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False}) 
+            data = projects_df['Тип компании'].value_counts()
+            v=data.values
+            n=data.index
+            utils.donut_chart(v,n,colors,legend=True,textinfo='percent')
     with col4:
         with st.container():
             a = companies_df['Тип компании'].value_counts()
@@ -335,7 +222,7 @@ def main():
                 courses_df['Курс'] = courses_df[['Курс в моменте','Программа в моменте']].agg(' '.join,axis=1).apply(lambda x:x[:5]+'.')
                 courses_df = courses_df[['ID студента','Курс']].drop_duplicates(subset = ['ID студента','Курс'], keep=False)
                 j = courses_df['Курс'].value_counts()
-                donut_chart(values=j.values, names=j.index, colors=colors)
+                utils.donut_chart(values=j.values, names=j.index, colors=colors, hovertemplate="<b>%{label}.</b> Участников: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества")
             except:
                 st.warning('Сейчас нет активных проектов :)')
                 pass
@@ -344,7 +231,7 @@ def main():
             st.markdown('**Динамика вовлеченности студентов**')
             data                    = students_in_projects_df.groupby('Академический год')['ID студента'].nunique().reset_index()
             data['Темп прироста']   = data['ID студента'].pct_change().fillna(0)
-            two_axis_barchart(data.tail(5), marker, value_label='студентов', primary_col='ID студента')
+            utils.two_axis_barchart(data.tail(5), marker, value_label='студентов', primary_col='ID студента')
 
         
     with col3:
@@ -393,7 +280,7 @@ def main():
             dtp = course_4_df.count() - tp
             v=[tp,dtp]
             n=['Участвовали в проектах','Не участвовали в проектах']
-            donut_chart(v,n,colors, textinfo='value')
+            utils.donut_chart(v,n,colors, textinfo='value', hovertemplate="<b>%{label}.</b><br><b>%{percent}</b> от студентов 4 курса")
     #Ряд интерактивов
     col1, col2 = st.columns([2, 4])
     

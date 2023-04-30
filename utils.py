@@ -5,6 +5,9 @@ from my_query import query_dict
 from fpdf import FPDF
 from datetime import date
 from io import BytesIO
+import plotly.express as px
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
 ####################################################################################################################################
 #                                                         STREAMLIT SETUP UTILS
@@ -274,73 +277,90 @@ def student_to_pdf(student_info, projects_summary, total_activity, events_df):
 
     return bytes(pdf.output())
 
-# def project_to_pdf(project_info):
-#     pdf = FESSBoard_PDF(orientation="P", unit="mm", format="Legal")
-#     pdf.add_page()
-#     # Project name
-#     pdf.set_font("DejaVu", "B", 16)
-#     pdf.multi_cell(w=0, h=8, txt=project_info['Название проекта'], new_x="LMARGIN", new_y="NEXT")
-#     # Padding
-#     pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
-#     # Dates
-#     try:
-#         start_date = project_info['Дата начала'].strftime('%d.%m.%Y')
-#     except:
-#         start_date = "..."
-#     try:
-#         end_date = project_info['Дата окончания'].strftime('%d.%m.%Y')
-#     except:
-#         end_date = "..."
-#     pdf.set_font("DejaVu", "B", 12)
-#     pdf.cell(None, 8, txt=f'Сроки реализации: ')
-#     pdf.set_font("DejaVu", "", 12)
-#     pdf.cell(None, 8, txt=f'{start_date} - {end_date}', new_x="LMARGIN", new_y="NEXT")
-#     # Basic info
-#     for i in ['Название компании', 'Тип компании', 'Макро-направление', 'Микро-направление', 'Грейд', 'Статус']:
-#         pdf.set_font("DejaVu", "B", 12)
-#         pdf.cell(None, 8, txt=f'{i}:')
-#         pdf.set_font("DejaVu", "", 12)
-#         pdf.cell(None, 8, txt=project_info[i], new_x="LMARGIN", new_y="NEXT")
-#     # Padding
-#     pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
-#     # Project description
-#     pdf.set_font("DejaVu", "B", 12)
-#     pdf.cell(w=0, h=8, txt="Описание проекта", new_x="LMARGIN", new_y="NEXT")
-#     pdf.set_font("DejaVu", "", 10)
-#     pdf.multi_cell(w=0, txt=project_info['Описание'], new_x="LMARGIN", new_y="NEXT")
-#     # Padding
-#     pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
-#     # Project results
-#     pdf.set_font("DejaVu", "B", 12)
-#     pdf.cell(w=0, h=8, txt="Результат проекта", new_x="LMARGIN", new_y="NEXT")
-#     pdf.set_font("DejaVu", "", 10)
-#     pdf.multi_cell(w=0, txt=project_info['Результат'], new_x="LMARGIN", new_y="NEXT")
-#     # Padding
-#     pdf.cell(0, 8, new_x="LMARGIN", new_y="NEXT")
-#     # Administrative
-#     for i in ['Модераторы', 'Кураторы', 'Преподаватели']:
-#         names = project_info[i]
-#         pdf.set_font("DejaVu", "B", 12)
-#         header = f'{i} проекта ({len(names) if type(names) != float else 0} чел.)'
-#         pdf.cell(w=0, h=8, txt=header, new_x="LMARGIN", new_y="NEXT")
-#         pdf.set_font("DejaVu", "", 10)
-#         if type(names) != list:
-#             pdf.cell(None, 8, txt='Не найдено', new_x="LMARGIN", new_y="NEXT")
-#         else:
-#             for j in names:
-#                 pdf.cell(None, 8, txt=j, new_x="LMARGIN", new_y="NEXT")
-#     # Participants
-#     for i in ['Модераторы', 'Кураторы', 'Преподаватели']:
-#         names = project_info[i]
-#         pdf.set_font("DejaVu", "B", 12)
-#         header = f'{i} проекта ({len(names) if type(names) != float else 0} чел.)'
-#         pdf.cell(w=0, h=8, txt=header, new_x="LMARGIN", new_y="NEXT")
-#         pdf.set_font("DejaVu", "", 10)
-#         if type(names) != list:
-#             pdf.cell(None, 8, txt='Не найдено', new_x="LMARGIN", new_y="NEXT")
-#         else:
-#             for j in names:
-#                 pdf.cell(None, 8, txt=j, new_x="LMARGIN", new_y="NEXT")
+##################
+##  Plot utils  ##
+##################
+def two_axis_barchart(data: pd.DataFrame, marker, value_label='шт.', group_col='Академический год', primary_col='Количество', secondary_col='Темп прироста'):
+    # figure with 2 axes
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    # bar plot (secondary_y = False)
+    fig.add_trace(go.Bar(
+            x                   = data[group_col],
+            y                   = data[primary_col],
+            width               = 0.7,
+            name                = value_label,
+            marker_color        = marker,
+            opacity             = 1,
+            marker_line_width   = 0,
+            text                = list(data[primary_col]),
+            ),
+        secondary_y = False)
+    fig.update_layout(
+            font_family    = "Source Sans Pro",
+            font_size      = 13,
+            paper_bgcolor  = 'rgba(0,0,0,0)',
+            plot_bgcolor   = 'rgba(0,0,0,0)',
+            margin         = dict(t=0, l=0, r=0, b=0),
+            yaxis_title    = "",
+            xaxis_title    = "",
+            width          = 10,
+            height         = 220,
+            xaxis_visible  = True,
+            yaxis_visible  = True,
+            xaxis          = dict(showgrid=False), 
+            yaxis          = dict(showgrid=False),
+            showlegend     = False
+            )
+    fig.update_traces(
+        textfont_size   = 14,
+            textangle      = 0,
+            textposition   = "auto",
+            cliponaxis     = False,
+            )
+    # fig['data'][0].width=0.7
+    # scatter plot (secondary_y = True)
+    fig.add_trace(go.Scatter(
+            x       = data[group_col].iloc[1:],
+            y       = data[secondary_col].iloc[1:],
+            line    = dict(color='#07C607'),
+            name    = secondary_col,
+            ),
+        secondary_y = True)
+    fig.update_yaxes(
+        hoverformat = ',.0%',
+        tickformat  = ',.0%',
+        secondary_y = True
+    )
+    st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
 
-#     return bytes(pdf.output())
+def donut_chart(values, names, colors, legend=False, textinfo='label', hovertemplate="<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества"):
+    fig = px.pie(
+        values                  = values,
+        names                   = names,
+        color_discrete_sequence = colors,
+        hole                    = .6
+    )
+
+    fig.update_traces(
+        textposition  = 'inside',
+        textinfo      = textinfo,
+        hovertemplate = hovertemplate,
+        textfont_size = 14
+        
+        )
+
+    fig.update_layout(
+        plot_bgcolor            = 'rgba(0,0,0,0)',
+        paper_bgcolor           = 'rgba(0,0,0,0)',
+        showlegend              = legend,
+        legend                  = dict(orientation="v",itemwidth=30,yanchor="top", y=0.8,xanchor="left",x=1),
+        font_family             = "Source Sans Pro",
+        title_font_family       = "Source Sans Pro",
+        title_font_color        = "white",
+        legend_title_font_color = "white",
+        height                  = 220,
+        margin                  = dict(t=0, l=0, r=0, b=0),
+        )
+    st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+
 
