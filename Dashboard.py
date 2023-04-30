@@ -72,6 +72,35 @@ def two_axis_barchart(data: pd.DataFrame, marker, value_label='шт.', group_col
     )
     st.plotly_chart(fig,use_container_width=True,config=config)
 
+def donut_chart(values, names, colors, legend=False, textinfo='label'):
+    fig = px.pie(
+        values                  = values,
+        names                   = names,
+        color_discrete_sequence = colors,
+        hole                    = .6
+    )
+
+    fig.update_traces(
+        textposition  = 'inside',
+        textinfo      = textinfo,
+        hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
+        textfont_size = 14
+        
+        )
+
+    fig.update_layout(
+        plot_bgcolor            = tr,
+        paper_bgcolor           = tr,
+        showlegend              = False,
+        font_family             = font,
+        title_font_family       = font,
+        title_font_color        = "white",
+        legend_title_font_color = "white",
+        height                  = 220,
+        margin                  = dict(t=0, l=0, r=0, b=0),
+        )
+    st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+
 def main():
     # load data
     with st.spinner('Читаем PMI и PMBOK...'):
@@ -142,39 +171,8 @@ def main():
         ## Распределение грейдов
         with st.container():
             st.markdown('<p class="tooltip"><strong>Грейды проектов</strong><span class="tooltiptext">Показывает чудеса грейдного членения</span></p>', unsafe_allow_html=True)
-            a   = projects_df['Грейд']
-
-            fig = px.pie(a,
-            values                  = a.value_counts(),
-            names                   = a.value_counts().index,
-            color_discrete_sequence = colors,
-            hole                    = .6
-            )
-
-            fig.update_traces(
-                textposition  = 'inside',
-                textinfo      = 'label',
-                hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
-                textfont_size = 14
-                
-                )
-
-            fig.update_layout(
-                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
-                plot_bgcolor            = tr,
-                paper_bgcolor           = tr,
-                #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
-                showlegend              = False,
-                font_family             = font,
-                title_font_family       = font,
-                title_font_color        = "white",
-                legend_title_font_color = "white",
-                height                  = 220,
-                margin                  = dict(t=0, l=0, r=0, b=0),
-                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
-                )
-
-            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+            k = projects_df['Грейд'].value_counts()
+            donut_chart(values=k.values, names=k.index, colors=colors)
     with col2:
         ## Число и темп прироста проектов
         with st.container():
@@ -278,36 +276,7 @@ def main():
             top_companies_df = projects_df[['Название компании','Тип компании']]
             top_companies_df = top_companies_df[top_companies_df['Тип компании']!='Частное лицо']
             top_companies_df = top_companies_df['Название компании'].value_counts().head(5)
-            fig = px.pie(top_companies_df.values,
-            values                  = top_companies_df.values,
-            names                   = top_companies_df.index,
-            color_discrete_sequence = colors,
-            hole                    = .6
-            )
-
-            fig.update_traces(
-                textposition  = 'inside',
-                textinfo      = 'label',
-                hovertemplate = "<b>%{label}.</b> Проектов: <b>%{value}.</b>",
-                textfont_size = 14
-                
-                )
-
-            fig.update_layout(
-                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
-                plot_bgcolor            = tr,
-                paper_bgcolor           = tr,
-                #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
-                showlegend              = False,
-                font_family             = font,
-                title_font_family       = font,
-                title_font_color        = "white",
-                legend_title_font_color = "white",
-                height                  = 220,
-                margin                  = dict(t=0, l=0, r=0, b=0),
-                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
-                )
-            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})  
+            donut_chart(values=top_companies_df.values, names=top_companies_df.index, colors=colors)
     with col2:
         with st.container():
             st.markdown('**Динамика вовлеченности компаний**')
@@ -361,44 +330,12 @@ def main():
         with st.container():
             try:
                 st.markdown('**Разделение по курсам**')
-                
                 courses_df = students_in_projects_df[['Статус','ID студента','Курс в моменте','Программа в моменте','ВУЗ в моменте']]
                 courses_df = courses_df.loc[(courses_df['Статус'] == 'Активен')&(courses_df['ВУЗ в моменте'] == 'ФЭСН РАНХиГС')]
-
                 courses_df['Курс'] = courses_df[['Курс в моменте','Программа в моменте']].agg(' '.join,axis=1).apply(lambda x:x[:5]+'.')
                 courses_df = courses_df[['ID студента','Курс']].drop_duplicates(subset = ['ID студента','Курс'], keep=False)
-                fig = px.pie(courses_df,
-                values                  = courses_df['Курс'].value_counts(),
-                names                   = courses_df['Курс'].value_counts().index,
-                color_discrete_sequence = colors,
-                hole                    = .6
-                )
-                
-
-                fig.update_traces(
-                    textposition  = 'inside',
-                    textinfo      = 'label',
-                    hovertemplate = "<b>%{label}.</b> Участников: <b>%{value}.</b> <br><b>%{percent}</b> от общего количества",
-                    textfont_size = 14
-                    
-                    )
-
-                fig.update_layout(
-                    # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
-                    plot_bgcolor            = tr,
-                    paper_bgcolor           = tr,
-                    #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
-                    showlegend              = False,
-                    font_family             = font,
-                    title_font_family       = font,
-                    title_font_color        = "white",
-                    legend_title_font_color = "white",
-                    height                  = 220,
-                    margin                  = dict(t=0, l=0, r=0, b=0),
-                    #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
-                    )
-
-                st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})  
+                j = courses_df['Курс'].value_counts()
+                donut_chart(values=j.values, names=j.index, colors=colors)
             except:
                 st.warning('Сейчас нет активных проектов :)')
                 pass
@@ -454,37 +391,9 @@ def main():
             tp = merged_df['ID студента'].nunique()
             #Сколько людей не принимали участие
             dtp = course_4_df.count() - tp
-            fig = px.pie(
-            values                  = [tp,dtp],
-            names                   = ['Участвовали в проектах','Не участвовали в проектах'],
-            color_discrete_sequence = colors,
-            hole                    = .6
-            )
-
-            fig.update_traces(
-                textposition  = 'inside',
-                textinfo      = 'value',
-                hovertemplate = "<b>%{label}.</b><br><b>%{percent}</b> от студентов 4 курса",
-                textfont_size = 14
-                
-                )
-
-            fig.update_layout(
-                # annotations           = [dict(text=projects_df.shape[0], x=0.5, y=0.5, font_size=40, showarrow=False, font=dict(family=font,color="white"))],
-                plot_bgcolor            = tr,
-                paper_bgcolor           = tr,
-                #legend                 = dict(yanchor="bottom",y=0.1,xanchor="left",x=0.5),
-                showlegend              = False,
-                font_family             = font,
-                title_font_family       = font,
-                title_font_color        = "white",
-                legend_title_font_color = "white",
-                height                  = 220,
-                margin                  = dict(t=0, l=0, r=0, b=0),
-                #legend=dict(orientation="h",yanchor="bottom",y=-0.4,xanchor="center",x=0,itemwidth=70,bgcolor = 'yellow')
-                )
-
-            st.plotly_chart(fig,use_container_width=True,config={'staticPlot': False,'displayModeBar': False})
+            v=[tp,dtp]
+            n=['Участвовали в проектах','Не участвовали в проектах']
+            donut_chart(v,n,colors, textinfo='value')
     #Ряд интерактивов
     col1, col2 = st.columns([2, 4])
     
