@@ -295,10 +295,11 @@ def main():
             # fields_df['Микро']      = fields_df['Микро'].str.replace(' ','<br>')
             # fields_df['Макро']      = '<b>'+fields_df['Макро'].astype(str)+'</b>'
             _fields_df = projects_df[['Макро-направление', 'Микро-направление']].copy()
-            _fields_count = _fields_df['Микро-направление'].value_counts().reset_index(name='Количество')
+            _fields_count = _fields_df['Микро-направление'].value_counts().reset_index()
+            _fields_count.columns = ['Микро-направление', 'Количество']
             _fields_df = _fields_df.drop_duplicates(subset='Микро-направление')
             _fields_df['Макро-направление'] = _fields_df['Макро-направление'].apply(lambda x: f'<b>{x}</b>')
-            _fields_df = _fields_df.merge(_fields_count, left_on='Микро-направление', right_on='index').drop(labels='index', axis=1)
+            _fields_df = _fields_df.merge(_fields_count, on='Микро-направление')
             fig = px.sunburst(_fields_df,
             path                    = ['Макро-направление', 'Микро-направление'],
             values                  = _fields_df['Количество'],
