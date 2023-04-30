@@ -143,7 +143,6 @@ def main():
         with st.container():
             st.markdown('<p class="tooltip"><strong>Грейды проектов</strong><span class="tooltiptext">Показывает чудеса грейдного членения</span></p>', unsafe_allow_html=True)
             a   = projects_df['Грейд']
-
             fig = px.pie(a,
             values                  = a.value_counts(),
             names                   = a.value_counts().index,
