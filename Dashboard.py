@@ -188,7 +188,8 @@ def main():
         with st.container():
             st.markdown('**Распределение мероприятий по регионам**')
             events_regions_df = events_df['Регион'].value_counts()
-            events_regions_df.name = 'cases'
+            events_regions_df.name = 'events'
+            events_regions_df
 
             with open('counties.pkl', 'rb') as f:
                 counties = pickle.load(f)
@@ -203,7 +204,9 @@ def main():
             df_regions['region_name'] = regions_list
             df_regions.set_index('region_name',inplace=True)
             df_regions = df_regions.merge(events_regions_df.to_frame(),left_index=True, right_index=True)
-
+            universities_df
+            events_df
+            df_regions
             if selection =='FESS':
                 colors_map = ['#FFD5D7','#ED1C24']
             else:
@@ -212,11 +215,11 @@ def main():
 
             fig = go.Figure(go.Choroplethmapbox(geojson=counties,
                             locations=df_regions['region_id'],
-                            z=df_regions['cases'],
+                            z=df_regions['events'],
                             text=df_regions.index.values,
                             colorscale = colors_map,
                             colorbar_thickness=5,
-                            customdata=np.stack([df_regions['cases'],df_regions.index.values], axis=-1),
+                            customdata=np.stack([df_regions['events'],df_regions.index.values], axis=-1),
                             hovertemplate='<b>%{text}</b>'+ '<br>' +
                                             'Ивентов: %{z}' + '<br>',
                             hoverinfo='text, z',
