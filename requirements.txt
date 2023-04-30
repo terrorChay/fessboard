@@ -1,0 +1,13 @@
+# Core
+streamlit
+pyxlsb
+xlsxwriter
+fpdf2
+
+# Extra visualization
+plotly
+
+# DB connection
+mysql-connector-python
+gsheetsdb
+requests

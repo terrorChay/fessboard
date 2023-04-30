@@ -1,0 +1,6 @@
+**/.streamlit/secrets.toml
+*.ipynb
+**/__pycache__
+*.py[cod]
+*$py.class
+**/.vscode/
