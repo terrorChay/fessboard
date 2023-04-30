@@ -301,7 +301,7 @@ def main():
             _fields_df = _fields_df.merge(_fields_count, left_on='Микро-направление', right_on='index').drop(labels='index', axis=1)
             fig = px.sunburst(_fields_df,
             path                    = ['Макро-направление', 'Микро-направление'],
-            values                  = 'Количество',
+            values                  = _fields_df['Количество'],
             branchvalues            = "total",
             color_discrete_sequence = sunburst
             )
