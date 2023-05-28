@@ -1,10 +1,10 @@
+streamlit==1.18.1
+fpdf2==2.6.1
+numpy==1.21.5
+plotly==5.9.0
+pandas==1.5.0
 pyxlsb
 xlsxwriter
 mysql-connector-python
 gsheetsdb
 requests
-fpdf2==2.6.1
-numpy==1.21.5
-pandas==1.5.0
-plotly==5.9.0
-streamlit==1.18.1

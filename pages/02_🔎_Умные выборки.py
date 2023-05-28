@@ -259,7 +259,7 @@ def run():
         df_search_applied   = search_dataframe(projects_report_query_df, 'tab4-1')
         # if search has results -> draw criteria filters and return filtered df
         if df_search_applied.shape[0]:
-            df_filters_applied  = filter_df(df_search_applied, key='ОФ №1', force_multiselect=['Название проекта', 'Название компании', 'ФИО студента', 'ВУЗ', 'Курс'])
+            df_filters_applied  = filter_df(df_search_applied, key='ОФ №1', force_multiselect=['Название проекта', 'Название компании', 'ФИО студента', 'ВУЗ', 'Курс', 'Академический год', 'Программа'])
             # if filters have results -> draw DF, download btn and analytics
             if 0 not in df_filters_applied.shape:
                 st.info("""Поля **ВУЗ** и **Курс** содержат значения во время выполнения проекта, а не текущие!  
