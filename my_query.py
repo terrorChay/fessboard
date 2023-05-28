@@ -356,6 +356,80 @@ query_dict =    {
                                                     ON students.masters_university_id = universities.university_id
                                                 INNER JOIN regions
                                                     ON universities.university_region_id = regions.region_id) Магистры
+                                                ON
+                                                  students.student_id = Магистры.student_id;
+                                            """,
+                "projects_report_query"  :  """
+                                            SELECT
+                                            students.student_id AS `ID студента`,
+                                            CONCAT_WS(
+                                                ' ',
+                                                students.student_surname,
+                                                students.student_name,
+                                                students.student_midname)
+                                            AS 'ФИО студента',
+                                            T0.project_id AS `ID проекта`,
+                                            T0.project_name AS `Название проекта`,
+                                            T0.company_name AS `Название компании`,
+                                            CASE
+                                                WHEN T0.is_frozen = 1
+                                                THEN 'Заморожен'
+                                                WHEN T0.is_frozen <> 1 AND (DAYNAME(T0.project_end_date) IS NULL OR DATE(T0.project_end_date) >= CURDATE())
+                                                THEN 'Активен' ELSE 'Завершен'
+                                            END AS Статус,
+                                            students_in_projects.team AS Команда,
+                                            students_in_projects.is_curator AS Куратор,
+                                            students_in_projects.is_moderator AS Модератор,
+                                            CASE WHEN students.masters_start_year = 0 OR
+                                                students.masters_start_year IS NULL OR
+                                                T0.project_start_date < STR_TO_DATE(CONCAT(students.masters_start_year, '-09-01'), '%Y-%m-%d') THEN CASE WHEN STR_TO_DATE(CONCAT(students.bachelors_start_year, '-09-01'), '%Y-%m-%d') <= T0.project_start_date AND
+                                                        T0.project_start_date < STR_TO_DATE(CONCAT(students.bachelors_start_year + 1, '-09-01'), '%Y-%m-%d') THEN '1' WHEN STR_TO_DATE(CONCAT(students.bachelors_start_year + 1, '-09-01'), '%Y-%m-%d') <= T0.project_start_date AND
+                                                        T0.project_start_date < STR_TO_DATE(CONCAT(students.bachelors_start_year + 2, '-09-01'), '%Y-%m-%d') THEN '2' WHEN STR_TO_DATE(CONCAT(students.bachelors_start_year + 2, '-09-01'), '%Y-%m-%d') <= T0.project_start_date AND
+                                                        T0.project_start_date < STR_TO_DATE(CONCAT(students.bachelors_start_year + 3, '-09-01'), '%Y-%m-%d') THEN '3' WHEN STR_TO_DATE(CONCAT(students.bachelors_start_year + 3, '-09-01'), '%Y-%m-%d') <= T0.project_start_date AND
+                                                        T0.project_start_date < STR_TO_DATE(CONCAT(students.bachelors_start_year + 4, '-09-01'), '%Y-%m-%d') THEN '4' ELSE NULL END ELSE CASE WHEN STR_TO_DATE(CONCAT(students.masters_start_year, '-09-01'), '%Y-%m-%d') <= T0.project_start_date AND
+                                                    T0.project_start_date < STR_TO_DATE(CONCAT(students.masters_start_year + 1, '-09-01'), '%Y-%m-%d') THEN '1' WHEN STR_TO_DATE(CONCAT(students.masters_start_year + 1, '-09-01'), '%Y-%m-%d') <= T0.project_start_date AND
+                                                    T0.project_start_date < STR_TO_DATE(CONCAT(students.masters_start_year + 2, '-09-01'), '%Y-%m-%d') THEN '2' ELSE NULL END END AS 'Курс',
+                                            CASE WHEN students.masters_start_year = 0 OR
+                                                students.masters_start_year IS NULL OR
+                                                T0.project_start_date < STR_TO_DATE(CONCAT(students.masters_start_year, '-09-01'), '%Y-%m-%d') THEN 'Бакалавриат' ELSE 'Магистратура' END AS 'Программа в моменте',
+                                            CASE WHEN students.masters_start_year = 0 OR
+                                                students.masters_start_year IS NULL OR
+                                                T0.project_start_date < STR_TO_DATE(CONCAT(students.masters_start_year, '-09-01'), '%Y-%m-%d') THEN Бакалавры.university_name ELSE Магистры.university_name END AS 'ВУЗ',
+                                            CASE
+                                                    WHEN YEAR(T0.project_start_date) = 0
+                                                        THEN NULL
+                                                    WHEN MONTH(T0.project_start_date) > 8
+                                                        THEN CONCAT_WS(' - ', YEAR(T0.project_start_date), YEAR(T0.project_start_date)+1)
+                                                    ELSE CONCAT_WS(' - ', YEAR(T0.project_start_date)-1, YEAR(T0.project_start_date))
+                                                END AS `Академический год`
+                                            FROM students_in_projects
+                                            LEFT OUTER JOIN (SELECT
+                                                *
+                                                FROM projects
+                                                    LEFT JOIN companies
+                                                        ON projects.project_company_id = companies.company_id) AS T0
+                                                ON students_in_projects.project_id = T0.project_id
+                                            LEFT OUTER JOIN students
+                                                ON students_in_projects.student_id = students.student_id
+                                            LEFT OUTER JOIN (SELECT
+                                                students.student_id,
+                                                universities.university_name,
+                                                regions.region
+                                                FROM students
+                                                INNER JOIN universities
+                                                    ON students.bachelors_university_id = universities.university_id
+                                                INNER JOIN regions
+                                                    ON universities.university_region_id = regions.region_id) Бакалавры
+                                                ON students.student_id = Бакалавры.student_id
+                                            LEFT OUTER JOIN (SELECT
+                                                students.student_id,
+                                                universities.university_name,
+                                                regions.region
+                                                FROM students
+                                                INNER JOIN universities
+                                                    ON students.masters_university_id = universities.university_id
+                                                INNER JOIN regions
+                                                    ON universities.university_region_id = regions.region_id) Магистры
                                                 ON students.student_id = Магистры.student_id;
                                             """,
 

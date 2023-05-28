@@ -141,7 +141,7 @@ def filter_df(df: pd.DataFrame, key="default", force_multiselect=[]) -> pd.DataF
             df[col] = df[col].dt.date
     # result
     df = df.reset_index(drop=True)
-    st.caption(f'Найдено {key}: {df.shape[0]}')
+    st.caption(f'Найдено записей: {df.shape[0]}')
     return df
 
 # Aggregate students' activity
@@ -185,6 +185,8 @@ def run():
         students_df         = utils.load_students()
         students_df['Курс'] = students_df['Курс'] + ' ' + students_df['Программа']
         students_df.drop('Программа', inplace=True, axis=1)
+    with st.spinner('Готовим отчетные формы'):
+        projects_report_query_df = utils.load_projects_report_query()
 
     st.title('Умные выборки')
     st.write('''
@@ -194,11 +196,11 @@ def run():
             :sunglasses: Поиск и фильтры можно использовать вместе!  
             :floppy_disk: Вы также можете скачать составленную выборку в формате Microsoft Excel.
             ''')
-    tab1, tab2, tab3 = st.tabs(["Проекты", "Мероприятия", "Студенты"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Проекты", "Мероприятия", "Студенты", "Отчетная форма №1"])
     #PROJECTS
     with tab1:
         # Draw search filters and return filtered df
-        df_search_applied   = search_dataframe(projects_df)
+        df_search_applied   = search_dataframe(projects_df, key='tab1')
         # if search has results -> draw criteria filters and return filtered df
         if df_search_applied.shape[0]:
             df_filters_applied  = filter_df(df_search_applied, key='проектов', force_multiselect=['Название компании', 'направление', 'отрасль', 'Тип', 'Статус', 'Грейд', 'год', 'Отрасль'])
@@ -216,7 +218,7 @@ def run():
     #EVENTS
     with tab2:
         # Draw search filters and return filtered df
-        df_search_applied   = search_dataframe(events_df, key='events')
+        df_search_applied   = search_dataframe(events_df, key='tab2')
         # if search has results -> draw criteria filters and return filtered df
         if df_search_applied.shape[0]:
             df_filters_applied  = filter_df(df_search_applied, key='мероприятий', force_multiselect=['год', 'Регион', 'Статус'])
@@ -236,7 +238,7 @@ def run():
         # Choose which projects (by year) to use in calculated columns
         students_pivot_df = agg_students(students_df, students_in_projects_df)
         # Draw search filters and return filtered df
-        df_search_applied   = search_dataframe(students_pivot_df, 'stud')
+        df_search_applied   = search_dataframe(students_pivot_df, 'tab3')
         # if search has results -> draw criteria filters and return filtered df
         if df_search_applied.shape[0]:
             df_filters_applied  = filter_df(df_search_applied, key='студентов', force_multiselect=['Курс', 'Поток', 'ВУЗ', 'Регион', 'Программа', 'Опыт', 'Отстранен'])
@@ -251,7 +253,26 @@ def run():
                 st.warning('Студенты не найдены')
         else:
             st.warning('Студенты не найдены')
-
+    # ОФ №1
+    with tab4:
+        # Draw search filters and return filtered df
+        df_search_applied   = search_dataframe(projects_report_query_df, 'tab4-1')
+        # if search has results -> draw criteria filters and return filtered df
+        if df_search_applied.shape[0]:
+            df_filters_applied  = filter_df(df_search_applied, key='ОФ №1', force_multiselect=['Название проекта', 'Название компании', 'ФИО студента', 'ВУЗ', 'Курс'])
+            # if filters have results -> draw DF, download btn and analytics
+            if 0 not in df_filters_applied.shape:
+                st.info("""Поля **ВУЗ** и **Курс** содержат значения во время выполнения проекта, а не текущие!  
+                        Поля **Куратор** и **Модератор** являются бинарными: 1 означает *Да*, 0 означает *Нет*.""")
+                st.dataframe(df_filters_applied)
+                col1, col2, _col3, _col4, _col5, _col6 = st.columns(6)
+                col1.download_button('💾 CSV', data=utils.convert_df(df_filters_applied), file_name="fessboard_report.csv", mime='text/csv', use_container_width=True)
+                col2.download_button('💾 Excel', data=utils.convert_df(df_filters_applied, True), file_name="fessboard_report.xlsx", use_container_width=True)
+            else:
+                # Technically only possible with long string criteria filters cuz they allow for any string input
+                st.warning('Студенты не найдены')
+        else:
+            st.warning('Студенты не найдены')
 if __name__ == "__main__":
     utils.page_config(layout='wide', title='Поиск проектов', page_icon=':bar_chart:')
     utils.remove_footer()

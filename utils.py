@@ -100,6 +100,14 @@ def load_students_in_projects():
     return df.dropna(subset=['Курс в моменте'])
 
 @st.cache_data(ttl=10800, show_spinner=False)
+def load_projects_report_query():
+    df = query_data(query_dict['projects_report_query'])
+    df.dropna(axis=0, subset=['Команда', 'ID студента'], inplace=True)
+    df['ID студента'] = df['ID студента'].astype(int)
+    df['ID проекта'] = df['ID проекта'].astype(int)
+    return df.dropna(subset=['Курс'])
+
+@st.cache_data(ttl=10800, show_spinner=False)
 def load_teachers_in_projects():
     return query_data(query_dict['teachers_in_projects'])
 
