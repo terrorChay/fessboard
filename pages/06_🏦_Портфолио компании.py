@@ -79,7 +79,8 @@ def run():
     marker = colors[0]
     # Draw company search filters and return chosen company
     company = company_selection(projects_df)
-    company_id = int(company[:5].split(' - ')[0])
+    company_id_str = company[:5].strip()
+    company_id = int(company_id_str)
     st.write(company_id)
     st.write("test_test")
     if company:
