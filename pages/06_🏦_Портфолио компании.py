@@ -79,8 +79,12 @@ def run():
     marker = colors[0]
     # Draw company search filters and return chosen company
     company = company_selection(projects_df)
-    company_id = (company[:5].split(' - ')[0])
-    st.write(company_id)
+    company_id_str = ''.join(filter(str.isdigit, company[:5]))
+    if company_id_str:
+        company_id = int(company_id_str)
+        st.write(f"company_id: {company_id}")
+    else:
+        st.write("Unable to extract a valid company ID.")
     st.write("test_test")
     if company:
         company_id = int(company[:5].split(' - ')[0])
