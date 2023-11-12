@@ -79,6 +79,8 @@ def run():
     marker = colors[0]
     # Draw company search filters and return chosen company
     company = company_selection(projects_df)
+    company_id = int(company[:5].split(' - ')[0])
+    print(company_id)
     if company:
         company_id = int(company[:5].split(' - ')[0])
         tab1, tab2, tab3 = st.tabs(['О компании', 'Проекты', 'Студенты'])
@@ -91,8 +93,6 @@ def run():
 
         # О компании
         with tab1:
-            company_id = int(company[:5].split(' - ')[0])
-            print(company_id)
             #INFO
             col1, col2 = st.columns([4,1])
             for key, value in company_data_df.items():
