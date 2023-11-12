@@ -83,7 +83,6 @@ def run():
         company_id_str = ''.join(filter(str.isdigit, company[:5]))
         if company_id_str:
             company_id = int(company_id_str)
-            st.write(f"company_id: {company_id}")
         else:
             st.write("Unable to extract a valid company ID.")
         tab1, tab2, tab3 = st.tabs(['О компании', 'Проекты', 'Студенты'])
