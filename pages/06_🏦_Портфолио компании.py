@@ -91,6 +91,8 @@ def run():
 
         # О компании
         with tab1:
+            company_id = int(company[:5].split(' - ')[0])
+            print(company_id)
             #INFO
             col1, col2 = st.columns([4,1])
             for key, value in company_data_df.items():
