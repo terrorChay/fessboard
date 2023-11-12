@@ -87,7 +87,12 @@ def run():
         st.write("Unable to extract a valid company ID.")
     st.write("test_test")
     if company:
-        company_id = int(company[:5].split(' - ')[0])
+        company_id_str = ''.join(filter(str.isdigit, company[:5]))
+        if company_id_str:
+            company_id = int(company_id_str)
+            st.write(f"company_id: {company_id}")
+        else:
+            st.write("Unable to extract a valid company ID.")
         tab1, tab2, tab3 = st.tabs(['О компании', 'Проекты', 'Студенты'])
         with st.spinner('Делаем однотумбовые столы...'):
             company_data_df            = utils.load_companies()
