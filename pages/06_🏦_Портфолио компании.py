@@ -80,7 +80,8 @@ def run():
     # Draw company search filters and return chosen company
     company = company_selection(projects_df)
     company_id = int(company[:5].split(' - ')[0])
-    print(company_id)
+    st.write(company_id)
+    st.write("test_test")
     if company:
         company_id = int(company[:5].split(' - ')[0])
         tab1, tab2, tab3 = st.tabs(['О компании', 'Проекты', 'Студенты'])
